@@ -1,13 +1,6 @@
-export const setApiCalled = (item) => {
+export const setUserInfo = (item) => {
     return{
-        type : 'APICALLED',
-        item : item
-    }
-}
-
-export const setSmartSearchNewDesign = (item) => {
-    return{
-        type : 'NEWDESIGN',
+        type : 'USERINFO',
         item : item
     }
 }

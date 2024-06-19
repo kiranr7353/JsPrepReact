@@ -1,5 +1,5 @@
   
-  .loginCcontainer {
+  .registerContainer {
     margin: 0;
     font-family: 'Arial', sans-serif;
     display: flex;
@@ -11,30 +11,30 @@
     height: 100vh;
   }
   
-  .loginBox {
+  .registerBox {
     display: flex;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     overflow: hidden;
-    width: 900px;
-    height: 600px;
+    width: 1100px;
+    height: 700px;
   }
   
-  .loginLeft {
+  .registerLeft {
     background-color: #fff;
     padding: 40px;
-    width: 350px;
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
   
-  .loginLogo img {
+  .registerLogo img {
     width: 50px;
     margin-bottom: 20px;
   }
   
-  .loginTitle {
+  .registerTitle {
     font-size: 2rem;
     color: #333;
   }
@@ -45,7 +45,7 @@
     margin-top: -10px;
   }
   
-  .loginForm label {
+  .registerForm label {
     display: block;
     font-weight: bold;
     margin-top: 20px;
@@ -72,7 +72,7 @@
     padding-top: 22px;
   }
   
-  .loginButton {
+  .registerButton {
     background-color: #5b67f1;
     color: #fff;
     border: none;
@@ -100,7 +100,7 @@
     background: #f8f8f8;
   }
   
-  .googleImage {
+  .loginGoogle img {
     width: 20px;
     margin-right: 10px;
     mix-blend-mode: multiply;
@@ -133,7 +133,7 @@
     padding-left: 5px;
   }
   
-  .registerHere {
+  .loginHere {
     font-weight: bold;
     color: #5b67f1;
     text-decoration: underline;
@@ -142,4 +142,10 @@
 
   .VisibilityOffIcon, .VisibilityIcon {
     cursor: pointer;
+  }
+
+  .nameContainer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }

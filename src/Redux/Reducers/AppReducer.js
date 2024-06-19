@@ -3,9 +3,8 @@ import {configureStore} from "@reduxjs/toolkit";
 
 import storage from "redux-persist/lib/storage";
 import {persistReducer} from "redux-persist";
+import UserInfoReducer from "./UserInfoReducer";
 
-import ApiCalledReducer from "./ApiCalledReducer";
-import EnableNewDesignReducer from "./EnableNewDesignReducer";
 
 const config = {
     key: 'root',
@@ -14,8 +13,7 @@ const config = {
 };
 
 export const allReducers = combineReducers({
-    isApiCalled: ApiCalledReducer,
-    setSmartSearchNewDesign: EnableNewDesignReducer
+    userInfo: UserInfoReducer,
 });
 
 export const persistedReducer = persistReducer(config, allReducers);

@@ -14,6 +14,7 @@ import { Provider } from 'react-redux';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import appStore from './Redux/Reducers/AppReducer';
+import RegisterHome from './Components/Register/RegisterHome';
 
 const LoginHome = lazy(() => import('./Components/Login/LoginHome'));
 const LogoutHome = lazy(() => import('./Components/Logout/LogoutHome'));
@@ -66,7 +67,7 @@ function App() {
     //     navigate('/login');
     // }
     // if (!whiteListUrls.includes(location.pathname)) 
-    window.history.pushState(null, '', `${env.siteUrl}${location.pathname}`);
+    // window.history.pushState(null, '', `${env.siteUrl}${location.pathname}`);
   }
   useEffect(() => {
     setAuthData();
@@ -86,6 +87,7 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Navigate to="/login" replace={true} />} />
                       <Route path="/login" element={<LoginHome />} />
+                      <Route path="/register" element={<RegisterHome />} />
                       <Route path="/logout" element={<LogoutHome />} />
                     </Routes>
                   </Suspense>
