@@ -1,0 +1,146 @@
+  
+  .loginCcontainer {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f2f5;
+    height: 100vh;
+  }
+  
+  .loginBox {
+    display: flex;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 900px;
+    height: 600px;
+  }
+  
+  .loginLeft {
+    background-color: #fff;
+    padding: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .loginLogo img {
+    width: 50px;
+    margin-bottom: 20px;
+  }
+  
+  .loginTitle {
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .loginSubtitle {
+    color: #888;
+    margin-bottom: 5px;
+    margin-top: -10px;
+  }
+  
+  .loginForm label {
+    display: block;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  
+  .loginForm input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .loginOptions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .loginOptions label {
+    display: flex;
+    align-items: center;
+  }
+  
+  .loginOptions a {
+    color: #5b67f1;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    padding-top: 22px;
+  }
+  
+  .loginButton {
+    background-color: #5b67f1;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 5px;
+    width: 100%;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  
+  .loginOr {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .loginGoogle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    background: #f8f8f8;
+  }
+  
+  .loginGoogle img {
+    width: 20px;
+    margin-right: 10px;
+    mix-blend-mode: multiply;
+  }
+  
+  .loginRegister {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .loginRegister a {
+    color: #5b67f1;
+    text-decoration: none;
+  }
+  
+  .loginRight {
+    flex: 1;
+    background-color: #2d2f48;
+    position: relative;
+  }
+  
+  .backgroundImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .remember {
+    text-wrap: nowrap;
+    padding-left: 5px;
+  }
+  
+  .registerHere {
+    font-weight: bold;
+    color: #5b67f1;
+  }

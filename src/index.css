@@ -11,3 +11,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+body{
+    padding-right: 0px !important;
+}
+
+@media screen and (max-width: 1024px) {
+    #root{
+        margin: auto !important;
+        overflow-x: auto;
+        width: 1440px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #root{
+        margin: auto !important;
+        overflow-x: auto;
+        width: 1024px;
+    }
+}
