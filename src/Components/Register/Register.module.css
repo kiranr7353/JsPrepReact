@@ -16,8 +16,8 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     overflow: hidden;
-    width: 1100px;
-    height: 700px;
+    width: 1160px;
+    height: 650px;
   }
   
   .registerLeft {
@@ -100,7 +100,7 @@
     background: #f8f8f8;
   }
   
-  .loginGoogle img {
+  .googleImage {
     width: 20px;
     margin-right: 10px;
     mix-blend-mode: multiply;
@@ -148,4 +148,68 @@
     display: flex;
     align-items: center;
     gap: 20px;
+  }
+
+  .required {
+    color: red;
+  }
+
+  .buttonsDiv {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .signUpBtn {
+    flex: 1 1;
+  }
+
+  .googleBtn {
+    flex: 1 1;
+  }
+
+  .phoneNumberDiv {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .passwordMismatch {
+    padding-top: 10px;
+    color: red;
+  }
+
+  .modalinnerwrapper {
+    padding: 20px;
+    min-width: 300px;
+  }
+  .headerText{
+    font-weight: bold;
+    font-size: 20px;
+    opacity: 0.7;
+    margin-top: -5px;
+  }
+  .modalactionsection {
+    text-align: center;
+  }
+  .modalactionsection button {
+    margin: 10px 10px;
+  }
+  .okButton{
+    text-transform: initial;
+    background-color: rgb(40, 108, 226);
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+  }
+  .errorMessage {
+    font-weight: bold;
+    color: #514e4e;
+    font-size: 19px;
   }

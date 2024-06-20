@@ -14,10 +14,11 @@ import { Provider } from 'react-redux';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import appStore from './Redux/Reducers/AppReducer';
-import RegisterHome from './Components/Register/RegisterHome';
 
 const LoginHome = lazy(() => import('./Components/Login/LoginHome'));
 const LogoutHome = lazy(() => import('./Components/Logout/LogoutHome'));
+const RegisterHome = lazy(() => import('./Components/Register/RegisterHome'));
+const Home = lazy(() => import('./Components/App/Home/Home'));
 
 function App() {
   const env = useMemo(() => Envurl(), [Envurl]);
@@ -31,13 +32,13 @@ function App() {
   const whiteListUrls = ['/', '/logout', '/login', '/home'];
   const [userAuthInfo, setuserAuthInfo] = useState({});
 
-  const isJWTTokenExpired = (token) => {
-    const expiry = token ? (JSON.parse(atob(token.split('.')[1]))).exp : 0;
-    return (Math.floor((new Date()).getTime() / 1000)) >= expiry;
-  }
+  // const isJWTTokenExpired = (token) => {
+  //   const expiry = token ? (JSON.parse(atob(token.split('.')[1]))).exp : 0;
+  //   return (Math.floor((new Date()).getTime() / 1000)) >= expiry;
+  // }
 
-  const cookies = useMemo(() => GetCookie('userTokenInfo'), [GetCookie('userTokenInfo')]);
-  const isUserLogged = cookies && !isJWTTokenExpired(cookies.authToken) && !whiteListUrls.includes(location.pathname);
+  // const cookies = useMemo(() => GetCookie('userTokenInfo'), [GetCookie('userTokenInfo')]);
+  // const isUserLogged = cookies && !isJWTTokenExpired(cookies.authToken) && !whiteListUrls.includes(location.pathname);
 
   const queryClient = new QueryClient();
 
@@ -45,7 +46,8 @@ function App() {
     // if (location.pathname === '/logout') {
     //     navigate(`/logout${location.search || ''}`);
     // }
-    // let cookies = GetCookie('userTokenInfo') ? GetCookie('userTokenInfo') : '';
+    let cookies = GetCookie('userTokenInfo') ? GetCookie('userTokenInfo') : '';
+    console.log(cookies);
     // if(searchParams.get('token')) {
     //     const paramData = searchParams.get('token') ? searchParams.get('token').replace(/xMl3Jk/g, '+') : null;
     //     cookies = paramData ? JSON.parse(decryptObjData(decodeURIComponent(paramData))) : null;
@@ -78,7 +80,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <UserContextProvider>
             <PersistGate persistor={persistor}>
-              {isUserLogged && userAuthInfo ? <IdleTimerComponent env={{ apiURL: env.apiURL, logoutUrl: env.angularLogoutUrl, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''}
+              {/* {isUserLogged && userAuthInfo ? <IdleTimerComponent env={{ apiURL: env.apiURL, logoutUrl: env.angularLogoutUrl, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''} */}
               <div className="dashboardheaderwrp">
               </div>
               <div>
@@ -89,6 +91,10 @@ function App() {
                       <Route path="/login" element={<LoginHome />} />
                       <Route path="/register" element={<RegisterHome />} />
                       <Route path="/logout" element={<LogoutHome />} />
+                      <Route path='/home' element={<Home />} />
+                      {/* <Route path="/dashboard" element={<LogoutHome />}>
+                         <Route path='home' element={<Home />} />
+                      </Route> */}
                     </Routes>
                   </Suspense>
                 </div>
