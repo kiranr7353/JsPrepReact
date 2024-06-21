@@ -14,6 +14,7 @@ import { Provider } from 'react-redux';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import appStore from './Redux/Reducers/AppReducer';
+import PrivateRoutes from './Components/PrivateRoutes';
 
 const LoginHome = lazy(() => import('./Components/Login/LoginHome'));
 const LogoutHome = lazy(() => import('./Components/Logout/LogoutHome'));
@@ -37,8 +38,8 @@ function App() {
   //   return (Math.floor((new Date()).getTime() / 1000)) >= expiry;
   // }
 
-  // const cookies = useMemo(() => GetCookie('userTokenInfo'), [GetCookie('userTokenInfo')]);
-  // const isUserLogged = cookies && !isJWTTokenExpired(cookies.authToken) && !whiteListUrls.includes(location.pathname);
+  const cookies = useMemo(() => GetCookie('userTokenInfo'), [GetCookie('userTokenInfo')]);
+  const isUserLogged = cookies;
 
   const queryClient = new QueryClient();
 
@@ -52,28 +53,29 @@ function App() {
     //     const paramData = searchParams.get('token') ? searchParams.get('token').replace(/xMl3Jk/g, '+') : null;
     //     cookies = paramData ? JSON.parse(decryptObjData(decodeURIComponent(paramData))) : null;
     // }
-    // if(cookies && cookies.authToken && !isJWTTokenExpired(cookies.authToken)) {
-    //     if (cookies.authorizedApps) delete cookies.authorizedApps;
-    //     if (cookies.company) delete cookies.company;
-    //     setuserAuthInfo({...cookies});
-    //     SetCookie('userTokenInfo', cookies);
-    //     const refeshData = RefreshToken({ userInfo: cookies });
-    //     refeshData.then(res => {
-    //         cookies.authToken = res.data.token;
-    //         setuserAuthInfo({...cookies});
-    //         SetCookie('userTokenInfo', cookies);
-    //         SetCookie('tokenTimeStamp', new Date().toISOString());
-    //     })
-    // } else if (!whiteListUrls.includes(location.pathname) && (!cookies || (cookies && cookies.authToken && isJWTTokenExpired(cookies.authToken)))) {
-    //     SetCookie('redirectUrl', window.location.href);
-    //     navigate('/login');
-    // }
+    if(cookies) {
+        // if (cookies.authorizedApps) delete cookies.authorizedApps;
+        // if (cookies.company) delete cookies.company;
+        // setuserAuthInfo({...cookies});
+        // SetCookie('userTokenInfo', cookies);
+        // const refeshData = RefreshToken({ userInfo: cookies });
+        // refeshData.then(res => {
+        //     cookies.authToken = res.data.token;
+        //     setuserAuthInfo({...cookies});
+        //     SetCookie('userTokenInfo', cookies);
+        //     SetCookie('tokenTimeStamp', new Date().toISOString());
+        navigate('/home')
+        // })
+    } else {
+      navigate('/login')
+    }
     // if (!whiteListUrls.includes(location.pathname)) 
     // window.history.pushState(null, '', `${env.siteUrl}${location.pathname}`);
   }
   useEffect(() => {
     setAuthData();
   }, []);
+  
   return (
     <React.Fragment>
       <Provider store={appStore}>
@@ -81,20 +83,16 @@ function App() {
           <UserContextProvider>
             <PersistGate persistor={persistor}>
               {/* {isUserLogged && userAuthInfo ? <IdleTimerComponent env={{ apiURL: env.apiURL, logoutUrl: env.angularLogoutUrl, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''} */}
-              <div className="dashboardheaderwrp">
-              </div>
               <div>
                 <div className='sshui-body-wrappper'>
                   <Suspense fallback={<Skeleton />}>
                     <Routes>
-                      <Route path="/" element={<Navigate to="/login" replace={true} />} />
+                      <Route element={<PrivateRoutes isUserLogged={isUserLogged} />}>
+                        <Route index path='/home' element={<Home />} />
+                      </Route>
                       <Route path="/login" element={<LoginHome />} />
                       <Route path="/register" element={<RegisterHome />} />
                       <Route path="/logout" element={<LogoutHome />} />
-                      <Route path='/home' element={<Home />} />
-                      {/* <Route path="/dashboard" element={<LogoutHome />}>
-                         <Route path='home' element={<Home />} />
-                      </Route> */}
                     </Routes>
                   </Suspense>
                 </div>

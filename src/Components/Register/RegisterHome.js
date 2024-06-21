@@ -142,7 +142,7 @@ const RegisterHome = () => {
         setCallRegisterApi(false);
         console.log(res);
         if ((res?.status === 200 || res?.status === 201)) {
-             
+            navigate('/home');
         } else {
             setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
             setOpenRegisterErrorDialog(true);

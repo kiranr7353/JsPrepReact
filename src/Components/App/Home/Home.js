@@ -14,7 +14,7 @@ const Home = () => {
        console.log(res);
     }
 
-    let detailsApi = useFetchAPI("LoginApi", `/user/${appState?.userInfo?.localId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onDetailSuccess));
+    let detailsApi = useFetchAPI("DetailsApi", `/user/${appState?.userInfo?.localId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onDetailSuccess));
     const fetching = detailsApi?.Loading || detailsApi?.Fetching;
 
     return (
