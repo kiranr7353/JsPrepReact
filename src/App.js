@@ -64,10 +64,10 @@ function App() {
         //     setuserAuthInfo({...cookies});
         //     SetCookie('userTokenInfo', cookies);
         //     SetCookie('tokenTimeStamp', new Date().toISOString());
-        navigate('/home')
+        // navigate('/home')
         // })
     } else {
-      navigate('/login')
+      // navigate('/login')
     }
     // if (!whiteListUrls.includes(location.pathname)) 
     // window.history.pushState(null, '', `${env.siteUrl}${location.pathname}`);

@@ -316,7 +316,7 @@ const RegisterHome = () => {
                         </p>
                     </div>
                     <div className={RegisterStyles.loginRight}>
-                        <img src="" alt="Background Design" className={RegisterStyles.backgroundImage} />
+                        <img src={'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/RegisterPageImages%2FRegister.jpg?alt=media&token=1031547f-bc39-43c0-b580-83e24e473726'} alt="Background Design" className={RegisterStyles.backgroundImage} />
                     </div>
                 </div>
             </div>
