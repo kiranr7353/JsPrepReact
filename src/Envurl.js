@@ -57,7 +57,7 @@ export const Envurl = () => {
             apiURL:'http://localhost:8082/api/v1/',
             // oAuthRedirectURL: 'http://localhost:3000/app/appuidashboard/home',
             contextPath: '/app/jsprep',
-            siteUrl: 'http://localhost:3001',
+            siteUrl: 'http://localhost:3002',
             // reactLogoutUrl: 'http://localhost:3000/app/appuidashboard/logout',
             // reactUAMUrl: 'http://localhost:3001/app/appuiuamapp/access-management',
         };
