@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import HomeStyles from './HomeStyles.module.css';
 
 import { useSelector } from 'react-redux';
@@ -6,7 +6,7 @@ import { useFetchAPI } from '../../../Hooks/useAPI';
 import { fetchQueryParams } from '../../../Hooks/fetchQueryParams';
 import { CommonHeaders } from '../../../CommonComponents/CommonHeaders';
 import { GetCookie } from '../../../Utils/util-functions';
-import { Box, InputAdornment, Tab, Tabs, TextField, styled } from '@mui/material';
+import { Box, InputAdornment, Tab, Tabs, TextField, styled, Skeleton } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -24,84 +24,6 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './swiperStyles.css';
 
-const AntTabs = styled(Tabs)({
-    borderBottom: '1px solid #e8e8e8',
-    '& .MuiTabs-indicator': {
-        backgroundColor: '#1890ff',
-    },
-});
-
-const AntTab = styled((props) => <Tab disableRipple {...props} />)(
-    ({ theme }) => ({
-        textTransform: 'none',
-        minWidth: 0,
-        [theme.breakpoints.up('sm')]: {
-            minWidth: 0,
-        },
-        fontWeight: theme.typography.fontWeightRegular,
-        marginRight: theme.spacing(1),
-        color: 'rgba(0, 0, 0, 0.85)',
-        fontFamily: [
-            '-apple-system',
-            'BlinkMacSystemFont',
-            '"Segoe UI"',
-            'Roboto',
-            '"Helvetica Neue"',
-            'Arial',
-            'sans-serif',
-            '"Apple Color Emoji"',
-            '"Segoe UI Emoji"',
-            '"Segoe UI Symbol"',
-        ].join(','),
-        '&:hover': {
-            color: '#40a9ff',
-            opacity: 1,
-        },
-        '&.Mui-selected': {
-            color: '#1890ff',
-            fontWeight: theme.typography.fontWeightMedium,
-        },
-        '&.Mui-focusVisible': {
-            backgroundColor: '#d1eaff',
-        },
-    }),
-);
-
-const StyledTabs = styled((props) => (
-    <Tabs
-        {...props}
-        TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }}
-    />
-))({
-    '& .MuiTabs-indicator': {
-        display: 'flex',
-        justifyContent: 'center',
-        backgroundColor: 'transparent',
-    },
-    '& .MuiTabs-indicatorSpan': {
-        maxWidth: 40,
-        width: '100%',
-        backgroundColor: '#635ee7',
-    },
-});
-
-const StyledTab = styled((props) => (
-    <Tab disableRipple {...props} />
-))(({ theme }) => ({
-    textTransform: 'none',
-    fontWeight: theme.typography.fontWeightRegular,
-    fontSize: theme.typography.pxToRem(15),
-    marginRight: theme.spacing(1),
-    color: 'rgba(255, 255, 255, 0.7)',
-    '&.Mui-selected': {
-        color: '#fff',
-    },
-    '&.Mui-focusVisible': {
-        backgroundColor: 'rgba(100, 95, 228, 0.32)',
-    },
-}));
-
-
 const Home = () => {
 
     const appState = useSelector(state => state);
@@ -109,8 +31,17 @@ const Home = () => {
 
     const [searchInput, setSearchInput] = useState('');
     const [detailsResponse, setDetailsResponse] = useState({});
-    const [categoriesData, setCategoriesData] = useState([]);
+    const [categoriesListData, setCategoryListData] = useState([]);
+    const [categoriesData, setCategoryData] = useState([]);
     const [tabValue, setTabValue] = useState('');
+    const [selectedItem, setSelectedItem] = useState({});
+    const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+    const [categoryType, setCategoryType] = useState('all');
+    const [callCategoryApi, setCallCategoryApi] = useState(false);
+    const [categoryId, setCategoryId] = useState('');
+    const [callTopicApi, setCallTopicApi] = useState(false);
+    const [selectedCategoryIndex, setSelectedCategoryIndex] = useState();
+    const [topicInfo, setTopicInfo] = useState({ data: [], error: '' });
 
     const handleChange = (e) => {
         setSearchInput(e?.target?.value);
@@ -130,12 +61,10 @@ const Home = () => {
         }
     }
 
-    const onCategoriesSuccess = res => {
+    const onCategoriesListSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
             console.log(res);
-            setCategoriesData(res?.data?.categories);
-            setTabValue(res?.data?.categories[0]?.categoryName);
-            // setDetailsResponse(res?.data?.userInfo);
+            setCategoryListData(res?.data?.categoriesList);
         } else {
 
         }
@@ -149,9 +78,66 @@ const Home = () => {
         setTabValue(newValue);
     }
 
+    useEffect(() => {
+        setSelectedItemIndex(0);
+        setCategoryType('all');
+        setCallCategoryApi(true);
+        setTopicInfo({ data: [], error: '' });
+    }, [])
+
+
+    const handleListClick = (el, idx) => {
+        console.log(el, idx);
+        setSelectedItemIndex(idx)
+        setSelectedItem(el);
+        setCategoryType(el?.id);
+        setCallCategoryApi(true);
+    }
+
+    const onCategoriesSuccess = res => {
+        setCallCategoryApi(false);
+        if ((res?.status === 200 || res?.status === 201)) {
+            setCategoryData(res?.data?.categories);
+        } else {
+
+        }
+    }
+
+    const handleCategoryClicked = (el, idx) => {
+        setSelectedCategoryIndex(idx)
+        setCategoryId(el?.categoryId);
+        setCallTopicApi(true);
+    }
+
+    const onTopicsSuccess = res => {
+        console.log(res);
+        setCallTopicApi(false);
+        setTopicInfo({data: [], error: ''});
+        if ((res?.status === 200 || res?.status === 201)) {
+            const sortedData = res?.data?.topics?.sort((a,b) => {
+                let keyA = a?.displayOrder,
+                    keyB = b?.displayOrder;
+                // Compare the 2 dates
+                if (keyA < keyB) return -1;
+                if (keyA > keyB) return 1;
+                return 0;
+            })
+            console.log(sortedData);
+            setTopicInfo({data: res?.data?.topics, error: ''});
+        } else {
+            setTopicInfo({data: [], error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later'});
+        }
+    }
+
+    const handleTopicClick = (el) => {
+        
+    }
+
     let detailsApi = useFetchAPI("DetailsApi", `/user/${appState?.userInfo?.localId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onDetailSuccess));
-    let getCategories = useFetchAPI("GetCategories", `/categories/getCategories`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesSuccess));
-    const fetching = detailsApi?.Loading || detailsApi?.Fetching || getCategories?.Loading || getCategories?.Fetching;
+    let getCategoriesList = useFetchAPI("GetCategoriesList", `/categories/getCategoryList`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesListSuccess));
+    let getCategories = useFetchAPI("GetCategories", `/categories/getCategoriesFromList/${categoryType}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesSuccess, "", callCategoryApi));
+    let getTopics = useFetchAPI("GetTopics", `/categories/getTopics/${categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onTopicsSuccess, "", callTopicApi));
+    const fetching = detailsApi?.Loading || detailsApi?.Fetching || getCategoriesList?.Loading || getCategoriesList?.Fetching;
 
     return (
         <>
@@ -203,53 +189,86 @@ const Home = () => {
                     <div className={HomeStyles.imageSection}>
                         <img src={Image} alt='Image' />
                     </div>
-                    <div className={HomeStyles.categories}>
+                    <div className={HomeStyles.categoryList}>
                         <h4 className={HomeStyles.categoriesText}>Categories</h4>
+                        {categoriesListData?.length > 0 ? (
+                            <>
+                                <div className={HomeStyles.listFlex}>
+                                    {categoriesListData?.map((el, idx) => (
+                                        <div key={el?.id} className={selectedItemIndex === idx ? HomeStyles.activeListData : HomeStyles.listData} onClick={() => handleListClick(el, idx)}>
+                                            {el?.value}
+                                        </div>
+                                    ))}
+                                </div>
+                            </>)
+                            : <></>
+                        }
+                    </div>
+                    <div className={HomeStyles.categories}>
+                        <Swiper
+                            slidesPerView={5}
+                            spaceBetween={0}
+                            cssMode={true}
+                            navigation={true}
+                            mousewheel={true}
+                            keyboard={true}
+                            modules={[Navigation, Mousewheel, Keyboard]}
+                            className="mySwiper"
+                        >
+                            <div className={HomeStyles.grid}>
+                                {(getCategories?.Loading || getCategories?.Fetching) ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
+                                    categoriesData?.map((el, index) => (
+                                        <SwiperSlide key={el?.categoryId}>
+                                            <div className={selectedCategoryIndex === index ? HomeStyles.activeCard : HomeStyles.card} onClick={() => handleCategoryClicked(el, index)}>
+                                                <div className={HomeStyles.cardFlex}>
+                                                    <div>
+                                                        <img className={HomeStyles.card__img} src={el?.imageUrl} alt={el?.categoryName} />
+                                                    </div>
+                                                    <div className={HomeStyles.card__content}>
+                                                        <h1 className={HomeStyles.card__header}>{el?.categoryName}</h1>
+                                                        <div className={HomeStyles.card__textWrapper}>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </SwiperSlide>
+                                    ))}
+                            </div>
+                        </Swiper>
+                    </div>
+                    <div className={HomeStyles.topics}>
+                        {getTopics?.data && <h4 className={HomeStyles.categoriesText}>Topics</h4>}
                         <Swiper
                             slidesPerView={4}
                             spaceBetween={0}
                             cssMode={true}
                             navigation={true}
-                            pagination={{
-                                clickable: true,
-                            }}
                             mousewheel={true}
                             keyboard={true}
-                            modules={[Navigation, Pagination, Mousewheel, Keyboard]}
+                            modules={[Navigation, Mousewheel, Keyboard]}
                             className="mySwiper"
                         >
                             <div className={HomeStyles.grid}>
-                                {categoriesData?.map((el, index) => (
-                                    <SwiperSlide key={el?.categoryId}>
-                                        <div className={HomeStyles.card}><img className={HomeStyles.card__img} src={el?.imageUrl} alt="Snowy Mountains" />
-                                            <div className={HomeStyles.card__content}>
-                                                <h1 className={HomeStyles.card__header}>{el?.categoryName}</h1>
-                                                <div className={HomeStyles.card__textWrapper}>
-                                                    <p className={HomeStyles.card__text}>{el?.description}</p>
+                                {(getTopics?.Loading || getTopics?.Fetching) ? <Skeleton variant="rectangular" width={'100%'} height={200} sx={{ marginBottom: 10 }} /> :
+                                    topicInfo?.data?.length > 0 ? topicInfo?.data?.map((el, index) => (
+                                        <SwiperSlide key={el?.topicId}>
+                                            <div className={HomeStyles.topicCard} onClick={() => handleTopicClick(el)}>
+                                                <div className={HomeStyles.topicCardFlex}>
+                                                    <div>
+                                                        <img className={HomeStyles.card__img} src={el?.imageUrl} alt={el?.topicName} />
+                                                    </div>
+                                                    <div className={HomeStyles.card__content}>
+                                                        <h1 className={HomeStyles.topicCard__header}>{el?.topicName}</h1>
+                                                        <div className={HomeStyles.card__textWrapper}>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div>
-                                            <button className={HomeStyles.card__text}>Explore <span>&rarr;</span></button>
-                                            </div>
-                                        </div>
-                                    </SwiperSlide>
-                                ))}
+                                        </SwiperSlide>
+                                    )) : <><h4>{topicInfo?.error}</h4></>}
                             </div>
                         </Swiper>
-                        {/* <Box sx={{ maxWidth: { xs: 320, sm: 480, lg: 800, xl: 1500 }, bgcolor: 'background.paper' }}>
-                            <TabContext value={tabValue}>
-                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                    <TabList onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-                                        {categoriesData?.map((el, index) => (
-                                            <Tab icon={<img src={el?.imageUrl} className={HomeStyles.tabImage} />} key={el?.categoryId} label={el?.categoryName} value={el?.categoryName} />
-                                        ))}
-                                    </TabList>
-                                </Box>
-                                {categoriesData?.map((el, index) => (
-                                    <TabPanel key={el?.categoryId} value={el?.categoryName}>{el?.categoryName}</TabPanel>
-                                ))}
-                            </TabContext>
-                        </Box> */}
+
                     </div>
                 </div>
                 <div className={HomeStyles.footer}>

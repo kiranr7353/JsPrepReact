@@ -44,10 +44,8 @@ const getData = (data) => {
     if (data && (data.isAxiosError || data.status === 401)) {
         const resp = data.data;
         if (resp.statusCode === 401 && resp.message === "Unauthorized") {
-            let isRedirect = GetCookie('isRedirect');
-            let isRedirectFromReact = GetCookie('isRedirectFromReact');
             RemoveAllCookies();
-            window.open(isRedirect ? `${envData.logoutUrl}?sessionExpired=true` : isRedirectFromReact ? `${envData.reactLogoutUrl}?sessionExpired=true` : `${envData.reactLogoutUrl}?sessionExpired=true`, '_self');
+            window.open(`${envData.reactLogoutUrl}?sessionExpired=true`, '_self');
             return null;
         }
         if (data && data.message) {

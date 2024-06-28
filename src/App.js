@@ -82,13 +82,14 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <UserContextProvider>
             <PersistGate persistor={persistor}>
-              {/* {isUserLogged && userAuthInfo ? <IdleTimerComponent env={{ apiURL: env.apiURL, logoutUrl: env.angularLogoutUrl, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''} */}
+              {isUserLogged ? <IdleTimerComponent env={{ apiURL: env.apiURL, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''}
               <div>
                 <div className='sshui-body-wrappper'>
                   <Suspense fallback={<Skeleton />}>
                     <Routes>
                       <Route element={<PrivateRoutes isUserLogged={isUserLogged} />}>
                         <Route index path='/home' element={<Home />} />
+                        <Route index path='/home/:categoryId/:topicId' element={<Home />} />
                       </Route>
                       <Route path="/login" element={<LoginHome />} />
                       <Route path="/register" element={<RegisterHome />} />

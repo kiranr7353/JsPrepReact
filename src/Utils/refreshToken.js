@@ -4,25 +4,25 @@ import ManageCookie from "./cookieManager";
 
 export default function refreshToken(env) {
     return new Promise((resolve,reject) => {
-        const payload = {};
         let authInfo =  ManageCookie('get', 'userTokenInfo');
+        let refreshToken =  ManageCookie('get', 'refreshToken');
+        const payload = { 
+            grant_type: "refresh_token",
+            refresh_token: refreshToken
+        };
         ManageCookie('set', 'tokenTimeStamp', new Date().toISOString());
         Axios({
             method: 'POST',
-            url: `${env.apiURL}user/refreshToken`,
+            url: `https://securetoken.googleapis.com/v1/token?key=AIzaSyAcZjxtVxKuaNoeClWKeh8Luk8g2NMjhZ8`,
             headers: {
                 "content-type": "application/json",
-                "accept": "application/json",
-                "authorization": "Bearer " + authInfo.authToken,
-                "login-fullname": authInfo.lastNm + ", " + authInfo.firstNm,
-                "login-usernm": authInfo.usernm,
-                "meta-timezone": moment_timezone.tz.guess()
+                "accept": "application/json"
             },
             data: payload
         })
         .then(response => {
-            if (response.data && response.data.token) {
-                authInfo.authToken = response.data.token;
+            if (response.data && response.data.access_token) {
+                authInfo.authToken = response.data.access_token;
                 ManageCookie('set', 'userTokenInfo', authInfo);
                 ManageCookie('set', 'tokenTimeStamp', new Date().toISOString());
             }
@@ -30,10 +30,8 @@ export default function refreshToken(env) {
         }).catch(error => {
             const errors = error.response && error.response.data;
             if (error.isAxiosError && errors.statusCode === 401) {
-                let isRedirect = ManageCookie('get', 'isRedirect');
-                let isRedirectFromReact = ManageCookie('get', 'isRedirectFromReact');
                 ManageCookie('removeAll');
-                window.open(isRedirect ? `${env.logoutUrl}?sessionExpired=true` : isRedirectFromReact ? `${env.reactLogoutUrl}?sessionExpired=true` : `${env.reactLogoutUrl}?sessionExpired=true`, '_self');
+                window.open(`${env.reactLogoutUrl}?sessionExpired=true`, '_self');
             }
         });
     });

@@ -4,6 +4,7 @@ const moment_timezone = require('moment-timezone');
 
 export const CommonHeaders = () => {
     const userTokenInfo = useMemo(() => GetCookie('userTokenInfo'), []);
+    const refreshToken = useMemo(() => GetCookie('refreshToken'), []);
     const userInfo = useMemo(() => GetCookie('userInfo'), []);
     
     return {
@@ -12,6 +13,7 @@ export const CommonHeaders = () => {
         "localId": userInfo ? userInfo.localId : '',
         "Authorization": userTokenInfo ? "Bearer " + userTokenInfo : '',
         "meta-timezone": moment_timezone.tz.guess() || "Asia/Calcutta",
+        "refreshToken": refreshToken
         // "operationid": operationId ? operationId : ''
     }
 }

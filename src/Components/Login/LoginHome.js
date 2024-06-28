@@ -87,7 +87,9 @@ const LoginHome = () => {
       setObject({ userInfo: user?.user?.stsTokenManager?.accessToken }, 'add');
       SetCookie('userTokenInfo', user?.user?.stsTokenManager?.accessToken, { path: '/' });
       SetCookie('userInfo', user?.user?.reloadUserInfo, { path: '/' });
+      SetCookie('tokenTimeStamp', new Date().toISOString(), { path: '/' });
       SetCookie('idleTime', user?.user?.stsTokenManager?.expirationTime, { path: '/' });
+      SetCookie('refreshToken', user?.user?.stsTokenManager?.refreshToken, { path: '/' });
       dispatch(setUserInfo(user?.user?.reloadUserInfo));
       setCallLoginApi(true);
     }).catch((error) => {
