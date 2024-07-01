@@ -15,11 +15,13 @@ import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import appStore from './Redux/Reducers/AppReducer';
 import PrivateRoutes from './Components/PrivateRoutes';
+import Header from './Components/Header/Header';
 
 const LoginHome = lazy(() => import('./Components/Login/LoginHome'));
 const LogoutHome = lazy(() => import('./Components/Logout/LogoutHome'));
 const RegisterHome = lazy(() => import('./Components/Register/RegisterHome'));
 const Home = lazy(() => import('./Components/App/Home/Home'));
+const TopicHome = lazy(() => import('./Components/App/TopicHome/TopicHome'));
 
 function App() {
   const env = useMemo(() => Envurl(), [Envurl]);
@@ -87,13 +89,14 @@ function App() {
                 <div className='sshui-body-wrappper'>
                   <Suspense fallback={<Skeleton />}>
                     <Routes>
-                      <Route element={<PrivateRoutes isUserLogged={isUserLogged} />}>
-                        <Route index path='/home' element={<Home />} />
-                        <Route index path='/home/:categoryId/:topicId' element={<Home />} />
-                      </Route>
+                      <Route path="/" element={<Navigate to="/login" replace={true} />} />
                       <Route path="/login" element={<LoginHome />} />
                       <Route path="/register" element={<RegisterHome />} />
                       <Route path="/logout" element={<LogoutHome />} />
+                      <Route path='/home' element={<Header />} >
+                        <Route index element={<Home />} />
+                        <Route path='topic/:categoryId/:topicId' element={<TopicHome />} />
+                      </Route>
                     </Routes>
                   </Suspense>
                 </div>

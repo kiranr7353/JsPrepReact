@@ -1,79 +1,6 @@
 .container {
     width: 100%;
 }
-
-.topBar {
-  background: #fff;
-  height: 5rem;
-  padding: 0 2.4rem;
-  position: relative;
-  z-index: 1010;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .08);
-}
-.topBarContainer {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 45px;
-}
-.requestSectionContainer {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-.requestText {
-    color: #2d2f31;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.4;
-    cursor: pointer;
-}
-.requestText:hover {
-    color: blue;
-}
-.textField div fieldset{
-    border: 1px solid;
-    background-color: #f7f9fa;
-    border-radius: 26px;
-    z-index: -100;
-}
-.textField div input{
-    width: 782px !important;
-}
-.searchIcon {
-  z-index: 100;
-  cursor: pointer;
-}
-.clearIcon {
-  z-index: 100;
-  cursor: pointer;
-}
-.profileSectionContainer {
-    display: flex;
-    align-items: center;
-}
-.avatar {
-    margin-left: -26px;
-    margin-right: 20px;
-    border: 1px solid gray;
-    padding: 10px;
-    border-radius: 50%;
-    width: 34px;
-    height: 34px;
-    text-align: center;
-    font-size: 20px;
-    background-color: #f7f9fa;
-    cursor: pointer;
-}
-.avatar > h5 {
-    margin: 0px;
-    font-size: 24px;
-    font-weight: 600;
-}
-.searchIconDisabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
 .body {
     margin: 0 140px;
 }
@@ -260,3 +187,41 @@
     font-weight: 700;
     cursor: pointer;
 }
+.topicsError {
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+}
+.modalinnerwrapper {
+    padding: 20px;
+    min-width: 300px;
+  }
+  .headerText{
+    font-weight: bold;
+    font-size: 20px;
+    opacity: 0.7;
+    margin-top: -5px;
+  }
+  .modalactionsection {
+    text-align: center;
+  }
+  .modalactionsection button {
+    margin: 10px 10px;
+  }
+  .okButton{
+    text-transform: initial;
+    background-color: rgb(40, 108, 226);
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+  }
+  .errorMessage {
+    font-weight: bold;
+    color: #514e4e;
+    font-size: 19px;
+  }

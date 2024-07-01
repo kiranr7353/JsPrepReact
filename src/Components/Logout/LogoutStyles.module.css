@@ -1,0 +1,17 @@
+.logoutMain {
+    text-align: center;
+    font-weight: 300;
+    padding-top: 12%;
+    color: #333333;
+    font-size: 32px;
+}
+.logoutMain .logButtons {
+    margin: 20px;
+    width: 20%;
+}
+.signout {
+    font-family: sans-serif !important;
+    margin-bottom: 4rem;
+    color: #686565;
+    margin-top: -5rem;
+}
