@@ -13,7 +13,7 @@ const TopicHome = () => {
   const selectTopicToRender = () => {
     switch(params?.categoryId){
       case 'react': 
-       return <ReactHome params={params} />
+       return <ReactHome params={params} locationDetails={location} />
        case 'javascript': 
        return <JavascriptHome params={params} />
     }

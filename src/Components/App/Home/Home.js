@@ -182,7 +182,7 @@ const Home = () => {
                                         <div className={HomeStyles.topicCard} onClick={() => handleTopicClick(el)}>
                                             <div className={HomeStyles.topicCardFlex}>
                                                 <div>
-                                                    <img className={HomeStyles.card__img} src={el?.imageUrl} alt={el?.topicName} />
+                                                    <img className={HomeStyles.card__imgTopic} src={el?.imageUrl} alt={el?.topicName} />
                                                 </div>
                                                 <div className={HomeStyles.card__content}>
                                                     <h1 className={HomeStyles.topicCard__header}>{el?.topicName}</h1>
