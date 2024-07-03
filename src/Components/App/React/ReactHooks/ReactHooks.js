@@ -1,13 +1,14 @@
-import React, { useState } from 'react'
-import { useFetchAPI } from '../../../Hooks/useAPI';
-import { CommonHeaders } from '../../../CommonComponents/CommonHeaders';
-import { fetchQueryParams } from '../../../Hooks/fetchQueryParams';
-import Loader from '../../../CommonComponents/Loader/Loader';
-import ReactStyles from './ReactStyles.module.css';
+import React, { useRef, useState } from 'react'
+import { useFetchAPI } from '../../../../Hooks/useAPI';
+import { CommonHeaders } from '../../../../CommonComponents/CommonHeaders';
+import { fetchQueryParams } from '../../../../Hooks/fetchQueryParams';
+import Loader from '../../../../CommonComponents/Loader/Loader';
+import ReactStyles from './ReactHooksStyles.module.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
-import CommonButton from '../../../CommonComponents/CommonButton';
+import CommonButton from '../../../../CommonComponents/CommonButton';
 import CancelIcon from '@mui/icons-material/Cancel';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 
 import 'swiper/css';
@@ -20,6 +21,8 @@ const ReactHooks = (props) => {
 
     const { params, locationDetails } = props;
 
+    const maxNumber = 69;
+
     const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [contentData, setContentData] = useState({});
@@ -28,6 +31,7 @@ const ReactHooks = (props) => {
     const [description, setDescription] = useState([
         { id: 1, data: '', snippet: [] }
     ])
+    const descInputRef = useRef("");
 
     console.log(locationDetails, 'locationDetails');
 
@@ -61,17 +65,47 @@ const ReactHooks = (props) => {
 
     const handleDescriptionChange = (i, e) => {
         let newValues = [...description];
-        newValues[i][e.target.name] = e.target.value;
+        if (e.target.name === 'snippet') {
+            const selectedFiles = e.target.files;
+            const selectedFilesArray = Array.from(selectedFiles);
+
+            const imagesArray = selectedFilesArray.map((file) => {
+                return URL.createObjectURL(file);
+            });
+
+            setDescription((prev) => ({ ...prev, snippet: [description[i]?.snippet.concat(imagesArray)] }));
+
+            newValues[i][e.target.name] = imagesArray;
+        } else {
+            newValues[i][e.target.name] = e.target.value;
+        }
         setDescription(newValues);
+    }
+
+    const deleteImage = (i,image) => {
+        let newValues = [...description];
+        const filtered = newValues[i]?.snippet?.findIndex((e) => e === image);
+        newValues[i]?.snippet?.splice(filtered, 1);
+        descInputRef.current.value = '';
+        setDescription(newValues);
+        URL.revokeObjectURL(image);
     }
 
     const addAnotherDescription = () => {
         setDescription([...description, { id: description.id++, data: "", snippet: [] }])
     }
 
+    const removeDescription = (i) => {
+        let newValues = [...description];
+        newValues.splice(i, 1);
+        setDescription(newValues);
+    }
+
     let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
 
     const fetching = GetHooks?.Loading || GetHooks?.Fetching;
+
+    console.log(description);
 
     return (
         <>
@@ -153,17 +187,63 @@ const ReactHooks = (props) => {
                         <div className={ReactStyles.conceptDescription}>
                             <FormControl sx={{ width: '100%' }}>
                                 <label>Description <span className={ReactStyles.required}>*</span></label>
-                                { description?.map((el, i) => (
-                                    <TextField
-                                    name='title'
-                                    value={el?.data || ""}
-                                    onChange={(e) => handleDescriptionChange(i, e)}
-                                    InputProps={{
-                                        type: 'text',
-                                    }}
-                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                    placeholder={"Enter Description"} size="large"
-                                />
+                                {description?.map((el, i) => (
+                                    <div className={ReactStyles.descriptionFlex}>
+                                        <div className={ReactStyles.descriptionDiv}>
+                                            <TextField
+                                                name='title'
+                                                value={el?.data || ""}
+                                                onChange={(e) => handleDescriptionChange(i, e)}
+                                                InputProps={{
+                                                    type: 'text',
+                                                }}
+                                                sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                placeholder={"Enter Description"} size="large"
+                                            />
+                                            <label className={`btn btn-primary ${ReactStyles.DocUpload}`}>Upload Code Snippet(s)</label>
+                                            <input ref={descInputRef} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={ReactStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
+                                            {description[i]?.snippet?.length > 0 &&
+                                                (description[i]?.snippet?.length > 10 ? (
+                                                    <p className="error">
+                                                        You can't upload more than 10 images! <br />
+                                                        <span>
+                                                            please delete <b> {description[i]?.snippet.length - 10} </b> of them{" "}
+                                                        </span>
+                                                    </p>
+                                                ) : (
+                                                    <button
+                                                        className="upload-btn"
+                                                        onClick={() => {
+                                                            console.log(description[i]?.snippet);
+                                                        }}
+                                                    >
+                                                        UPLOAD {description[i]?.snippet?.length} IMAGE
+                                                        {description[i]?.snippet?.length === 1 ? "" : "S"}
+                                                    </button>
+                                                ))}
+                                            <div className={ReactStyles.images}>
+                                                {description[i]?.snippet &&
+                                                    description[i]?.snippet?.map((image, index) => {
+                                                        return (
+                                                            <div key={image} className={ReactStyles.image}>
+                                                                <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
+                                                                <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
+                                                                    Delete
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                            </div>
+                                        </div>
+
+                                        <div className={ReactStyles.remove}>
+                                            {
+                                                i ?
+                                                    <HighlightOffIcon titleAccess='Remove' className={ReactStyles.removeIcon} onClick={() => removeDescription(i)} />
+                                                    : null
+                                            }
+                                        </div>
+                                    </div>
                                 ))}
                                 <h6 className={ReactStyles.anotherDescription}><u onClick={addAnotherDescription}>Add Another Description</u></h6>
                             </FormControl>

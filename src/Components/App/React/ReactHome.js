@@ -3,7 +3,7 @@ import ReactBasics from './ReactBasics';
 import ReactRouter from './ReactRouter';
 import ReactRedux from './ReactRedux';
 import ReactContext from './ReactContext';
-import ReactHooks from './ReactHooks';
+import ReactHooks from './ReactHooks/ReactHooks';
 import ReactQuery from './ReactQuery';
 import TrickyQuestions from './TrickyQuestions';
 import ReactRoadMap from './ReactRoadMap';
