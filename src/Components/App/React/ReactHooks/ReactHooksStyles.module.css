@@ -173,9 +173,19 @@
 }
 .imageDelete {
   display: block;
+  background: #f27f97;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.uploadBtn {
   background: lightblue;
   border: none;
   padding: 8px;
   border-radius: 5px;
   font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
 }

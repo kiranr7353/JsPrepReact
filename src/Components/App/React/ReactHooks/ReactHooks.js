@@ -9,6 +9,7 @@ import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
 import CommonButton from '../../../../CommonComponents/CommonButton';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { getDownloadURL, ref as storageRef, uploadBytes, uploadBytesResumable, deleteObject } from "firebase/storage";
 
 
 import 'swiper/css';
@@ -16,22 +17,23 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './ReactHooksSwiperStyles.css';
 import { Drawer, FormControl, TextField } from '@mui/material';
+import { storage } from '../../../../firebaseConfig';
 
 const ReactHooks = (props) => {
 
     const { params, locationDetails } = props;
-
-    const maxNumber = 69;
 
     const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [contentData, setContentData] = useState({});
     const [openDrawer, setOpenDrawer] = useState(false);
     const [addConceptTitle, setAddConceptTitle] = useState("");
+    const [descriptionImageUploaded, setDescriptionImageUploaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [description, setDescription] = useState([
-        { id: 1, data: '', snippet: [] }
+        { id: 1, data: '', snippet: [], imageUploaded: false }
     ])
-    const descInputRef = useRef("");
+    const descInputRef = useRef([]);
 
     console.log(locationDetails, 'locationDetails');
 
@@ -82,23 +84,73 @@ const ReactHooks = (props) => {
         setDescription(newValues);
     }
 
-    const deleteImage = (i,image) => {
+    const deleteImage = (i, image) => {
         let newValues = [...description];
         const filtered = newValues[i]?.snippet?.findIndex((e) => e === image);
         newValues[i]?.snippet?.splice(filtered, 1);
-        descInputRef.current.value = '';
+        descInputRef.current[i].value = '';
         setDescription(newValues);
         URL.revokeObjectURL(image);
     }
 
     const addAnotherDescription = () => {
-        setDescription([...description, { id: description.id++, data: "", snippet: [] }])
+        setDescription([...description, { id: description?.length + 1, data: "", snippet: [] }])
     }
 
     const removeDescription = (i) => {
         let newValues = [...description];
         newValues.splice(i, 1);
         setDescription(newValues);
+    }
+
+
+    let urls = [];
+    const uploadImageToFireStore = async (img, i, index) => {
+        let blob = await fetch(img).then(r => r.blob());
+        const type = blob?.type.split('/')[1];
+        const path = `${`React/ReactHooks/${addConceptTitle}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        const imageRef = storageRef(storage, path, { contentType: blob?.type });
+        setIsLoading(true);
+        uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
+            .then((snapshot) => {
+                getDownloadURL(snapshot.ref)
+                    .then((url) => {
+                        setIsLoading(false);
+                        let newValues = [...description];
+                        urls.push(url)
+                        newValues[i].snippet = urls;
+                        newValues[i].imageUploaded = true;
+                        setDescription(newValues);
+                        return url;
+                    })
+                    .catch((error) => {
+                        setIsLoading(false);
+                    });
+            })
+            .catch((error) => {
+                setIsLoading(false);
+            });
+    }
+
+    const uploadImages = (i) => {
+        description[i].snippet?.forEach(async (el, index) => {
+            await uploadImageToFireStore(el, i, index)
+        })
+    }
+
+    const removeUploadedImage = async (i, image) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => {
+            let newValues = [...description];
+            const index = newValues[i].snippet.findIndex(el => el === image);
+            newValues[i].snippet.splice(index, 1);
+            if(newValues[i].snippet?.length === 0) {
+                descInputRef.current[i].value = '';
+            }
+            setDescription(newValues);
+        }).catch((error) => {
+
+        });
     }
 
     let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
@@ -109,7 +161,7 @@ const ReactHooks = (props) => {
 
     return (
         <>
-            {(fetching) && <Loader showLoader={fetching} />}
+            {(fetching || isLoading) && <Loader showLoader={fetching} />}
             <div className={ReactStyles.banner}>
                 <div className={ReactStyles.body}>
                     <div className={ReactStyles.contentFlex}>
@@ -191,7 +243,7 @@ const ReactHooks = (props) => {
                                     <div className={ReactStyles.descriptionFlex}>
                                         <div className={ReactStyles.descriptionDiv}>
                                             <TextField
-                                                name='title'
+                                                name='data'
                                                 value={el?.data || ""}
                                                 onChange={(e) => handleDescriptionChange(i, e)}
                                                 InputProps={{
@@ -201,7 +253,7 @@ const ReactHooks = (props) => {
                                                 placeholder={"Enter Description"} size="large"
                                             />
                                             <label className={`btn btn-primary ${ReactStyles.DocUpload}`}>Upload Code Snippet(s)</label>
-                                            <input ref={descInputRef} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={ReactStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
+                                            <input ref={el => descInputRef.current[i] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={ReactStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
                                             {description[i]?.snippet?.length > 0 &&
                                                 (description[i]?.snippet?.length > 10 ? (
                                                     <p className="error">
@@ -211,14 +263,9 @@ const ReactHooks = (props) => {
                                                         </span>
                                                     </p>
                                                 ) : (
-                                                    <button
-                                                        className="upload-btn"
-                                                        onClick={() => {
-                                                            console.log(description[i]?.snippet);
-                                                        }}
-                                                    >
-                                                        UPLOAD {description[i]?.snippet?.length} IMAGE
-                                                        {description[i]?.snippet?.length === 1 ? "" : "S"}
+                                                    <button className={ReactStyles.uploadBtn} disabled={description[i]?.imageUploaded} onClick={() => uploadImages(i)}>
+                                                        {description[i]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.snippet?.length} Image
+                                                        {description[i]?.snippet?.length === 1 ? "" : "s"}
                                                     </button>
                                                 ))}
                                             <div className={ReactStyles.images}>
@@ -227,9 +274,11 @@ const ReactHooks = (props) => {
                                                         return (
                                                             <div key={image} className={ReactStyles.image}>
                                                                 <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
-                                                                <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
+                                                                {!description[i]?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
                                                                     Delete
-                                                                </button>
+                                                                </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedImage(i, image)}>
+                                                                    Remove
+                                                                </button>}
                                                             </div>
                                                         );
                                                     })}
