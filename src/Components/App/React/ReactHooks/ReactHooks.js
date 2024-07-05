@@ -99,6 +99,13 @@ const ReactHooks = (props) => {
 
     const removeDescription = (i) => {
         let newValues = [...description];
+        if(newValues[i]?.snippet?.length > 0) {
+            if(newValues[i]?.imageUploaded) {
+                newValues[i]?.snippet.forEach((image) => {
+                    removeUploadedImage(i, image);
+                });
+            }
+        }
         newValues.splice(i, 1);
         setDescription(newValues);
     }
