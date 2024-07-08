@@ -189,3 +189,24 @@
   cursor: pointer;
   margin-top: 10px;
 }
+.headerInput {
+  margin-bottom: 15px !important;
+}
+.pointsDiv {
+  border: 1px solid #cac3c3;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+.pointsInput {
+  width: 100%;
+}
+.removeIconPoint {
+  float: right;
+  color: red;
+  cursor: pointer;
+}
+.noOfColumns {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}

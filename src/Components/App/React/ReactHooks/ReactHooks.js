@@ -6,6 +6,10 @@ import Loader from '../../../../CommonComponents/Loader/Loader';
 import ReactStyles from './ReactHooksStyles.module.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
+import Switch from '@mui/joy/Switch';
+import Typography from '@mui/joy/Typography';
+import { Drawer, FormControl, TextField } from '@mui/material';
+import { storage } from '../../../../firebaseConfig';
 import CommonButton from '../../../../CommonComponents/CommonButton';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
@@ -16,8 +20,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './ReactHooksSwiperStyles.css';
-import { Drawer, FormControl, TextField } from '@mui/material';
-import { storage } from '../../../../firebaseConfig';
+
 
 const ReactHooks = (props) => {
 
@@ -31,14 +34,14 @@ const ReactHooks = (props) => {
     const [descriptionImageUploaded, setDescriptionImageUploaded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [description, setDescription] = useState([
-        { id: 1, data: '', snippet: [], imageUploaded: false }
+        { id: 1, header: '', data: '', snippet: [], imageUploaded: false, hasPoints: false, pointsData: [], hasTable: false, tableCoumns: [], tableData: [], noOfColumns: 0 }
     ])
     const descInputRef = useRef([]);
+    const descPointsInputRef = useRef([]);
 
-    console.log(locationDetails, 'locationDetails');
+    // console.log(locationDetails, 'locationDetails');
 
     const onHooksSucess = res => {
-        console.log(res);
         setHooksConceptsInfo({ data: [], error: '' });
         if ((res?.status === 200 || res?.status === 201)) {
             setHooksConceptsInfo({ data: res?.data?.concepts, error: '' });
@@ -70,18 +73,52 @@ const ReactHooks = (props) => {
         if (e.target.name === 'snippet') {
             const selectedFiles = e.target.files;
             const selectedFilesArray = Array.from(selectedFiles);
-
             const imagesArray = selectedFilesArray.map((file) => {
                 return URL.createObjectURL(file);
             });
-
             setDescription((prev) => ({ ...prev, snippet: [description[i]?.snippet.concat(imagesArray)] }));
-
             newValues[i][e.target.name] = imagesArray;
-        } else {
+        } else if (e.target.type === 'checkbox') {
+            if (e.target.id === 'points') {
+                newValues[i]['hasPoints'] = e.target.checked;
+                if (newValues[i]['hasPoints']) {
+                    newValues[i]['pointsData'].push({ id: 1, value: '', snippet: [], imageUploaded: false });
+                } else {
+                    newValues[i]['pointsData'] = []
+                }
+            } else if (e.target.id === 'table') {
+                newValues[i]['hasTable'] = e.target.checked;
+                // if (newValues[i]['hasTable']) {
+                //     newValues[i]['tableCoumns'].push([]);
+                // } else {
+                //     newValues[i]['tableCoumns'] = []
+                // }
+            }
+        }
+        else {
             newValues[i][e.target.name] = e.target.value;
         }
         setDescription(newValues);
+    }
+
+    const handlePointsChange = (idx, e, i) => {
+        let pointsValues = [...description[i].pointsData];
+        if (e.target.name === 'snippet') {
+            const selectedFiles = e.target.files;
+            const selectedFilesArray = Array.from(selectedFiles);
+            const imagesArray = selectedFilesArray.map((file) => {
+                return URL.createObjectURL(file);
+            });
+            setDescription(prev => {
+                return [...prev.slice(0, i), { ...prev[i], pointsData: { ...description[i].pointsData[idx], snippet: [description[i]?.pointsData[idx]?.snippet.concat(imagesArray)] } }, ...prev.slice(i + 1)]
+            })
+            pointsValues[idx][e.target.name] = imagesArray;
+        } else {
+            pointsValues[idx][e.target.name] = e.target.value;
+        }
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
+        })
     }
 
     const deleteImage = (i, image) => {
@@ -93,14 +130,31 @@ const ReactHooks = (props) => {
         URL.revokeObjectURL(image);
     }
 
+    const deletePointsImage = (i, image, index) => {
+        let pointsValues = [...description[i].pointsData];
+        const filtered = pointsValues[index]?.snippet?.findIndex((e) => e === image);
+        pointsValues[index]?.snippet?.splice(filtered, 1);
+        descPointsInputRef.current[index].value = '';
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
+        })
+        URL.revokeObjectURL(image);
+    }
+
     const addAnotherDescription = () => {
-        setDescription([...description, { id: description?.length + 1, data: "", snippet: [] }])
+        setDescription([...description, { id: description?.length + 1, data: "", snippet: [], imageUploaded: false, hasPoints: false, pointsData: [], hasTable: false, tableCoumns: [], tableData: [], noOfColumns: 0 }])
+    }
+
+    const addAnotherPoint = (i) => {
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], pointsData: [...prev[i].pointsData, { id: description[i]?.pointsData?.length + 1, value: '', snippet: [], imageUploaded: false }] }, ...prev.slice(i + 1)]
+        })
     }
 
     const removeDescription = (i) => {
         let newValues = [...description];
-        if(newValues[i]?.snippet?.length > 0) {
-            if(newValues[i]?.imageUploaded) {
+        if (newValues[i]?.snippet?.length > 0) {
+            if (newValues[i]?.imageUploaded) {
                 newValues[i]?.snippet.forEach((image) => {
                     removeUploadedImage(i, image);
                 });
@@ -110,12 +164,19 @@ const ReactHooks = (props) => {
         setDescription(newValues);
     }
 
+    const removePoint = (idx, i) => {
+        let pointsValues = [...description[i].pointsData];
+        pointsValues.splice(idx);
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
+        })
+    }
 
     let urls = [];
     const uploadImageToFireStore = async (img, i, index) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${addConceptTitle}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
@@ -145,13 +206,49 @@ const ReactHooks = (props) => {
         })
     }
 
+    let pointsUrls = [];
+    const uploadPointsImageToFireStore = async (img, i, index, idx) => {
+        let blob = await fetch(img).then(r => r.blob());
+        const type = blob?.type.split('/')[1];
+        const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
+        const imageRef = storageRef(storage, path, { contentType: blob?.type });
+        setIsLoading(true);
+        uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
+            .then((snapshot) => {
+                getDownloadURL(snapshot.ref)
+                    .then((url) => {
+                        setIsLoading(false);
+                        let pointsValues = [...description[i]?.pointsData];
+                        pointsUrls.push(url)
+                        pointsValues[idx].snippet = pointsUrls;
+                        pointsValues[idx].imageUploaded = true;
+                        setDescription(prev => {
+                            return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
+                        })
+                        return url;
+                    })
+                    .catch((error) => {
+                        setIsLoading(false);
+                    });
+            })
+            .catch((error) => {
+                setIsLoading(false);
+            });
+    }
+
+    const uploadPointsImages = (idx, i) => {
+        description[i]?.pointsData[idx]?.snippet?.forEach(async (el, index) => {
+            await uploadPointsImageToFireStore(el, i, index, idx)
+        })
+    }
+
     const removeUploadedImage = async (i, image) => {
         const imageRef = storageRef(storage, image);
         deleteObject(imageRef).then(() => {
             let newValues = [...description];
             const index = newValues[i].snippet.findIndex(el => el === image);
             newValues[i].snippet.splice(index, 1);
-            if(newValues[i].snippet?.length === 0) {
+            if (newValues[i].snippet?.length === 0) {
                 descInputRef.current[i].value = '';
             }
             setDescription(newValues);
@@ -159,6 +256,27 @@ const ReactHooks = (props) => {
 
         });
     }
+
+    const removeUploadedPointsImage = async (i, image, idx) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => {
+            let pointsValues = [...description[i].pointsData];
+            const index = pointsValues[idx].snippet.findIndex(el => el === image);
+            pointsValues[idx].snippet.splice(index, 1);
+            if (pointsValues[idx].snippet?.length === 0) {
+                descPointsInputRef.current[idx].value = '';
+            }
+            setDescription(prev => {
+                return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
+            })
+        }).catch((error) => {
+
+        });
+    }
+
+    // const data = [
+    //     { sectionId:1, description: [{ id: 1, header:'', data:"", codeSnippets: [], hasTable: true, tableColumn: [], tableData: [], hasPoints: true, pointsData: [{},{}] },{},{}] }
+    // ]
 
     let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
 
@@ -250,6 +368,17 @@ const ReactHooks = (props) => {
                                     <div className={ReactStyles.descriptionFlex}>
                                         <div className={ReactStyles.descriptionDiv}>
                                             <TextField
+                                                className={ReactStyles.headerInput}
+                                                name='header'
+                                                value={el?.header || ""}
+                                                onChange={(e) => handleDescriptionChange(i, e)}
+                                                InputProps={{
+                                                    type: 'text',
+                                                }}
+                                                sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                placeholder={"Enter Header"} size="large"
+                                            />
+                                            <TextField
                                                 name='data'
                                                 value={el?.data || ""}
                                                 onChange={(e) => handleDescriptionChange(i, e)}
@@ -290,8 +419,95 @@ const ReactHooks = (props) => {
                                                         );
                                                     })}
                                             </div>
+                                            <div className={ReactStyles.points}>
+                                                <Typography component="label" endDecorator={<Switch sx={{ ml: 1, mt: 1 }} id='points' name='hasPoints' checked={el?.hasPoints} onChange={(e) => handleDescriptionChange(i, e)} />}>
+                                                    Add Points
+                                                </Typography>
+                                                {description[i]?.hasPoints &&
+                                                    <>
+                                                        {description[i]?.pointsData?.map((point, idx) => (
+                                                            <>
+                                                                <div className={ReactStyles.pointsDiv}>
+                                                                    {idx ? <HighlightOffIcon titleAccess='Remove' className={ReactStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
+                                                                    <h4>Point {idx + 1}</h4>
+                                                                    <label>Enter Point</label>
+                                                                    <TextField
+                                                                        className={ReactStyles.pointsInput}
+                                                                        name='value'
+                                                                        value={point?.value || ""}
+                                                                        onChange={(e) => handlePointsChange(idx, e, i)}
+                                                                        InputProps={{
+                                                                            type: 'text',
+                                                                        }}
+                                                                        sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                                        placeholder={"Enter Value"} size="large"
+                                                                    />
+                                                                    <div>
+                                                                        <label className={`btn btn-primary ${ReactStyles.DocUpload}`}>Upload Code Snippet(s)</label>
+                                                                        <input ref={el => descPointsInputRef.current[idx] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={ReactStyles.uploadInput} onChange={(e) => handlePointsChange(idx, e, i)} />
+                                                                        {description[i]?.pointsData[idx]?.snippet?.length > 0 &&
+                                                                            (description[i]?.pointsData[idx]?.snippet?.length > 10 ? (
+                                                                                <p className="error">
+                                                                                    You can't upload more than 10 images! <br />
+                                                                                    <span>
+                                                                                        please delete <b> {description[i]?.pointsData[idx]?.snippet.length - 10} </b> of them{" "}
+                                                                                    </span>
+                                                                                </p>
+                                                                            ) : (
+                                                                                <button className={ReactStyles.uploadBtn} disabled={description[i]?.pointsData[idx]?.imageUploaded} onClick={() => uploadPointsImages(idx, i)}>
+                                                                                    {description[i]?.pointsData[idx]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.pointsData[idx]?.snippet?.length} Image
+                                                                                    {description[i]?.pointsData[idx]?.snippet?.length === 1 ? "" : "s"}
+                                                                                </button>
+                                                                            ))}
+                                                                        <div className={ReactStyles.images}>
+                                                                            {description[i]?.pointsData[idx]?.snippet &&
+                                                                                description[i]?.pointsData[idx]?.snippet?.map((image, index) => {
+                                                                                    return (
+                                                                                        <div key={image} className={ReactStyles.image}>
+                                                                                            <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
+                                                                                            {!description[i]?.pointsData[idx]?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
+                                                                                                Delete
+                                                                                            </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image, idx)}>
+                                                                                                Remove
+                                                                                            </button>}
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                        ))}
+                                                        <h6 className={ReactStyles.anotherDescription}><u onClick={() => addAnotherPoint(i)}>Add Another Point</u></h6>
+                                                    </>}
+                                            </div>
+                                            <div className={ReactStyles.table}>
+                                                <Typography component="label" endDecorator={<Switch sx={{ ml: 1, mt: 1 }} id='table' name='hasTable' checked={el?.hasTable} onChange={(e) => handleDescriptionChange(i, e)} />}>
+                                                    Add Table
+                                                </Typography>
+                                                {description[i].hasTable ?
+                                                    <>
+                                                        <div className={ReactStyles.noOfColumns}>
+                                                            <div>
+                                                                <TextField
+                                                                    className={ReactStyles.headerInput}
+                                                                    name='noOfColumns'
+                                                                    value={el?.noOfColumns || ""}
+                                                                    onChange={(e) => handleDescriptionChange(i, e)}
+                                                                    InputProps={{
+                                                                        type: 'text',
+                                                                    }}
+                                                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                                    placeholder={"Enter Number of Columns"} size="large"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} disabled={!description[i]?.noOfColumns}>Ok</CommonButton>
+                                                            </div>
+                                                        </div>
+                                                    </> : null}
+                                            </div>
                                         </div>
-
                                         <div className={ReactStyles.remove}>
                                             {
                                                 i ?
