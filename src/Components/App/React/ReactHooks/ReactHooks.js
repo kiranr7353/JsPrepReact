@@ -8,7 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
 import Switch from '@mui/joy/Switch';
 import Typography from '@mui/joy/Typography';
-import { Drawer, FormControl, TextField } from '@mui/material';
+import { Drawer, FormControl, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { storage } from '../../../../firebaseConfig';
 import CommonButton from '../../../../CommonComponents/CommonButton';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -88,12 +88,16 @@ const ReactHooks = (props) => {
                 }
             } else if (e.target.id === 'table') {
                 newValues[i]['hasTable'] = e.target.checked;
-                // if (newValues[i]['hasTable']) {
-                //     newValues[i]['tableCoumns'].push([]);
-                // } else {
-                //     newValues[i]['tableCoumns'] = []
-                // }
+                if (newValues[i]['hasTable']) {
+                    newValues[i]['tableCoumns'].push({ value: '' }, { value: '' });
+                    newValues[i]['tableData'].push({ value1: '', value2: '' });
+                } else {
+                    newValues[i]['noOfColumns'] = 0;
+                    newValues[i]['tableCoumns'] = [];
+                }
             }
+        } else if (e.target.name === 'noOfColumns') {
+            newValues[i]['noOfColumns'] = parseInt(e.target.value);
         }
         else {
             newValues[i][e.target.name] = e.target.value;
@@ -274,9 +278,34 @@ const ReactHooks = (props) => {
         });
     }
 
+    const handleTableChange = (index, e, i) => {
+        let tableValues = [...description[i].tableCoumns];
+        tableValues[index][e.target.name] = e.target.value;
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], tableCoumns: tableValues }, ...prev.slice(i + 1)]
+        })
+    }
+
+    const handleTableDataChange = (index, e, i) => {
+        let tableDataValues = [...description[i].tableData];
+        tableDataValues[index][e.target.name] = e.target.value;
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], tableData: tableDataValues }, ...prev.slice(i + 1)]
+        })
+    }
+
+    const addAnotherRow = (i) => {
+        setDescription(prev => {
+            return [...prev.slice(0, i), { ...prev[i], tableData: [...prev[i].tableData, { value1: '', value2: '' }] }, ...prev.slice(i + 1)]
+        })
+    }
+
     // const data = [
     //     { sectionId:1, description: [{ id: 1, header:'', data:"", codeSnippets: [], hasTable: true, tableColumn: [], tableData: [], hasPoints: true, pointsData: [{},{}] },{},{}] }
     // ]
+
+    const tableColumn = ['col1', 'col2'];
+    const tableData = [{ value1: 'value1', value2: 'value2' }, { value1: 'value1', value2: 'value2' }]
 
     let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
 
@@ -335,6 +364,29 @@ const ReactHooks = (props) => {
                     </div>
                 </div>
             </div>
+            {/* <Table sx={{ minWidth: 200, marginTop: 100 }} aria-label="simple table">
+                <TableHead>
+                    <TableRow>
+                    {tableColumn.map((column, i) => (
+                                                <TableCell key={i}>{column}</TableCell>
+                                            ))}
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {tableData.map((row) => (
+                        <TableRow
+                            key={row.value1}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                            <TableCell>
+                                {row.value1}
+                            </TableCell>
+                            <TableCell>{row.value2}</TableCell>
+                            
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table> */}
             <Drawer anchor={'right'} open={openDrawer} onClose={handleCloseDrawer}>
                 <div className={ReactStyles.addConceptContainer}>
                     <div className={ReactStyles.addConceptTitle}>
@@ -487,25 +539,55 @@ const ReactHooks = (props) => {
                                                 </Typography>
                                                 {description[i].hasTable ?
                                                     <>
-                                                        <div className={ReactStyles.noOfColumns}>
-                                                            <div>
+                                                        <div>
+                                                            <h4>Table Columns</h4>
+                                                            {description[i]?.tableCoumns?.map((el, index) =>
                                                                 <TextField
-                                                                    className={ReactStyles.headerInput}
-                                                                    name='noOfColumns'
-                                                                    value={el?.noOfColumns || ""}
-                                                                    onChange={(e) => handleDescriptionChange(i, e)}
+                                                                    className={ReactStyles.columnInput}
+                                                                    name='value'
+                                                                    value={el?.value || ""}
+                                                                    onChange={(ev) => handleTableChange(index, ev, i)}
                                                                     InputProps={{
                                                                         type: 'text',
                                                                     }}
                                                                     sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                                    placeholder={"Enter Number of Columns"} size="large"
+                                                                    placeholder={"Enter Column Name"} size="large"
                                                                 />
-                                                            </div>
-                                                            <div>
-                                                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} disabled={!description[i]?.noOfColumns}>Ok</CommonButton>
-                                                            </div>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <h4>Table Data</h4>
+                                                            {description[i]?.tableData?.map((el, index) =>
+                                                                <>
+                                                                    <TextField
+                                                                        className={ReactStyles.columnInput}
+                                                                        name='value1'
+                                                                        value={el?.value1 || ""}
+                                                                        onChange={(ev) => handleTableDataChange(index, ev, i)}
+                                                                        InputProps={{
+                                                                            type: 'text',
+                                                                        }}
+                                                                        sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                                        placeholder={"Enter Data"} size="large"
+                                                                    />
+                                                                    <TextField
+                                                                        className={ReactStyles.columnInput}
+                                                                        name='value2'
+                                                                        value={el?.value2 || ""}
+                                                                        onChange={(ev) => handleTableDataChange(index, ev, i)}
+                                                                        InputProps={{
+                                                                            type: 'text',
+                                                                        }}
+                                                                        sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                                        placeholder={"Enter Data"} size="large"
+                                                                    />
+                                                                </>
+
+                                                            )}
+                                                            <h6 className={ReactStyles.anotherDescription}><u onClick={() => addAnotherRow(i)}>Add Another Row</u></h6>
                                                         </div>
                                                     </> : null}
+
                                             </div>
                                         </div>
                                         <div className={ReactStyles.remove}>
