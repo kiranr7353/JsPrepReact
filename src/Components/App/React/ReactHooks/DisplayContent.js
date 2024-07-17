@@ -22,6 +22,8 @@ import { fetchQueryParams } from '../../../../Hooks/fetchQueryParams';
 import Loader from '../../../../CommonComponents/Loader/Loader';
 import AddSection from './AddSection';
 import AppNoData from '../../../../CommonComponents/AppNoData/AppNoData';
+import { storage } from '../../../../firebaseConfig';
+import { ref as storageRef, deleteObject } from "firebase/storage";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -44,6 +46,7 @@ const DisplayContent = (props) => {
     const [addSectionClicked, setAddSectionClicked] = useState(false);
     const [deleteSectionPayload, setDeleteSectionPayload] = useState({});
     const [deleteSectionClicked, setDeleteSectionClicked] = useState(false);
+    const [descriptionDelete, setDescriptionDelete] = useState();
 
 
     const handleEditDescription = (desc, sectionid) => {
@@ -60,6 +63,7 @@ const DisplayContent = (props) => {
 
     const handleDeleteDescription = (desc, sectionId) => {
         let payload = {};
+        setDescriptionDelete(desc);
         payload.sectionId = sectionId;
         payload.categoryId = categoryId;
         payload.title = contentData?.title;
@@ -71,6 +75,28 @@ const DisplayContent = (props) => {
         setCallDeleteDescApi(true);
     }
 
+    const removeUploadedImage = async (image) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => {
+
+        }).catch((error) => {
+
+        });
+    }
+
+    const handleDeleteImages = () => {
+        descriptionDelete?.snippet?.forEach(image => {
+            removeUploadedImage(image);
+        })
+        if (descriptionDelete?.pointsData?.length > 0) {
+            descriptionDelete?.pointsData?.forEach(el => {
+                el?.snippet?.forEach(image => {
+                    removeUploadedImage(image);
+                })
+            })
+        }
+    }
+
     const onDeleteSuccess = res => {
         setCallDeleteDescApi(false);
         setDeleteSectionClicked(false);
@@ -80,6 +106,7 @@ const DisplayContent = (props) => {
             GetHooks?.refetch();
             setSelectedIndex(contentData.id - 1);
             setOpenPopup(true);
+            handleDeleteImages();
         } else {
             setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later');
             setOpenPopup(true);
@@ -149,9 +176,9 @@ const DisplayContent = (props) => {
                                         <div className={ReactStyles.grid}>
                                             {
                                                 desc?.snippet && desc?.snippet?.length > 0 && desc?.snippet?.map((img, index) => (
-                                                    <SwiperSlide key={img + index}>
+                                                    <SwiperSlide key={img?.url + index}>
                                                         <Zoom>
-                                                            <img src={img} alt={img} width="500" />
+                                                            <img src={img?.url} alt={img?.url} width="500" />
                                                         </Zoom>
                                                     </SwiperSlide>
                                                 ))}

@@ -48,7 +48,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
             const selectedFiles = e.target.files;
             const selectedFilesArray = Array.from(selectedFiles);
             const imagesArray = selectedFilesArray.map((file) => {
-                return URL.createObjectURL(file);
+                return {url: URL.createObjectURL(file), imageUploaded: false};
             });
             setDescription((prev) => ({ ...prev, snippet: [description[i]?.snippet.concat(imagesArray)] }));
             newValues[i][e.target.name] = imagesArray;
@@ -160,7 +160,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
     const uploadImageToFireStore = async (img, i, index) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${'addConceptTitle'}/section1/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`React/ReactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         // setIsLoading(true);
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
@@ -170,8 +170,8 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                         // setIsLoading(false);
                         let newValues = [...description];
                         urls.push(url)
-                        newValues[i].snippet = urls;
-                        newValues[i].imageUploaded = true;
+                        newValues[i].snippet[index].url = url;
+                        newValues[i].snippet[index].imageUploaded = true;
                         setDescription(newValues);
                         return url;
                     })
@@ -184,17 +184,15 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
             });
     }
 
-    const uploadImages = (i) => {
-        description[i].snippet?.forEach(async (el, index) => {
-            await uploadImageToFireStore(el, i, index)
-        })
+    const uploadImages = async(i, url, imageIndex) => {
+        await uploadImageToFireStore(url, i, imageIndex)
     }
 
     let pointsUrls = [];
     const uploadPointsImageToFireStore = async (img, i, index, idx) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${'addConceptTitle'}/section1/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`React/ReactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         // setIsLoading(true);
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
@@ -226,11 +224,11 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
         })
     }
 
-    const removeUploadedImage = async (i, image) => {
+    const removeUploadedImage = async (i, image, imageIndex) => {
         const imageRef = storageRef(storage, image);
         deleteObject(imageRef).then(() => {
             let newValues = [...description];
-            const index = newValues[i].snippet.findIndex(el => el === image);
+            const index = newValues[i].snippet.findIndex(el => el.url === image);
             newValues[i].snippet.splice(index, 1);
             if (newValues[i].snippet?.length === 0) {
                 descInputRef.current[i].value = '';
@@ -312,6 +310,8 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
         window.scroll(0, 0);
     }
 
+    console.log(description, 'description');
+
     let EditDescription = useFetchAPI("EditDescription", `/concepts/section/editDescription`, "POST", payload, CommonHeaders(), fetchQueryParams("", "", "", onAddSuccess, "", callAddDescApi));
 
     return (
@@ -365,22 +365,29 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                                                         </span>
                                                     </p>
                                                 ) : (
-                                                    <button className={ReactStyles.uploadBtn} disabled={description[i]?.imageUploaded} onClick={() => uploadImages(i)}>
-                                                        {description[i]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.snippet?.length} Image
-                                                        {description[i]?.snippet?.length === 1 ? "" : "s"}
-                                                    </button>
+                                                    <>
+                                                        {/* {description[i]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.snippet?.length} Image
+                                                        {description[i]?.snippet?.length === 1 ? "" : "s"} */}
+                                                    </>
                                                 ))}
                                             <div className={ReactStyles.images}>
                                                 {description[i]?.snippet &&
                                                     description[i]?.snippet?.map((image, index) => {
                                                         return (
                                                             <div key={image} className={ReactStyles.image}>
-                                                                <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
-                                                                {!description[i]?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
-                                                                    Delete
-                                                                </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedImage(i, image)}>
-                                                                    Remove
-                                                                </button>}
+                                                                <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
+                                                                <div className={ReactStyles.uploadBtnContainer}>
+                                                                    <div className={ReactStyles.imageUploadBtn}>
+                                                                        <button className={ReactStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>Upload</button>
+                                                                    </div>
+                                                                    <div>
+                                                                        {!image?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
+                                                                            Remove
+                                                                        </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedImage(i, image?.url, index)}>
+                                                                            Cancel Upload
+                                                                        </button>}
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         );
                                                     })}

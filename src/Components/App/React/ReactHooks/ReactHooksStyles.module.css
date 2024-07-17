@@ -180,7 +180,7 @@
 }
 .descriptionImage {
   height: 100px;
-  width: 150px;
+  width: 180px;
 }
 .imageDelete {
   display: block;
@@ -199,6 +199,9 @@
   font-weight: bold;
   cursor: pointer;
   margin-top: 10px;
+}
+.uploadBtn:disabled {
+  cursor: not-allowed;
 }
 .headerInput {
   margin-bottom: 15px !important;
@@ -304,4 +307,12 @@
 }
 .modalactionsection button {
   margin: 10px 10px;
+}
+.uploadBtnContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.imageUploadBtn {
+  margin-top: -10px;
 }

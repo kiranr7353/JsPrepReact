@@ -33,7 +33,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
     const descPointsInputRef = useRef([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    let uploadImagesSectionId = contentData ? (contentData?.data?.length > 1 ? contentData?.data?.length + 1 : 1) : 1;
+    let uploadImagesSectionId = contentData ? (contentData?.data?.length > 0 ? contentData?.data?.length + 1 : 1) : 1;
 
     console.log(contentData, 'contentData');
 
