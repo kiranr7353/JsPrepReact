@@ -1,70 +1,49 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
+import ReactStyles from './ReactHooksStyles.module.css';
+import Switch from '@mui/joy/Switch';
+import Typography from '@mui/joy/Typography';
+import { Alert, Dialog, DialogContent, Drawer, FormControl, Slide, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
+import { storage } from '../../../../firebaseConfig';
+import CommonButton from '../../../../CommonComponents/CommonButton';
+import CancelIcon from '@mui/icons-material/Cancel';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { getDownloadURL, ref as storageRef, uploadBytesResumable, deleteObject } from "firebase/storage";
 import { useFetchAPI } from '../../../../Hooks/useAPI';
 import { CommonHeaders } from '../../../../CommonComponents/CommonHeaders';
 import { fetchQueryParams } from '../../../../Hooks/fetchQueryParams';
 import Loader from '../../../../CommonComponents/Loader/Loader';
-import ReactStyles from './ReactHooksStyles.module.css';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
-import Switch from '@mui/joy/Switch';
-import Typography from '@mui/joy/Typography';
-import { Drawer, FormControl, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
-import { storage } from '../../../../firebaseConfig';
-import CommonButton from '../../../../CommonComponents/CommonButton';
-import CancelIcon from '@mui/icons-material/Cancel';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import { getDownloadURL, ref as storageRef, uploadBytes, uploadBytesResumable, deleteObject } from "firebase/storage";
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import './ReactHooksSwiperStyles.css';
-import DisplayContent from './DisplayContent';
+const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSelectedIndex, setContentData, setAddSectionClicked }) => {
 
-
-const ReactHooks = (props) => {
-
-    const { params, locationDetails } = props;
-
-    const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [contentData, setContentData] = useState({});
     const [openDrawer, setOpenDrawer] = useState(false);
-    const [addConceptTitle, setAddConceptTitle] = useState("");
-    const [descriptionImageUploaded, setDescriptionImageUploaded] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [description, setDescription] = useState([
         { id: 1, header: '', data: '', snippet: [], imageUploaded: false, hasPoints: false, pointsData: [], hasTable: false, tableColumns: [], tableData: [] }
     ])
+    const [payload, setPayload] = useState({});
+    const [callAddSectionApi, setCallAddSectionApi] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [openPopup, setOpenPopup] = useState(false);
     const descInputRef = useRef([]);
     const descPointsInputRef = useRef([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const onHooksSucess = res => {
-        setHooksConceptsInfo({ data: [], error: '' });
-        if ((res?.status === 200 || res?.status === 201)) {
-            setHooksConceptsInfo({ data: res?.data?.concepts, error: '' });
-        } else {
-            setHooksConceptsInfo({ data: [], error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
-        }
-    }
+    let uploadImagesSectionId = contentData ? (contentData?.data?.length > 1 ? contentData?.data?.length + 1 : 1) : 1;
 
-    const handleContentClick = (el, index) => {
-        setSelectedIndex(index);
-        setContentData(el);
-    }
+    console.log(contentData, 'contentData');
 
-    const toggleDrawer = () => {
+    useEffect(() => {
         setOpenDrawer(true);
-    }
+    }, [])
 
     const handleCloseDrawer = () => {
         setOpenDrawer(false);
-
-    }
-
-    const handleTitleChange = (event) => {
-        setAddConceptTitle(event.target.value);
+        setAddSectionClicked(false)
     }
 
     const handleDescriptionChange = (i, e) => {
@@ -188,7 +167,7 @@ const ReactHooks = (props) => {
     const uploadImageToFireStore = async (img, i, index) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`React/ReactHooks/${contentData.title}/section${uploadImagesSectionId}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
@@ -222,7 +201,8 @@ const ReactHooks = (props) => {
     const uploadPointsImageToFireStore = async (img, i, index, idx) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`React/ReactHooks/${contentData.title}/section${uploadImagesSectionId}/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
+        console.log(path);
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
@@ -260,6 +240,7 @@ const ReactHooks = (props) => {
             let newValues = [...description];
             const index = newValues[i].snippet.findIndex(el => el === image);
             newValues[i].snippet.splice(index, 1);
+            newValues[i].imageUploaded = false;
             if (newValues[i].snippet?.length === 0) {
                 descInputRef.current[i].value = '';
             }
@@ -275,6 +256,7 @@ const ReactHooks = (props) => {
             let pointsValues = [...description[i].pointsData];
             const index = pointsValues[idx].snippet.findIndex(el => el === image);
             pointsValues[idx].snippet.splice(index, 1);
+            pointsValues[idx].imageUploaded = false;
             if (pointsValues[idx].snippet?.length === 0) {
                 descPointsInputRef.current[idx].value = '';
             }
@@ -308,89 +290,64 @@ const ReactHooks = (props) => {
         })
     }
 
-    let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
+    const handleAddSection = () => {
+        let payload = {};
+        payload.sectionId = contentData ? (contentData?.data?.length > 0 ? contentData?.data?.length + 1 : 1) : 1;
+        payload.categoryId = categoryId;
+        payload.title = contentData?.title;
+        payload.topicId = locationDetails?.state?.topicDetails?.topicId;
+        let itemsToAdd = { description, sectionId: payload.sectionId };
+        if(contentData?.data?.length > 0) {
+            contentData.data.push(itemsToAdd)
+        } else {
+            contentData.data = itemsToAdd;
+        }
+        payload.data = contentData?.data;
+        console.log(payload);
+        setPayload(payload);
+        setCallAddSectionApi(true);
+    }
 
-    const fetching = GetHooks?.Loading || GetHooks?.Fetching;
+    const onAddSectionSuccess = (res) => {
+        setCallAddSectionApi(false);
+        setErrorMessage('')
+        if ((res?.status === 200 || res?.status === 201)) {
+            setErrorMessage('');
+            GetHooks?.refetch();
+            setSelectedIndex(contentData.id - 1);
+            setOpenPopup(true);
+        } else {
+            setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later');
+            setOpenPopup(true);
+        }
+    }
+
+    let AddSection = useFetchAPI("AddSection", `/concepts/section/editDescription`, "POST", payload, CommonHeaders(), fetchQueryParams("", "", "", onAddSectionSuccess, "", callAddSectionApi));
+
+    const fetching = AddSection?.Loading || AddSection?.Fetching;
 
     console.log(description);
 
+    const handleCloseDialog = () => {
+        setOpenPopup(false);
+        handleCloseDrawer();
+        window.scroll(0, 0);
+    }
+
     return (
         <>
-            {(fetching || isLoading) && <Loader showLoader={fetching} />}
-            <div className={ReactStyles.banner}>
-                <div className={ReactStyles.body}>
-                    <div className={ReactStyles.contentFlex}>
-                        <div className={ReactStyles.content}>
-                            <h4 className={ReactStyles.contentHeader}>{locationDetails?.state?.topicDetails?.topicName}</h4>
-                            <h5 className={ReactStyles.contentDescription}>{locationDetails?.state?.topicDetails?.description}</h5>
-                        </div>
-                        <div className={ReactStyles.image}>
-                            <img className={ReactStyles.topicImage} src={locationDetails?.state?.topicDetails?.imageUrl} alt={locationDetails?.state?.topicDetails?.topicName} />
-                        </div>
-                    </div>
-                    <div className={ReactStyles.addConceptsBtn}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={toggleDrawer}>Add Concept</CommonButton>
-                    </div>
-                    <div className={ReactStyles.concepts}>
-                        <Swiper
-                            slidesPerView={6}
-                            spaceBetween={10}
-                            cssMode={true}
-                            navigation={true}
-                            mousewheel={true}
-                            keyboard={true}
-                            modules={[Navigation, Mousewheel, Keyboard]}
-                            className="mySwiper"
-                        >
-                            <div className={ReactStyles.grid}>
-                                {
-                                    hooksConceptsInfo?.data?.length > 0 ? hooksConceptsInfo?.data?.map((el, index) => (
-                                        <SwiperSlide key={el?.title}>
-                                            <div className={selectedIndex === index ? ReactStyles.topicCardActive : ReactStyles.topicCard} onClick={() => handleContentClick(el, index)}>
-                                                <div className={ReactStyles.topicCardFlex}>
-                                                    <div className={ReactStyles.card__content}>
-                                                        <h1 className={selectedIndex === index ? ReactStyles.topicCard__headerActive : ReactStyles.topicCard__header}>{el?.title}</h1>
-                                                        <div className={ReactStyles.card__textWrapper}>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </SwiperSlide>
-                                    )) : <><h4 className={ReactStyles.topicsError}>{hooksConceptsInfo?.error}</h4></>}
-                            </div>
-                        </Swiper>
-                        {contentData?.title && <div className={ReactStyles.conceptContent}>
-                            <DisplayContent contentData={contentData} locationDetails={locationDetails} categoryId={params?.categoryId} GetHooks={GetHooks} setSelectedIndex={setSelectedIndex} setContentData={setSelectedIndex} />
-                        </div>}
-                    </div>
-                </div>
-            </div>
+            {fetching && <Loader showLoader={fetching} />}
             <Drawer anchor={'right'} open={openDrawer} onClose={handleCloseDrawer}>
                 <div className={ReactStyles.addConceptContainer}>
                     <div className={ReactStyles.addConceptTitle}>
                         <div>
-                            <h2>Add Concept</h2>
+                            <h2>Add Section</h2>
                         </div>
                         <div>
                             <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div className={ReactStyles.addConceptForm}>
-                        <div className={ReactStyles.conceptTitle}>
-                            <FormControl sx={{ width: '100%' }}>
-                                <label>Title <span className={ReactStyles.required}>*</span></label>
-                                <TextField
-                                    name='title'
-                                    value={addConceptTitle}
-                                    onChange={handleTitleChange}
-                                    InputProps={{
-                                        type: 'text',
-                                    }}
-                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                    placeholder={"Enter Concept Title"} size="large"
-                                />
-                            </FormControl>
-                        </div>
                         <div className={ReactStyles.conceptDescription}>
                             <FormControl sx={{ width: '100%' }}>
                                 {description?.map((el, i) => (
@@ -595,10 +552,37 @@ const ReactHooks = (props) => {
                             </FormControl>
                         </div>
                     </div>
+                    <div className={ReactStyles.editBtnContainer}>
+                        <div>
+                            <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddSection(description)}>Save</CommonButton>
+                        </div>
+                        <div>
+                            <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleCloseDrawer}>Cancel</CommonButton>
+                        </div>
+                    </div>
                 </div>
             </Drawer>
+            <Dialog open={openPopup} TransitionComponent={Transition} keepMounted onClose={handleCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
+                <div className={ReactStyles.modalinnerwrapper}>
+                    <div><h4 className={ReactStyles.headerText}>{errorMessage?.length > 0 ? 'Failed' : 'Success'}</h4></div>
+                    <IconButton aria-label="close" onClick={handleCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent>
+                        <Alert
+                            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                            severity={errorMessage?.length > 0 ? "error" : "success"}
+                        >
+                            {errorMessage?.length > 0 ? errorMessage : 'Added Successfully'}
+                        </Alert>
+                    </DialogContent>
+                    <div className={ReactStyles.modalactionsection}>
+                        <CommonButton variant="contained" bgColor={'white'} color={'#286ce2'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleCloseDialog}>Ok</CommonButton>
+                    </div>
+                </div>
+            </Dialog>
         </>
     )
 }
 
-export default ReactHooks
+export default AddSection

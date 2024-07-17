@@ -1,0 +1,41 @@
+.swiper {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 15rem;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .swiper-button-prev:after, .swiper-button-next:after {
+    margin-top: 0px !important;
+    transform: scale(0.32) !important;
+  }
+
+  .swiper-button-next:after {
+    margin-left: 17px !important;
+    border: 1px solid black !important;
+    padding: 15px 23px !important;
+    border-radius: 50% !important;
+    background: black !important;
+    color: white !important;
+  }
+
+  .swiper-button-prev:after {
+    margin-left: -16px !important;
+    border: 1px solid black !important;
+    padding: 15px 23px !important;
+    border-radius: 50% !important;
+    background: black !important;
+    color: white !important;
+  }

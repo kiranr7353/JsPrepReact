@@ -95,9 +95,11 @@
   .conceptContent {
     border: 1px solid #cfc6c6;
     padding: 0 20px 20px 20px;
+    background: black;
+    color: white;
   }
   .contentTitle {
-    font-size: 21px;
+    font-size: 30px;
   }
   .addConceptsBtn {
     float: right;
@@ -144,6 +146,11 @@
   border: 1px solid #9a9696;
   padding: 10px;
 }
+.addDescriptionDiv {
+  flex: 12;
+  border: 1px solid #9a9696;
+  padding: 10px;
+}
 .remove {
   flex: 1;
 }
@@ -152,6 +159,10 @@
 }
 .descriptionDiv > div {
   width: 100%;
+}
+.addDescriptionDiv > div {
+  width: 100%;
+  margin-bottom: 20px;
 }
 .descriptionFlex {
   margin: 0 0 10px 0;
@@ -212,4 +223,85 @@
 }
 .columnInput {
   margin-right: 20px !important;
+}
+.tableData {
+  margin-bottom: 15px;
+}
+.tableDataFlex {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.headerFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.contentData {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  margin-top: 20px;
+}
+.section {
+  background: linear-gradient(90deg, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+  color: black;
+  padding: 0px 30px 10px 30px;
+}
+.description {
+  margin-bottom: 40px;
+  margin-top: 85px;
+}
+.pointsDiv {
+  margin-bottom: 20px;
+}
+.points {
+  margin-bottom: 20px;
+}
+.descHeader {
+  font-size: 22px;
+}
+.descData {
+  font-size: 19px;
+}
+.descCodeSnippet {
+  font-size: 14px;
+}
+.descPoint {
+  font-size: 18px;
+}
+.addDescBtn {
+  float: right;
+  width: 50%;
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  gap: 20px;
+}
+.switch {
+  margin-left: 0 !important;
+  margin-bottom: 20px !important;
+  gap: 10px !important;
+}
+.editBtnContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: end;
+}
+.modalinnerwrapper {
+  padding: 20px;
+  min-width: 300px;
+}
+.headerText{
+  font-weight: bold;
+  font-size: 20px;
+  opacity: 0.7;
+  margin-top: -5px;
+}
+.modalactionsection {
+  text-align: center;
+}
+.modalactionsection button {
+  margin: 10px 10px;
 }

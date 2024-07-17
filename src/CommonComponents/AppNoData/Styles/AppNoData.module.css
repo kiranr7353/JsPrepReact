@@ -1,0 +1,17 @@
+.noDataContainer{
+    /* width: 20%; */
+    margin: auto;
+    text-align: center;
+}
+
+.noDataImg{
+    margin: 0rem 0rem 1rem 0rem;
+    color: #CCCCCC;
+    height: 200px;
+    width: 200px;
+}
+
+.noDataTxt{
+    font-size: 25px;
+    color: #CCCCCC;
+}
