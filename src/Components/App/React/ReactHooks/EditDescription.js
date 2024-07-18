@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import { Alert, Dialog, DialogContent, Drawer, FormControl, FormControlLabel, Slide, Snackbar, TextField, Typography } from '@mui/material';
+import { Alert, Button, Dialog, DialogContent, Drawer, FormControl, FormControlLabel, Slide, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import Switch from '@mui/joy/Switch';
 import ReactStyles from './ReactHooksStyles.module.css';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -59,7 +59,7 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
       if (e.target.id === 'points') {
         newValues[i]['hasPoints'] = e.target.checked;
         if (newValues[i]['hasPoints']) {
-          if (desc?.pointsData) {
+          if (desc?.hasPoints) {
           } else {
             newValues[i]['pointsData'].push({ id: 1, value: '', snippet: [], imageUploaded: false });
           }
@@ -94,12 +94,15 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
     if (e.target.name === 'snippet') {
       const selectedFiles = e.target.files;
       const selectedFilesArray = Array.from(selectedFiles);
-      const imagesArray = selectedFilesArray.map((file) => {
-        return URL.createObjectURL(file);
+      let imagesArray = selectedFilesArray.map((file) => {
+        return { url: URL.createObjectURL(file), imageUploaded: false };
       });
       setDescription(prev => {
         return [...prev.slice(0, i), { ...prev[i], pointsData: { ...description[i].pointsData[idx], snippet: [description[i]?.pointsData[idx]?.snippet.concat(imagesArray)] } }, ...prev.slice(i + 1)]
       })
+      if (pointsValues[idx]?.snippet?.length > 0) {
+        imagesArray = pointsValues[idx]?.snippet.concat(imagesArray);
+      }
       pointsValues[idx][e.target.name] = imagesArray;
     } else {
       pointsValues[idx][e.target.name] = e.target.value;
@@ -171,12 +174,12 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
     const path = `${`React/ReactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
     const imageRef = storageRef(storage, path, { contentType: blob?.type });
     setIsLoading(true);
+    let newValues = [...description];
     uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
       .then((snapshot) => {
         getDownloadURL(snapshot.ref)
           .then((url) => {
             setIsLoading(false);
-            let newValues = [...description];
             urls.push(url)
             newValues[i].snippet[index].url = url;
             newValues[i].snippet[index].imageUploaded = true;
@@ -185,10 +188,12 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
           })
           .catch((error) => {
             setIsLoading(false);
+            newValues[i].snippet[index].imageUploadedSuccess = false;
           });
       })
       .catch((error) => {
         setIsLoading(false);
+        newValues[i].snippet[index].imageUploadedSuccess = false;
       });
   }
 
@@ -203,15 +208,15 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
     const path = `${`React/ReactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
     const imageRef = storageRef(storage, path, { contentType: blob?.type });
     setIsLoading(true);
+    let pointsValues = [...description[i]?.pointsData];
     uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
       .then((snapshot) => {
         getDownloadURL(snapshot.ref)
           .then((url) => {
             setIsLoading(false);
-            let pointsValues = [...description[i]?.pointsData];
             pointsUrls.push(url)
-            pointsValues[idx].snippet = pointsUrls;
-            pointsValues[idx].imageUploaded = true;
+            pointsValues[idx].snippet[index].url = url;
+            pointsValues[idx].snippet[index].imageUploaded = true;
             setDescription(prev => {
               return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
             })
@@ -219,17 +224,17 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
           })
           .catch((error) => {
             setIsLoading(false);
+            pointsValues[idx].snippet[index].imageUploadedSuccess = false;
           });
       })
       .catch((error) => {
         setIsLoading(false);
+        pointsValues[idx].snippet[index].imageUploadedSuccess = false;
       });
   }
 
-  const uploadPointsImages = (idx, i) => {
-    description[i]?.pointsData[idx]?.snippet?.forEach(async (el, index) => {
-      await uploadPointsImageToFireStore(el, i, index, idx)
-    })
+  const uploadPointsImages = async (idx, i, url, index) => {
+    await uploadPointsImageToFireStore(url, i, index, idx)
   }
 
   const removeUploadedImage = async (i, image, imageIndex) => {
@@ -254,7 +259,7 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
     setIsLoading(true);
     deleteObject(imageRef).then(() => {
       let pointsValues = [...description[i].pointsData];
-      const index = pointsValues[idx].snippet.findIndex(el => el === image);
+      const index = pointsValues[idx].snippet.findIndex(el => el?.url === image);
       pointsValues[idx].snippet.splice(index, 1);
       if (pointsValues[idx].snippet?.length === 0) {
         descPointsInputRef.current[idx].value = '';
@@ -390,7 +395,7 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                                 <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
                                 <div className={ReactStyles.uploadBtnContainer}>
                                   <div className={ReactStyles.imageUploadBtn}>
-                                    <button className={ReactStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>Upload</button>
+                                    <button className={ReactStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
                                   </div>
                                   <div>
                                     {!image?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
@@ -400,6 +405,11 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                                     </button>}
                                   </div>
                                 </div>
+                                {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={ReactStyles.uploadErrorAlert}>
+                                  <Alert autoHideDuration={3000} severity="error">
+                                    Upload Failed! Try again later.
+                                  </Alert>
+                                </div>}
                               </div>
                             );
                           })}
@@ -437,22 +447,32 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                                           </span>
                                         </p>
                                       ) : (
-                                        <button className={ReactStyles.uploadBtn} disabled={description[i]?.pointsData[idx]?.imageUploaded} onClick={() => uploadPointsImages(idx, i)}>
-                                          {description[i]?.pointsData[idx]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.pointsData[idx]?.snippet?.length} Image
-                                          {description[i]?.pointsData[idx]?.snippet?.length === 1 ? "" : "s"}
-                                        </button>
+                                        <>
+                                        </>
                                       ))}
                                     <div className={ReactStyles.images}>
                                       {description[i]?.pointsData[idx]?.snippet &&
                                         description[i]?.pointsData[idx]?.snippet?.map((image, index) => {
                                           return (
                                             <div key={image + index} className={ReactStyles.image}>
-                                              <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
-                                              {!description[i]?.pointsData[idx]?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
-                                                Delete
-                                              </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image, idx)}>
-                                                Remove
-                                              </button>}
+                                              <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
+                                              <div className={ReactStyles.uploadBtnContainer}>
+                                                <div className={ReactStyles.imageUploadBtn}>
+                                                  <button className={ReactStyles.uploadBtn} disabled={image.imageUploaded} onClick={() => uploadPointsImages(idx, i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                </div>
+                                                <div>
+                                                  {!image.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
+                                                    Delete
+                                                  </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image?.url, idx, index)}>
+                                                    Cancel Upload
+                                                  </button>}
+                                                </div>
+                                              </div>
+                                              {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={ReactStyles.uploadErrorAlert}>
+                                                <Alert autoHideDuration={3000} severity="error">
+                                                  Upload Failed! Try again later.
+                                                </Alert>
+                                              </div>}
                                             </div>
                                           );
                                         })}

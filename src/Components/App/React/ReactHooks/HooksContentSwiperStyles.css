@@ -11,7 +11,7 @@
   
   .swiper-slide img {
     display: block;
-    width: 100%;
+    width: 95%;
     height: 15rem;
     object-fit: contain;
     mix-blend-mode: multiply;

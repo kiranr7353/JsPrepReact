@@ -86,12 +86,12 @@ const DisplayContent = (props) => {
 
     const handleDeleteImages = () => {
         descriptionDelete?.snippet?.forEach(image => {
-            removeUploadedImage(image);
+            removeUploadedImage(image?.url);
         })
         if (descriptionDelete?.pointsData?.length > 0) {
             descriptionDelete?.pointsData?.forEach(el => {
                 el?.snippet?.forEach(image => {
-                    removeUploadedImage(image);
+                    removeUploadedImage(image?.url);
                 })
             })
         }
@@ -205,9 +205,9 @@ const DisplayContent = (props) => {
                                                                 <div className={ReactStyles.grid}>
                                                                     {
                                                                         point?.snippet && point?.snippet?.length > 0 && point?.snippet?.map((img, index) => (
-                                                                            <SwiperSlide key={img + index}>
+                                                                            <SwiperSlide key={img?.url + index}>
                                                                                 <Zoom>
-                                                                                    <img src={img} alt={img} width="500" />
+                                                                                    <img src={img?.url} alt={img?.url} width="500" />
                                                                                 </Zoom>
                                                                             </SwiperSlide>
                                                                         ))}

@@ -308,6 +308,10 @@ const ReactHooks = (props) => {
         })
     }
 
+    const handleAddConcept = () => {
+
+    }
+
     let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
 
     const fetching = GetHooks?.Loading || GetHooks?.Fetching;
@@ -589,10 +593,19 @@ const ReactHooks = (props) => {
                                             </div>
 
                                         </div>
+
                                     </>
                                 ))}
                                 <h6 className={ReactStyles.anotherDescription}><u onClick={addAnotherDescription}>Add Another Description</u></h6>
                             </FormControl>
+                        </div>
+                        <div className={ReactStyles.editBtnContainer}>
+                            <div>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddConcept()}>Save</CommonButton>
+                            </div>
+                            <div>
+                                <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleCloseDrawer}>Cancel</CommonButton>
+                            </div>
                         </div>
                     </div>
                 </div>
