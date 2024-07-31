@@ -36,7 +36,7 @@
     overflow: hidden;
     cursor: pointer;
     transition: 0.2s;
-    height: 60px;
+    height: 68px;
     margin-bottom: 50px;
     width: 100%;
     border: 0.5px solid #d9d3d3;
@@ -49,7 +49,7 @@
     overflow: hidden;
     cursor: pointer;
     transition: 0.2s;
-    height: 60px;
+    height: 68px;
     margin-bottom: 50px;
     width: 100%;
     border: 0.5px solid #d9d3d3;
@@ -77,6 +77,12 @@
   }
   .card__content {
     padding: 0 1rem;
+  }
+  .card__contentHooks {
+    padding: 0 1rem;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
   }
   .grid {
     display: grid;
@@ -318,4 +324,13 @@
 }
 .uploadErrorAlert {
   margin-top: 10px;
+}
+.deleteIcon, .editIcon {
+  cursor: pointer;
+  transform: scale(0.8);
+}
+.icons {
+  display: flex;
+  justify-content: end;
+  margin-top: -11px;
 }

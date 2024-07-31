@@ -132,7 +132,6 @@ const DisplayContent = (props) => {
         let data = contentData.data.filter(el => el.sectionId !== sectionId);
         contentData.data = data;
         deleteSectionPayload.data = contentData.data;
-        console.log(deleteSectionPayload);
         setDeleteSectionPayload(deleteSectionPayload);
         setCallDeleteDescApi(true);
     }

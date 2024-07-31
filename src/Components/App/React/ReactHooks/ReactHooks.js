@@ -8,10 +8,14 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
 import Switch from '@mui/joy/Switch';
 import Typography from '@mui/joy/Typography';
-import { Drawer, FormControl, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
+import { Alert, Dialog, DialogContent, Drawer, FormControl, Slide, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { storage } from '../../../../firebaseConfig';
 import CommonButton from '../../../../CommonComponents/CommonButton';
 import CancelIcon from '@mui/icons-material/Cancel';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { getDownloadURL, ref as storageRef, uploadBytes, uploadBytesResumable, deleteObject } from "firebase/storage";
 
@@ -21,24 +25,41 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './ReactHooksSwiperStyles.css';
 import DisplayContent from './DisplayContent';
+import ConfirmationDialog from '../../../../CommonComponents/ConfirmationDialog/ConfirmationDialog';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
 
 const ReactHooks = (props) => {
 
     const { params, locationDetails } = props;
 
+    console.log(locationDetails, 'locationDetails');
+
     const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [contentData, setContentData] = useState({});
     const [openDrawer, setOpenDrawer] = useState(false);
     const [addConceptTitle, setAddConceptTitle] = useState("");
+    const [addConceptPayload, setAddConceptPayload] = useState({});
     const [descriptionImageUploaded, setDescriptionImageUploaded] = useState(false);
+    const [addConceptApi, setAddConceptApi] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [description, setDescription] = useState([
         { id: 1, header: '', data: '', snippet: [], imageUploaded: false, hasPoints: false, pointsData: [], hasTable: false, tableColumns: [], tableData: [] }
     ])
     const descInputRef = useRef([]);
     const descPointsInputRef = useRef([]);
+    const deleteConceptTitle = useRef('');
+    const deleteConceptInfo = useRef();
+    const [errorMessage, setErrorMessage] = useState("");
+    const [openPopup, setOpenPopup] = useState(false);
+    const [openConfirmationPopup, setOpenConfirmationPopup] = useState(false);
+    const [deleteConceptPayload, setDeleteConceptPayload] = useState({});
+    const [callDeleteConceptApi, setCallDeleteConceptApi] = useState(false);
+    const [openDeleteModalInfo, setOpenDeleteModalInfo] = useState({ open: false, success: '', error: '' });
 
     const onHooksSucess = res => {
         setHooksConceptsInfo({ data: [], error: '' });
@@ -60,7 +81,6 @@ const ReactHooks = (props) => {
 
     const handleCloseDrawer = () => {
         setOpenDrawer(false);
-
     }
 
     const handleTitleChange = (event) => {
@@ -73,7 +93,7 @@ const ReactHooks = (props) => {
             const selectedFiles = e.target.files;
             const selectedFilesArray = Array.from(selectedFiles);
             const imagesArray = selectedFilesArray.map((file) => {
-                return URL.createObjectURL(file);
+                return { url: URL.createObjectURL(file), imageUploaded: false };
             });
             setDescription((prev) => ({ ...prev, snippet: [description[i]?.snippet.concat(imagesArray)] }));
             newValues[i][e.target.name] = imagesArray;
@@ -81,7 +101,7 @@ const ReactHooks = (props) => {
             if (e.target.id === 'points') {
                 newValues[i]['hasPoints'] = e.target.checked;
                 if (newValues[i]['hasPoints']) {
-                    newValues[i]['pointsData'].push({ id: 1, value: '', snippet: [], imageUploaded: false });
+                    newValues[i]['pointsData'].push({ id: 1, value: '', snippet: [] });
                 } else {
                     newValues[i]['pointsData'] = []
                 }
@@ -111,7 +131,7 @@ const ReactHooks = (props) => {
             const selectedFiles = e.target.files;
             const selectedFilesArray = Array.from(selectedFiles);
             const imagesArray = selectedFilesArray.map((file) => {
-                return URL.createObjectURL(file);
+                return { url: URL.createObjectURL(file), imageUploaded: false };
             });
             setDescription(prev => {
                 return [...prev.slice(0, i), { ...prev[i], pointsData: { ...description[i].pointsData[idx], snippet: [description[i]?.pointsData[idx]?.snippet.concat(imagesArray)] } }, ...prev.slice(i + 1)]
@@ -191,31 +211,31 @@ const ReactHooks = (props) => {
         const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
+        let newValues = [...description];
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
             .then((snapshot) => {
                 getDownloadURL(snapshot.ref)
                     .then((url) => {
                         setIsLoading(false);
-                        let newValues = [...description];
                         urls.push(url)
-                        newValues[i].snippet = urls;
-                        newValues[i].imageUploaded = true;
+                        newValues[i].snippet[index].url = url;
+                        newValues[i].snippet[index].imageUploaded = true;
                         setDescription(newValues);
                         return url;
                     })
                     .catch((error) => {
                         setIsLoading(false);
+                        newValues[i].snippet[index].imageUploadedSuccess = false;
                     });
             })
             .catch((error) => {
                 setIsLoading(false);
+                newValues[i].snippet[index].imageUploadedSuccess = false;
             });
     }
 
-    const uploadImages = (i) => {
-        description[i].snippet?.forEach(async (el, index) => {
-            await uploadImageToFireStore(el, i, index)
-        })
+    const uploadImages = async (i, url, imageIndex) => {
+        await uploadImageToFireStore(url, i, imageIndex)
     }
 
     let pointsUrls = [];
@@ -225,15 +245,15 @@ const ReactHooks = (props) => {
         const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
+        let pointsValues = [...description[i]?.pointsData];
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
             .then((snapshot) => {
                 getDownloadURL(snapshot.ref)
                     .then((url) => {
                         setIsLoading(false);
-                        let pointsValues = [...description[i]?.pointsData];
                         pointsUrls.push(url)
-                        pointsValues[idx].snippet = pointsUrls;
-                        pointsValues[idx].imageUploaded = true;
+                        pointsValues[idx].snippet[index].url = url;
+                        pointsValues[idx].snippet[index].imageUploaded = true;
                         setDescription(prev => {
                             return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
                         })
@@ -241,24 +261,24 @@ const ReactHooks = (props) => {
                     })
                     .catch((error) => {
                         setIsLoading(false);
+                        pointsValues[idx].snippet[index].imageUploadedSuccess = false;
                     });
             })
             .catch((error) => {
                 setIsLoading(false);
+                pointsValues[idx].snippet[index].imageUploadedSuccess = false;
             });
     }
 
-    const uploadPointsImages = (idx, i) => {
-        description[i]?.pointsData[idx]?.snippet?.forEach(async (el, index) => {
-            await uploadPointsImageToFireStore(el, i, index, idx)
-        })
+    const uploadPointsImages = async (idx, i, url, index) => {
+        await uploadPointsImageToFireStore(url, i, index, idx);
     }
 
     const removeUploadedImage = async (i, image) => {
         const imageRef = storageRef(storage, image);
         deleteObject(imageRef).then(() => {
             let newValues = [...description];
-            const index = newValues[i].snippet.findIndex(el => el === image);
+            const index = newValues[i].snippet.findIndex(el => el.url === image);
             newValues[i].snippet.splice(index, 1);
             if (newValues[i].snippet?.length === 0) {
                 descInputRef.current[i].value = '';
@@ -273,7 +293,7 @@ const ReactHooks = (props) => {
         const imageRef = storageRef(storage, image);
         deleteObject(imageRef).then(() => {
             let pointsValues = [...description[i].pointsData];
-            const index = pointsValues[idx].snippet.findIndex(el => el === image);
+            const index = pointsValues[idx].snippet.findIndex(el => el.url === image);
             pointsValues[idx].snippet.splice(index, 1);
             if (pointsValues[idx].snippet?.length === 0) {
                 descPointsInputRef.current[idx].value = '';
@@ -309,18 +329,117 @@ const ReactHooks = (props) => {
     }
 
     const handleAddConcept = () => {
+        const payload = {};
+        let payloadData = [{ description: [], sectionId: 1 }];
+        payload.categoryId = params?.categoryId;
+        payload.topicId = locationDetails?.state?.topicDetails?.topicId;
+        payload.id = hooksConceptsInfo?.data?.length + 1;
+        payload.title = addConceptTitle;
+        payloadData[0].description = description;
+        payload.data = payloadData;
+        console.log(payload);
+        setAddConceptPayload(payload);
+        setAddConceptApi(true);
+    }
+
+    const onAddConceptSuccess = (res) => {
+        setAddConceptApi(false);
+        setErrorMessage('')
+        if ((res?.status === 200 || res?.status === 201)) {
+            setErrorMessage('');
+            GetHooks?.refetch();
+            setSelectedIndex(contentData.id - 1);
+            setOpenPopup(true);
+        } else {
+            setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later');
+            setOpenPopup(true);
+        }
+    }
+
+    const handleCloseDialog = () => {
+        setOpenPopup(false);
+        handleCloseDrawer();
+        window.scroll(0, 0);
+    }
+
+    const removeConceptUploadedImage = (image) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => { }).then(err => { })
+    }
+
+    const handleDeleteConceptImages = (info) => {
+        console.log(info);
+        info.data.forEach(el => {
+            el.description.forEach(desc => {
+                if (desc.snippet?.length > 0) {
+                    desc.snippet?.forEach(img => {
+                        removeConceptUploadedImage(img?.url);
+                    })
+                }
+                if (desc.pointsData?.length > 0) {
+                    desc.pointsData?.forEach(point => {
+                        if (point?.snippet?.length > 0) {
+                            point?.snippet?.forEach(image => {
+                                removeConceptUploadedImage(image?.url);
+                            })
+                        }
+                    })
+                }
+            })
+        })
+    }
+
+    const handleEditConcept = () => {
 
     }
 
-    let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
+    const handleDeleteConcept = (title, el) => {
+        deleteConceptTitle.current = title;
+        deleteConceptInfo.current = el;
+        setOpenConfirmationPopup(true);
+    }
 
-    const fetching = GetHooks?.Loading || GetHooks?.Fetching;
+    const handleDeleteConceptCloseDialog = () => {
+        setOpenConfirmationPopup(false);
+        deleteConceptTitle.current = '';
+        deleteConceptInfo.current = null;
+    }
+
+    const handleDeleteConceptConfirm = () => {
+        setDeleteConceptPayload({ title: deleteConceptTitle.current, categoryId: params?.categoryId, topicId: locationDetails?.state?.topicDetails?.topicId })
+        setCallDeleteConceptApi(true);
+    }
+
+    const onDeleteConceptSuccess = res => {
+        setCallDeleteConceptApi(false);
+        setOpenDeleteModalInfo({ open: false, success: ``, error: '' });
+        if ((res?.status === 200 || res?.status === 201)) {
+            handleDeleteConceptCloseDialog();
+            handleDeleteConceptImages(deleteConceptInfo.current);
+            GetHooks?.refetch();
+            setOpenDeleteModalInfo({ open: true, success: `Deleted Successfully`, error: '' });
+        } else {
+            setOpenDeleteModalInfo({ open: true, success: ``, error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
+        }
+    }
+
+    const handleDeleteConceptClosePopup = () => {
+        setOpenDeleteModalInfo({ open: false, success: ``, error: '' });
+        deleteConceptTitle.current = '';
+        deleteConceptInfo.current = null;
+    }
+
+    let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
+    let AddConcept = useFetchAPI("AddConcept", `/concepts/addConcepts`, "POST", addConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddConceptSuccess, "", addConceptApi));
+    let DeleteConcept = useFetchAPI("DeleteConcept", `/concepts/deleteConcept`, "POST", deleteConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteConceptSuccess, "", callDeleteConceptApi));
+
+    const fetching = GetHooks?.Loading || GetHooks?.Fetching || AddConcept?.Loading || AddConcept?.Fetching || DeleteConcept?.Loading || DeleteConcept?.Fetching;
 
     console.log(description);
 
     return (
         <>
-            {(fetching || isLoading) && <Loader showLoader={fetching} />}
+            {(fetching || isLoading) && <Loader showLoader={fetching || isLoading} />}
             <div className={ReactStyles.banner}>
                 <div className={ReactStyles.body}>
                     <div className={ReactStyles.contentFlex}>
@@ -352,11 +471,14 @@ const ReactHooks = (props) => {
                                         <SwiperSlide key={el?.title}>
                                             <div className={selectedIndex === index ? ReactStyles.topicCardActive : ReactStyles.topicCard} onClick={() => handleContentClick(el, index)}>
                                                 <div className={ReactStyles.topicCardFlex}>
-                                                    <div className={ReactStyles.card__content}>
+                                                    <div className={ReactStyles.card__contentHooks}>
                                                         <h1 className={selectedIndex === index ? ReactStyles.topicCard__headerActive : ReactStyles.topicCard__header}>{el?.title}</h1>
-                                                        <div className={ReactStyles.card__textWrapper}>
-                                                        </div>
+
                                                     </div>
+                                                </div>
+                                                <div className={ReactStyles.icons}>
+                                                    <EditIcon titleAccess='Edit' className={ReactStyles.editIcon} onClick={handleEditConcept} />
+                                                    <DeleteIcon titleAccess='Delete' className={ReactStyles.deleteIcon} onClick={() => handleDeleteConcept(el?.title, el)} />
                                                 </div>
                                             </div>
                                         </SwiperSlide>
@@ -434,22 +556,31 @@ const ReactHooks = (props) => {
                                                             </span>
                                                         </p>
                                                     ) : (
-                                                        <button className={ReactStyles.uploadBtn} disabled={description[i]?.imageUploaded} onClick={() => uploadImages(i)}>
-                                                            {description[i]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.snippet?.length} Image
-                                                            {description[i]?.snippet?.length === 1 ? "" : "s"}
-                                                        </button>
+                                                        <></>
                                                     ))}
                                                 <div className={ReactStyles.images}>
                                                     {description[i]?.snippet &&
                                                         description[i]?.snippet?.map((image, index) => {
                                                             return (
                                                                 <div key={image} className={ReactStyles.image}>
-                                                                    <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
-                                                                    {!description[i]?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
-                                                                        Delete
-                                                                    </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedImage(i, image)}>
-                                                                        Remove
-                                                                    </button>}
+                                                                    <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
+                                                                    <div className={ReactStyles.uploadBtnContainer}>
+                                                                        <div className={ReactStyles.imageUploadBtn}>
+                                                                            <button className={ReactStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                                        </div>
+                                                                        <div>
+                                                                            {!image?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
+                                                                                Remove
+                                                                            </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedImage(i, image?.url, index)}>
+                                                                                Cancel Upload
+                                                                            </button>}
+                                                                        </div>
+                                                                    </div>
+                                                                    {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={ReactStyles.uploadErrorAlert}>
+                                                                        <Alert autoHideDuration={3000} severity="error">
+                                                                            Upload Failed! Try again later.
+                                                                        </Alert>
+                                                                    </div>}
                                                                 </div>
                                                             );
                                                         })}
@@ -489,22 +620,31 @@ const ReactHooks = (props) => {
                                                                                         </span>
                                                                                     </p>
                                                                                 ) : (
-                                                                                    <button className={ReactStyles.uploadBtn} disabled={description[i]?.pointsData[idx]?.imageUploaded} onClick={() => uploadPointsImages(idx, i)}>
-                                                                                        {description[i]?.pointsData[idx]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.pointsData[idx]?.snippet?.length} Image
-                                                                                        {description[i]?.pointsData[idx]?.snippet?.length === 1 ? "" : "s"}
-                                                                                    </button>
+                                                                                    <></>
                                                                                 ))}
                                                                             <div className={ReactStyles.images}>
                                                                                 {description[i]?.pointsData[idx]?.snippet &&
                                                                                     description[i]?.pointsData[idx]?.snippet?.map((image, index) => {
                                                                                         return (
-                                                                                            <div key={image} className={ReactStyles.image}>
-                                                                                                <img src={image} className={ReactStyles.descriptionImage} alt="upload" />
-                                                                                                {!description[i]?.pointsData[idx]?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
-                                                                                                    Delete
-                                                                                                </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image, idx)}>
-                                                                                                    Remove
-                                                                                                </button>}
+                                                                                            <div key={image + index} className={ReactStyles.image}>
+                                                                                                <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
+                                                                                                <div className={ReactStyles.uploadBtnContainer}>
+                                                                                                    <div className={ReactStyles.imageUploadBtn}>
+                                                                                                        <button className={ReactStyles.uploadBtn} disabled={image.imageUploaded} onClick={() => uploadPointsImages(idx, i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                                                                    </div>
+                                                                                                    <div>
+                                                                                                        {!image.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
+                                                                                                            Delete
+                                                                                                        </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image?.url, idx, index)}>
+                                                                                                            Cancel Upload
+                                                                                                        </button>}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={ReactStyles.uploadErrorAlert}>
+                                                                                                    <Alert autoHideDuration={3000} severity="error">
+                                                                                                        Upload Failed! Try again later.
+                                                                                                    </Alert>
+                                                                                                </div>}
                                                                                             </div>
                                                                                         );
                                                                                     })}
@@ -601,7 +741,7 @@ const ReactHooks = (props) => {
                         </div>
                         <div className={ReactStyles.editBtnContainer}>
                             <div>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddConcept()}>Save</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddConcept()} disabled={ !addConceptTitle }>Save</CommonButton>
                             </div>
                             <div>
                                 <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleCloseDrawer}>Cancel</CommonButton>
@@ -610,6 +750,41 @@ const ReactHooks = (props) => {
                     </div>
                 </div>
             </Drawer>
+            <Dialog open={openPopup} TransitionComponent={Transition} keepMounted onClose={handleCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
+                <div className={ReactStyles.modalinnerwrapper}>
+                    <div><h4 className={ReactStyles.headerText}>{errorMessage?.length > 0 ? 'Failed' : 'Success'}</h4></div>
+                    <IconButton aria-label="close" onClick={handleCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent>
+                        <Alert
+                            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                            severity={errorMessage?.length > 0 ? "error" : "success"}
+                        >
+                            {errorMessage?.length > 0 ? errorMessage : 'Concept Added Successfully'}
+                        </Alert>
+                    </DialogContent>
+                    <div className={ReactStyles.modalactionsection}>
+                        <CommonButton variant="contained" bgColor={'white'} color={'#286ce2'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleCloseDialog}>Ok</CommonButton>
+                    </div>
+                </div>
+            </Dialog>
+            <Dialog open={openConfirmationPopup} TransitionComponent={Transition} keepMounted onClose={handleDeleteConceptCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
+                <div className={ReactStyles.modalinnerwrapper}>
+                    <div><h4 className={ReactStyles.headerText}>Delete {deleteConceptTitle.current}</h4></div>
+                    <IconButton aria-label="close" onClick={handleDeleteConceptCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent>
+                        Are you sure you want to delete {deleteConceptTitle.current}?
+                    </DialogContent>
+                    <div className={ReactStyles.modalactionsection}>
+                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleDeleteConceptConfirm}>Delete</CommonButton>
+                        <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleDeleteConceptCloseDialog}>Cancel</CommonButton>
+                    </div>
+                </div>
+            </Dialog>
+            <ConfirmationDialog openDialog={openDeleteModalInfo?.open} errorMessage={openDeleteModalInfo?.error} successMessage={openDeleteModalInfo?.success} handleCloseDialog={handleDeleteConceptClosePopup} />
         </>
     )
 }
