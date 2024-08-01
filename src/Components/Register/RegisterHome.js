@@ -303,10 +303,10 @@ const RegisterHome = () => {
                         </div>
                         <div className={RegisterStyles.buttonsDiv}>
                             <div className={RegisterStyles.signUpBtn}>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} disabled={!registerFormValues?.email || !registerFormValues?.password || !registerFormValues?.confirmPassword || !registerFormValues?.firstName || !registerFormValues?.lastName || !registerFormValues?.phoneNumber || !registerFormValues?.dob || !passwordMatch} onClick={handleRegister}>Sign Up</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} disabled={!registerFormValues?.email || !registerFormValues?.password || !registerFormValues?.confirmPassword || !registerFormValues?.firstName || !registerFormValues?.lastName || !registerFormValues?.phoneNumber || !registerFormValues?.dob || !passwordMatch} onClick={handleRegister}>Sign Up</CommonButton>
                             </div>
                             <div className={RegisterStyles.googleBtn}>
-                                <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} border={'1px solid #ddd'}>
+                                <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'}>
                                     <img className={RegisterStyles.googleImage} src={GoogleImg} alt="Google Logo" /> Sign up with Google
                                 </CommonButton>
                             </div>

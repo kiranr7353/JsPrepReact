@@ -148,15 +148,15 @@ const DisplayContent = (props) => {
                         <div><h2 className={ReactStyles.contentTitle}>{contentData?.title}</h2></div>
                     </div>
                     <div>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddSection()}>Add Section</CommonButton>
+                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddSection()}>Add Section</CommonButton>
                     </div>
                 </div>
                 <div className={ReactStyles.contentData}>
                     {contentData?.data ? contentData?.data?.length > 0 && contentData?.data?.map((el, i) => (
                         <div className={ReactStyles.section} key={el?.sectionId + i}>
                             <div className={ReactStyles.addDescBtn}>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddDescription(el, el?.sectionId)}>Add Description</CommonButton>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleDeleteSection(el, el?.sectionId)}>Delete Section</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddDescription(el, el?.sectionId)}>Add Description</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteSection(el, el?.sectionId)}>Delete Section</CommonButton>
                             </div>
                             {el?.description && el?.description?.length > 0 && el?.description?.map((desc, idx) => (
                                 <div className={ReactStyles.description} key={desc?.id + idx}>
@@ -243,8 +243,8 @@ const DisplayContent = (props) => {
                                         </div>
                                     )}
                                     <div className={ReactStyles.addDescBtn}>
-                                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleEditDescription(desc, el?.sectionId)}>Edit Description</CommonButton>
-                                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'28%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleDeleteDescription(desc, el?.sectionId)}>Delete Description</CommonButton>
+                                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleEditDescription(desc, el?.sectionId)}>Edit Description</CommonButton>
+                                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'28%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteDescription(desc, el?.sectionId)}>Delete Description</CommonButton>
                                     </div>
                                 </div>
                             ))}

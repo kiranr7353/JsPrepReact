@@ -254,6 +254,7 @@
   color: #0d0d0d;
   text-align: center;
   margin-top: 0px;
+  height: 85px;
 }
 .modalinnerwrapperTitleEdit {
   padding: 20px;
@@ -327,4 +328,8 @@
   display: flex;
   width: 100%;
   justify-content: end;
+}
+.addTopicBtn {
+  float: right;
+  margin-bottom: 10px;
 }

@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import PropTypes from 'prop-types';
 
 const CommonButton = (props) => {
-    const { variant, onClick, disabled, type, color, padding, bgColor, borderRadius, disabledBGColor, fontSize,fontWeight,border, marign, className, width, height } = props;
+    const { variant, onClick, disabled, type, color, padding, bgColor, borderRadius, disabledBGColor, fontSize,fontWeight,border, margin, className, width, height } = props;
     const buttonStyle = {
         textTransform: "initial",
         ...(variant === "contained"? {backgroundColor: bgColor ? bgColor : "#286ce2"} : {}) ,
@@ -16,7 +16,7 @@ const CommonButton = (props) => {
         cursor: disabled ? "not-allowed" : "pointer",
         pointerEvents: "auto",
         border: border? border : "",
-        margin: marign,
+        margin: margin,
         width: width ? width :  '',
         height: height ? height :  ''
     };
