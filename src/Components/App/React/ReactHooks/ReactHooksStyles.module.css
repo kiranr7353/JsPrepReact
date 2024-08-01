@@ -1,336 +1,366 @@
 .body {
-    margin: 0 140px;
+  margin: 0 140px;
 }
 .banner {
-    background: #434343;
-    height: 300px;
-    width: 100%;
-    margin-top: -40px;
+  background: #434343;
+  height: 300px;
+  width: 100%;
+  margin-top: -40px;
 }
 .contentHeader {
-    color: white;
-    padding: 60px 0 0 0;
-    font-size: 32px;
+  color: white;
+  padding: 60px 0 0 0;
+  font-size: 32px;
 }
 .contentFlex {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 .content {
-    width: 65%;
+  width: 65%;
 }
 .contentDescription {
-    color: white;
-    font-size: 16px;
+  color: white;
+  font-size: 16px;
 }
 .topicImage {
-    width: 91%;
-    margin-top: 77px;
-    height: 191px;
+  width: 91%;
+  margin-top: 77px;
+  height: 191px;
 }
 .topicCard {
-    display: flex;
-    flex-direction: column;
-    background-color: #dddada;
-    border-radius: 0.4rem;
-    overflow: hidden;
-    cursor: pointer;
-    transition: 0.2s;
-    height: 68px;
-    margin-bottom: 50px;
-    width: 100%;
-    border: 0.5px solid #d9d3d3;
-  }
-  .topicCardActive {
-    display: flex;
-    flex-direction: column;
-    background-color: black;
-    border-radius: 0.4rem;
-    overflow: hidden;
-    cursor: pointer;
-    transition: 0.2s;
-    height: 68px;
-    margin-bottom: 50px;
-    width: 100%;
-    border: 0.5px solid #d9d3d3;
-    color: white;
-  }
-  .topicCard:hover {
-    background-color: black;
-  }
-  .topicCard:hover .topicCard__header {
-    color: white;
-  }
-  .topicCard__header {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #0d0d0d;
-    text-align: center;
-    text-wrap: nowrap;
-  }
-  .topicCard__headerActive {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: white;
-    text-align: center;
-    text-wrap: nowrap;
-  }
-  .card__content {
-    padding: 0 1rem;
-  }
-  .card__contentHooks {
-    padding: 0 1rem;
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-  }
+  display: flex;
+  flex-direction: column;
+  background-color: #dddada;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+  height: 68px;
+  margin-bottom: 50px;
+  width: 100%;
+  border: 0.5px solid #d9d3d3;
+}
+.topicCardActive {
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+  height: 68px;
+  margin-bottom: 50px;
+  width: 100%;
+  border: 0.5px solid #d9d3d3;
+  color: white;
+}
+.topicCard:hover {
+  background-color: black;
+}
+.topicCard:hover .topicCard__header {
+  color: white;
+}
+.topicCard__header {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #0d0d0d;
+  text-align: center;
+  text-wrap: nowrap;
+}
+.topicCard__headerActive {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+  text-wrap: nowrap;
+}
+.card__content {
+  padding: 0 1rem;
+}
+.card__contentHooks {
+  padding: 0 1rem;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+}
+.grid {
+  display: grid;
+  width: 114rem;
+  grid-gap: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+}
+@media (max-width: 60em) {
   .grid {
-    display: grid;
-    width: 114rem;
     grid-gap: 3rem;
-    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
   }
-  @media (max-width: 60em) {
-    .grid {
-      grid-gap: 3rem;
-    }
-  }
-  .concepts {
-    margin-top: 50px;
-  }
-  .conceptContent {
-    border: 1px solid #cfc6c6;
-    padding: 0 20px 20px 20px;
-    background: black;
-    color: white;
-  }
-  .contentTitle {
-    font-size: 30px;
-  }
-  .addConceptsBtn {
-    float: right;
-    margin-top: 20px;
-  }
-  .addConceptContainer {
-    width: 700px;
-    padding: 20px;
-  }
-  .addConceptTitle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .addConceptForm label {
-    display: block;
-    font-weight: bold;
-    margin-top: 20px;
-    padding-bottom: 5px;
-  }
-  /* .DocUpload {
-    width: 50%;
-    height: 40px;
-    border-radius: 0%;
-    color: blue;
-  } */
-  .anotherDescription {
-    color: blue;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  .removeIcon {
-    color: red;
-    cursor: pointer;
-    margin-top: 15px;
 }
-.descriptionFlex {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.concepts {
+  margin-top: 50px;
 }
-.descriptionDiv {
-  flex: 12;
-  border: 1px solid #9a9696;
-  padding: 10px;
+.conceptContent {
+  border: 1px solid #cfc6c6;
+  padding: 0 20px 20px 20px;
+  background: black;
+  color: white;
 }
-.addDescriptionDiv {
-  flex: 12;
-  border: 1px solid #9a9696;
-  padding: 10px;
+.contentTitle {
+  font-size: 30px;
 }
-.remove {
-  flex: 1;
-}
-.uploadInput {
-  width: 100%;
-}
-.descriptionDiv > div {
-  width: 100%;
-}
-.addDescriptionDiv > div {
-  width: 100%;
-  margin-bottom: 20px;
-}
-.descriptionFlex {
-  margin: 0 0 10px 0;
-}
-.images {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
-.image {
-  margin: 1rem 0.5rem;
-  position: relative;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-}
-.descriptionImage {
-  height: 100px;
-  width: 180px;
-}
-.imageDelete {
-  display: block;
-  background: #f27f97;
-  border: none;
-  padding: 8px;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.uploadBtn {
-  background: lightblue;
-  border: none;
-  padding: 8px;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 10px;
-}
-.uploadBtn:disabled {
-  cursor: not-allowed;
-}
-.headerInput {
-  margin-bottom: 15px !important;
-}
-.pointsDiv {
-  border: 1px solid #cac3c3;
-  padding: 10px;
-  margin-bottom: 15px;
-}
-.pointsInput {
-  width: 100%;
-}
-.removeIconPoint {
+.addConceptsBtn {
   float: right;
-  color: red;
-  cursor: pointer;
+  margin-top: 20px;
 }
-.noOfColumns {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.addConceptContainer {
+  width: 700px;
+  padding: 20px;
 }
-.columnInput {
-  margin-right: 20px !important;
-}
-.tableData {
-  margin-bottom: 15px;
-}
-.tableDataFlex {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.headerFlex {
+.addConceptTitle {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.contentData {
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
+.addConceptForm label {
+  display: block;
+  font-weight: bold;
   margin-top: 20px;
+  padding-bottom: 5px;
 }
-.section {
-  background: linear-gradient(90deg, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
-  color: black;
-  padding: 0px 30px 10px 30px;
+/* .DocUpload {
+  width: 50%;
+  height: 40px;
+  border-radius: 0%;
+  color: blue;
+} */
+.anotherDescription {
+  color: blue;
+  font-size: 12px;
+  cursor: pointer;
 }
-.description {
-  margin-bottom: 40px;
-  margin-top: 85px;
+.removeIcon {
+  color: red;
+  cursor: pointer;
+  margin-top: 15px;
+}
+.descriptionFlex {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.descriptionDiv {
+flex: 12;
+border: 1px solid #9a9696;
+padding: 10px;
+}
+.addDescriptionDiv {
+flex: 12;
+border: 1px solid #9a9696;
+padding: 10px;
+}
+.remove {
+flex: 1;
+}
+.uploadInput {
+width: 100%;
+}
+.descriptionDiv > div {
+width: 100%;
+}
+.addDescriptionDiv > div {
+width: 100%;
+margin-bottom: 20px;
+}
+.descriptionFlex {
+margin: 0 0 10px 0;
+}
+.images {
+display: flex;
+flex-direction: row;
+flex-wrap: wrap;
+}
+
+.image {
+margin: 1rem 0.5rem;
+position: relative;
+box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+.descriptionImage {
+height: 100px;
+width: 180px;
+}
+.imageDelete {
+display: block;
+background: #f27f97;
+border: none;
+padding: 8px;
+border-radius: 5px;
+font-weight: bold;
+cursor: pointer;
+}
+.uploadBtn {
+background: lightblue;
+border: none;
+padding: 8px;
+border-radius: 5px;
+font-weight: bold;
+cursor: pointer;
+margin-top: 10px;
+}
+.uploadBtn:disabled {
+cursor: not-allowed;
+}
+.headerInput {
+margin-bottom: 15px !important;
 }
 .pointsDiv {
-  margin-bottom: 20px;
+border: 1px solid #cac3c3;
+padding: 10px;
+margin-bottom: 15px;
+}
+.pointsInput {
+width: 100%;
+}
+.removeIconPoint {
+float: right;
+color: red;
+cursor: pointer;
+}
+.noOfColumns {
+display: flex;
+align-items: center;
+gap: 20px;
+}
+.columnInput {
+margin-right: 20px !important;
+}
+.tableData {
+margin-bottom: 15px;
+}
+.tableDataFlex {
+display: flex;
+align-items: center;
+gap: 20px;
+}
+.headerFlex {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+.contentData {
+display: flex;
+flex-direction: column;
+gap: 50px;
+margin-top: 20px;
+}
+.section {
+background: linear-gradient(90deg, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+color: black;
+padding: 0px 30px 10px 30px;
+}
+.description {
+margin-bottom: 40px;
+margin-top: 85px;
+}
+.pointsDiv {
+margin-bottom: 20px;
 }
 .points {
-  margin-bottom: 20px;
+margin-bottom: 20px;
 }
 .descHeader {
-  font-size: 22px;
+font-size: 22px;
 }
 .descData {
-  font-size: 19px;
+font-size: 19px;
 }
 .descCodeSnippet {
-  font-size: 14px;
+font-size: 14px;
 }
 .descPoint {
-  font-size: 18px;
+font-size: 18px;
 }
 .addDescBtn {
-  float: right;
-  width: 50%;
-  display: flex;
-  align-items: end;
-  justify-content: end;
-  gap: 20px;
+float: right;
+width: 50%;
+display: flex;
+align-items: end;
+justify-content: end;
+gap: 20px;
 }
 .switch {
-  margin-left: 0 !important;
-  margin-bottom: 20px !important;
-  gap: 10px !important;
+margin-left: 0 !important;
+margin-bottom: 20px !important;
+gap: 10px !important;
 }
 .editBtnContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: end;
+display: flex;
+align-items: center;
+gap: 10px;
+justify-content: end;
 }
 .modalinnerwrapper {
-  padding: 20px;
-  min-width: 300px;
+padding: 20px;
+min-width: 300px;
 }
 .headerText{
-  font-weight: bold;
-  font-size: 20px;
-  opacity: 0.7;
-  margin-top: -5px;
+font-weight: bold;
+font-size: 20px;
+opacity: 0.7;
+margin-top: -5px;
 }
 .modalactionsection {
-  text-align: center;
+text-align: center;
 }
 .modalactionsection button {
-  margin: 10px 10px;
+margin: 10px 10px;
 }
 .uploadBtnContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+display: flex;
+align-items: center;
+gap: 10px;
 }
 .imageUploadBtn {
-  margin-top: -10px;
+margin-top: -10px;
 }
 .uploadErrorAlert {
-  margin-top: 10px;
+margin-top: 10px;
 }
 .deleteIcon, .editIcon {
-  cursor: pointer;
-  transform: scale(0.8);
+cursor: pointer;
+transform: scale(0.8);
 }
 .icons {
-  display: flex;
-  justify-content: end;
-  margin-top: -11px;
+display: flex;
+justify-content: end;
+margin-top: -11px;
+}
+.changeTo {
+margin-top: 10px;
+}
+.currentLabel {
+padding-right: 31px;
+}
+.changeToLabel {
+padding-right: 10px;
+}
+.topicEditIcon {
+padding-left: 10px;
+color: white;
+cursor: pointer;
+}
+.topicEdit {
+background: blue;
+border: 1px solid;
+border-radius: 50%;
+/* padding-left: 5px; */
+}
+.modelContent {
+padding-top: 0px !important;
+}
+.modalinnerwrapperTitleEdit {
+padding: 20px;
+width: 400px;
+}
+.editTopicDescInput {
+width: 100%;
 }

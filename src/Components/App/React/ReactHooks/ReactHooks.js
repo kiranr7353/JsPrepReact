@@ -8,7 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
 import Switch from '@mui/joy/Switch';
 import Typography from '@mui/joy/Typography';
-import { Alert, Dialog, DialogContent, Drawer, FormControl, Slide, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
+import { Alert, Dialog, DialogContent, Drawer, FormControl, Slide, TextField } from '@mui/material';
 import { storage } from '../../../../firebaseConfig';
 import CommonButton from '../../../../CommonComponents/CommonButton';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -44,7 +44,6 @@ const ReactHooks = (props) => {
     const [openDrawer, setOpenDrawer] = useState(false);
     const [addConceptTitle, setAddConceptTitle] = useState("");
     const [addConceptPayload, setAddConceptPayload] = useState({});
-    const [descriptionImageUploaded, setDescriptionImageUploaded] = useState(false);
     const [addConceptApi, setAddConceptApi] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [description, setDescription] = useState([
@@ -54,17 +53,26 @@ const ReactHooks = (props) => {
     const descPointsInputRef = useRef([]);
     const deleteConceptTitle = useRef('');
     const deleteConceptInfo = useRef();
+    const editConceptInfo = useRef();
     const [errorMessage, setErrorMessage] = useState("");
     const [openPopup, setOpenPopup] = useState(false);
     const [openConfirmationPopup, setOpenConfirmationPopup] = useState(false);
+    const [openEditTitleModal, setOpenEditTitleModal] = useState(false);
     const [deleteConceptPayload, setDeleteConceptPayload] = useState({});
     const [callDeleteConceptApi, setCallDeleteConceptApi] = useState(false);
+    const [openEditModalInfo, setOpenEditModalInfo] = useState({ open: false, success: '', error: '' });
     const [openDeleteModalInfo, setOpenDeleteModalInfo] = useState({ open: false, success: '', error: '' });
+    const [editTitle, setEditTitle] = useState('');
+    const [callEditConcept, setCallEditConcept] = useState(false);
+    const [editConceptPayload, setEditConceptPayload] = useState({});
 
-    const onHooksSucess = res => {
+
+    const onHooksSuccess = res => {
         setHooksConceptsInfo({ data: [], error: '' });
         if ((res?.status === 200 || res?.status === 201)) {
             setHooksConceptsInfo({ data: res?.data?.concepts, error: '' });
+            setContentData(res?.data?.concepts[0]);
+            setSelectedIndex(0);
         } else {
             setHooksConceptsInfo({ data: [], error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
         }
@@ -337,7 +345,6 @@ const ReactHooks = (props) => {
         payload.title = addConceptTitle;
         payloadData[0].description = description;
         payload.data = payloadData;
-        console.log(payload);
         setAddConceptPayload(payload);
         setAddConceptApi(true);
     }
@@ -368,7 +375,6 @@ const ReactHooks = (props) => {
     }
 
     const handleDeleteConceptImages = (info) => {
-        console.log(info);
         info.data.forEach(el => {
             el.description.forEach(desc => {
                 if (desc.snippet?.length > 0) {
@@ -389,8 +395,34 @@ const ReactHooks = (props) => {
         })
     }
 
-    const handleEditConcept = () => {
+    const handleEditConcept = (el) => {
+        setOpenEditTitleModal(true);
+        editConceptInfo.current = el;
+    }
 
+    const handleEditConceptConfirm = () => {
+        setEditConceptPayload({ currentTitle: editConceptInfo?.current?.title, changedTitle: editTitle, categoryId: params?.categoryId, topicId: locationDetails?.state?.topicDetails?.topicId });
+        setCallEditConcept(true);
+        setOpenEditTitleModal(false);
+    }
+
+    const handleEditTitleCloseDialog = () => {
+        setOpenEditTitleModal(false);
+        editConceptInfo.current = null;
+        setEditTitle('');
+    }
+
+    const onEditConceptSuccess = res => {
+        setCallEditConcept(false);
+        setOpenEditModalInfo({ open: false, success: ``, error: '' });
+        if ((res?.status === 200 || res?.status === 201)) {
+            GetHooks?.refetch();
+            setSelectedIndex(contentData.id);
+            handleEditTitleCloseDialog();
+            setOpenEditModalInfo({ open: true, success: `Updated Successfully`, error: '' });
+        } else {
+            setOpenEditModalInfo({ open: true, success: ``, error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
+        }
     }
 
     const handleDeleteConcept = (title, el) => {
@@ -414,9 +446,10 @@ const ReactHooks = (props) => {
         setCallDeleteConceptApi(false);
         setOpenDeleteModalInfo({ open: false, success: ``, error: '' });
         if ((res?.status === 200 || res?.status === 201)) {
-            handleDeleteConceptCloseDialog();
             handleDeleteConceptImages(deleteConceptInfo.current);
             GetHooks?.refetch();
+            setSelectedIndex(contentData.id - 1);
+            handleDeleteConceptCloseDialog();
             setOpenDeleteModalInfo({ open: true, success: `Deleted Successfully`, error: '' });
         } else {
             setOpenDeleteModalInfo({ open: true, success: ``, error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
@@ -429,11 +462,18 @@ const ReactHooks = (props) => {
         deleteConceptInfo.current = null;
     }
 
-    let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSucess));
+    const handleEditConceptClosePopup = () => {
+        setOpenEditModalInfo({ open: false, success: ``, error: '' });
+        editConceptInfo.current = null;
+        setEditTitle('');
+    }
+
+    let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSuccess));
     let AddConcept = useFetchAPI("AddConcept", `/concepts/addConcepts`, "POST", addConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddConceptSuccess, "", addConceptApi));
     let DeleteConcept = useFetchAPI("DeleteConcept", `/concepts/deleteConcept`, "POST", deleteConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteConceptSuccess, "", callDeleteConceptApi));
+    let EditConcept = useFetchAPI("EditConcept", `/concepts/editConcept`, "POST", editConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onEditConceptSuccess, "", callEditConcept));
 
-    const fetching = GetHooks?.Loading || GetHooks?.Fetching || AddConcept?.Loading || AddConcept?.Fetching || DeleteConcept?.Loading || DeleteConcept?.Fetching;
+    const fetching = GetHooks?.Loading || GetHooks?.Fetching || AddConcept?.Loading || AddConcept?.Fetching || DeleteConcept?.Loading || DeleteConcept?.Fetching || EditConcept?.Loading || EditConcept?.Fetching;
 
     console.log(description);
 
@@ -473,11 +513,10 @@ const ReactHooks = (props) => {
                                                 <div className={ReactStyles.topicCardFlex}>
                                                     <div className={ReactStyles.card__contentHooks}>
                                                         <h1 className={selectedIndex === index ? ReactStyles.topicCard__headerActive : ReactStyles.topicCard__header}>{el?.title}</h1>
-
                                                     </div>
                                                 </div>
                                                 <div className={ReactStyles.icons}>
-                                                    <EditIcon titleAccess='Edit' className={ReactStyles.editIcon} onClick={handleEditConcept} />
+                                                    <EditIcon titleAccess='Edit' className={ReactStyles.editIcon} onClick={() => handleEditConcept(el)} />
                                                     <DeleteIcon titleAccess='Delete' className={ReactStyles.deleteIcon} onClick={() => handleDeleteConcept(el?.title, el)} />
                                                 </div>
                                             </div>
@@ -741,7 +780,7 @@ const ReactHooks = (props) => {
                         </div>
                         <div className={ReactStyles.editBtnContainer}>
                             <div>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddConcept()} disabled={ !addConceptTitle }>Save</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} onClick={() => handleAddConcept()} disabled={!addConceptTitle}>Save</CommonButton>
                             </div>
                             <div>
                                 <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} marign={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleCloseDrawer}>Cancel</CommonButton>
@@ -785,6 +824,41 @@ const ReactHooks = (props) => {
                 </div>
             </Dialog>
             <ConfirmationDialog openDialog={openDeleteModalInfo?.open} errorMessage={openDeleteModalInfo?.error} successMessage={openDeleteModalInfo?.success} handleCloseDialog={handleDeleteConceptClosePopup} />
+            <Dialog open={openEditTitleModal} TransitionComponent={Transition} keepMounted onClose={handleEditTitleCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
+                <div className={ReactStyles.modalinnerwrapper}>
+                    <div><h4 className={ReactStyles.headerText}>Edit {editConceptInfo?.current?.title}</h4></div>
+                    <IconButton aria-label="close" onClick={handleEditTitleCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent>
+                        <div>
+                            <label className={ReactStyles.currentLabel}>Current</label>
+                            <TextField
+                                className={ReactStyles.columnInput}
+                                value={editConceptInfo?.current?.title}
+                                size="small"
+                                disabled
+                            />
+                        </div>
+                        <div className={ReactStyles.changeTo}>
+                            <label className={ReactStyles.changeToLabel}>Change To</label>
+                            <TextField
+                                name='changeTitle'
+                                className={ReactStyles.columnInput}
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                size="small"
+                                placeholder='Type here.....'
+                            />
+                        </div>
+                    </DialogContent>
+                    <div className={ReactStyles.modalactionsection}>
+                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleEditConceptConfirm}>Edit</CommonButton>
+                        <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleEditTitleCloseDialog}>Cancel</CommonButton>
+                    </div>
+                </div>
+            </Dialog>
+            <ConfirmationDialog openDialog={openEditModalInfo?.open} errorMessage={openEditModalInfo?.error} successMessage={openEditModalInfo?.success} handleCloseDialog={handleEditConceptClosePopup} />
         </>
     )
 }
