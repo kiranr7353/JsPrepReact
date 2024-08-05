@@ -1,0 +1,30 @@
+.body {
+    margin: 0 140px;
+  }
+  .banner {
+    background: #434343;
+    height: 300px;
+    width: 100%;
+    margin-top: -40px;
+  }
+  .contentHeader {
+    color: white;
+    padding: 60px 0 0 0;
+    font-size: 32px;
+  }
+  .contentFlex {
+    display: flex;
+    align-items: center;
+  }
+  .content {
+    width: 65%;
+  }
+  .contentDescription {
+    color: white;
+    font-size: 16px;
+  }
+  .topicImage {
+    width: 91%;
+    margin-top: 77px;
+    height: 191px;
+  }

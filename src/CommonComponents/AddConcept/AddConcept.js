@@ -1,98 +1,46 @@
-import React, { useRef, useState } from 'react'
-import { useFetchAPI } from '../../../../Hooks/useAPI';
-import { CommonHeaders } from '../../../../CommonComponents/CommonHeaders';
-import { fetchQueryParams } from '../../../../Hooks/fetchQueryParams';
-import Loader from '../../../../CommonComponents/Loader/Loader';
-import ReactStyles from './ReactHooksStyles.module.css';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
-import Switch from '@mui/joy/Switch';
-import Typography from '@mui/joy/Typography';
-import { Alert, Dialog, DialogContent, Drawer, FormControl, Slide, TextField } from '@mui/material';
-import { storage } from '../../../../firebaseConfig';
-import CommonButton from '../../../../CommonComponents/CommonButton';
+import React, { useEffect, useRef, useState } from 'react'
+import AddConceptStyles from './AddConceptStyles.module.css';
+import CommonButton from '../CommonButton';
+import { Alert, Dialog, DialogContent, Drawer, FormControl, Slide, Switch, TextField, Typography } from '@mui/material';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CancelIcon from '@mui/icons-material/Cancel';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import { getDownloadURL, ref as storageRef, uploadBytes, uploadBytesResumable, deleteObject } from "firebase/storage";
-
-
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import './ReactHooksSwiperStyles.css';
-import DisplayContent from './DisplayContent';
-import ConfirmationDialog from '../../../../CommonComponents/ConfirmationDialog/ConfirmationDialog';
+import { getDownloadURL, ref as storageRef, uploadBytesResumable, deleteObject } from "firebase/storage";
+import { storage } from '../../firebaseConfig';
+import { CommonHeaders } from '../CommonHeaders';
+import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
+import { useFetchAPI } from '../../Hooks/useAPI';
+import Loader from '../Loader/Loader';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const AddConcept = (props) => {
 
-const ReactHooks = (props) => {
+    const { params, locationDetails, setAddConceptClick, conceptsInfo, getConcepts, contentData, setSelectedIndex } = props
 
-    const { params, locationDetails } = props;
-
-    console.log(locationDetails, 'locationDetails');
-
-    const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [contentData, setContentData] = useState({});
-    const [openDrawer, setOpenDrawer] = useState(false);
     const [addConceptTitle, setAddConceptTitle] = useState("");
-    const [addConceptPayload, setAddConceptPayload] = useState({});
-    const [addConceptApi, setAddConceptApi] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [description, setDescription] = useState([
         { id: 1, header: '', data: '', snippet: [], imageUploaded: false, hasPoints: false, pointsData: [], hasTable: false, tableColumns: [], tableData: [] }
     ])
     const descInputRef = useRef([]);
     const descPointsInputRef = useRef([]);
-    const deleteConceptTitle = useRef('');
-    const deleteConceptInfo = useRef();
-    const editConceptInfo = useRef();
+    const [isLoading, setIsLoading] = useState(false);
+    const [openDrawer, setOpenDrawer] = useState(false);
+    const [addConceptPayload, setAddConceptPayload] = useState({});
+    const [addConceptApi, setAddConceptApi] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [openPopup, setOpenPopup] = useState(false);
-    const [openConfirmationPopup, setOpenConfirmationPopup] = useState(false);
-    const [openEditTitleModal, setOpenEditTitleModal] = useState(false);
-    const [deleteConceptPayload, setDeleteConceptPayload] = useState({});
-    const [callDeleteConceptApi, setCallDeleteConceptApi] = useState(false);
-    const [openEditModalInfo, setOpenEditModalInfo] = useState({ open: false, success: '', error: '' });
-    const [openDeleteModalInfo, setOpenDeleteModalInfo] = useState({ open: false, success: '', error: '' });
-    const [editTitle, setEditTitle] = useState('');
-    const [callEditConcept, setCallEditConcept] = useState(false);
-    const [editConceptPayload, setEditConceptPayload] = useState({});
 
-
-    const onHooksSuccess = res => {
-        setHooksConceptsInfo({ data: [], error: '' });
-        if ((res?.status === 200 || res?.status === 201)) {
-            setHooksConceptsInfo({ data: res?.data?.concepts, error: '' });
-            setContentData(res?.data?.concepts[0]);
-            setSelectedIndex(0);
-        } else {
-            setHooksConceptsInfo({ data: [], error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
-        }
-    }
-
-    const handleContentClick = (el, index) => {
-        setSelectedIndex(index);
-        setContentData(el);
-    }
-
-    const toggleDrawer = () => {
+    useEffect(() => {
         setOpenDrawer(true);
-    }
+    }, [])
 
     const handleCloseDrawer = () => {
         setOpenDrawer(false);
-    }
-
-    const handleTitleChange = (event) => {
-        setAddConceptTitle(event.target.value);
+        setAddConceptClick(false);
     }
 
     const handleDescriptionChange = (i, e) => {
@@ -216,7 +164,7 @@ const ReactHooks = (props) => {
     const uploadImageToFireStore = async (img, i, index) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`${params?.categoryId}/${params?.topicId}/${addConceptTitle}/section1/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         let newValues = [...description];
@@ -250,7 +198,7 @@ const ReactHooks = (props) => {
     const uploadPointsImageToFireStore = async (img, i, index, idx) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${addConceptTitle}/section1/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`${params?.categoryId}/${params?.topicId}/${addConceptTitle}/section1/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         let pointsValues = [...description[i]?.pointsData];
@@ -341,7 +289,7 @@ const ReactHooks = (props) => {
         let payloadData = [{ description: [], sectionId: 1 }];
         payload.categoryId = params?.categoryId;
         payload.topicId = locationDetails?.state?.topicDetails?.topicId;
-        payload.id = hooksConceptsInfo?.data?.length + 1;
+        payload.id = (conceptsInfo?.data && conceptsInfo?.data?.length > 0) ? conceptsInfo?.data?.length + 1 : 1;
         payload.title = addConceptTitle;
         payloadData[0].description = description;
         payload.data = payloadData;
@@ -354,7 +302,7 @@ const ReactHooks = (props) => {
         setErrorMessage('')
         if ((res?.status === 200 || res?.status === 201)) {
             setErrorMessage('');
-            GetHooks?.refetch();
+            getConcepts?.refetch();
             setSelectedIndex(contentData.id - 1);
             setOpenPopup(true);
         } else {
@@ -369,168 +317,16 @@ const ReactHooks = (props) => {
         window.scroll(0, 0);
     }
 
-    const removeConceptUploadedImage = (image) => {
-        const imageRef = storageRef(storage, image);
-        deleteObject(imageRef).then(() => { }).then(err => { })
-    }
-
-    const handleDeleteConceptImages = (info) => {
-        info.data.forEach(el => {
-            el.description.forEach(desc => {
-                if (desc.snippet?.length > 0) {
-                    desc.snippet?.forEach(img => {
-                        removeConceptUploadedImage(img?.url);
-                    })
-                }
-                if (desc.pointsData?.length > 0) {
-                    desc.pointsData?.forEach(point => {
-                        if (point?.snippet?.length > 0) {
-                            point?.snippet?.forEach(image => {
-                                removeConceptUploadedImage(image?.url);
-                            })
-                        }
-                    })
-                }
-            })
-        })
-    }
-
-    const handleEditConcept = (el) => {
-        setOpenEditTitleModal(true);
-        editConceptInfo.current = el;
-    }
-
-    const handleEditConceptConfirm = () => {
-        setEditConceptPayload({ currentTitle: editConceptInfo?.current?.title, changedTitle: editTitle, categoryId: params?.categoryId, topicId: locationDetails?.state?.topicDetails?.topicId });
-        setCallEditConcept(true);
-        setOpenEditTitleModal(false);
-    }
-
-    const handleEditTitleCloseDialog = () => {
-        setOpenEditTitleModal(false);
-        editConceptInfo.current = null;
-        setEditTitle('');
-    }
-
-    const onEditConceptSuccess = res => {
-        setCallEditConcept(false);
-        setOpenEditModalInfo({ open: false, success: ``, error: '' });
-        if ((res?.status === 200 || res?.status === 201)) {
-            GetHooks?.refetch();
-            setSelectedIndex(contentData.id);
-            handleEditTitleCloseDialog();
-            setOpenEditModalInfo({ open: true, success: `Updated Successfully`, error: '' });
-        } else {
-            setOpenEditModalInfo({ open: true, success: ``, error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
-        }
-    }
-
-    const handleDeleteConcept = (title, el) => {
-        deleteConceptTitle.current = title;
-        deleteConceptInfo.current = el;
-        setOpenConfirmationPopup(true);
-    }
-
-    const handleDeleteConceptCloseDialog = () => {
-        setOpenConfirmationPopup(false);
-        deleteConceptTitle.current = '';
-        deleteConceptInfo.current = null;
-    }
-
-    const handleDeleteConceptConfirm = () => {
-        setDeleteConceptPayload({ title: deleteConceptTitle.current, categoryId: params?.categoryId, topicId: locationDetails?.state?.topicDetails?.topicId })
-        setCallDeleteConceptApi(true);
-    }
-
-    const onDeleteConceptSuccess = res => {
-        setCallDeleteConceptApi(false);
-        setOpenDeleteModalInfo({ open: false, success: ``, error: '' });
-        if ((res?.status === 200 || res?.status === 201)) {
-            handleDeleteConceptImages(deleteConceptInfo.current);
-            GetHooks?.refetch();
-            setSelectedIndex(contentData.id - 1);
-            handleDeleteConceptCloseDialog();
-            setOpenDeleteModalInfo({ open: true, success: `Deleted Successfully`, error: '' });
-        } else {
-            setOpenDeleteModalInfo({ open: true, success: ``, error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
-        }
-    }
-
-    const handleDeleteConceptClosePopup = () => {
-        setOpenDeleteModalInfo({ open: false, success: ``, error: '' });
-        deleteConceptTitle.current = '';
-        deleteConceptInfo.current = null;
-    }
-
-    const handleEditConceptClosePopup = () => {
-        setOpenEditModalInfo({ open: false, success: ``, error: '' });
-        editConceptInfo.current = null;
-        setEditTitle('');
-    }
-
-    let GetHooks = useFetchAPI("GetHooks", `/concepts/getConcepts/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onHooksSuccess));
     let AddConcept = useFetchAPI("AddConcept", `/concepts/addConcepts`, "POST", addConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddConceptSuccess, "", addConceptApi));
-    let DeleteConcept = useFetchAPI("DeleteConcept", `/concepts/deleteConcept`, "POST", deleteConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteConceptSuccess, "", callDeleteConceptApi));
-    let EditConcept = useFetchAPI("EditConcept", `/concepts/editConcept`, "POST", editConceptPayload, CommonHeaders(), fetchQueryParams("", "", "", onEditConceptSuccess, "", callEditConcept));
 
-    const fetching = GetHooks?.Loading || GetHooks?.Fetching || AddConcept?.Loading || AddConcept?.Fetching || DeleteConcept?.Loading || DeleteConcept?.Fetching || EditConcept?.Loading || EditConcept?.Fetching;
+    const fetching = AddConcept?.Loading || AddConcept?.Fetching;
 
     return (
         <>
             {(fetching || isLoading) && <Loader showLoader={fetching || isLoading} />}
-            <div className={ReactStyles.banner}>
-                <div className={ReactStyles.body}>
-                    <div className={ReactStyles.contentFlex}>
-                        <div className={ReactStyles.content}>
-                            <h4 className={ReactStyles.contentHeader}>{locationDetails?.state?.topicDetails?.topicName}</h4>
-                            <h5 className={ReactStyles.contentDescription}>{locationDetails?.state?.topicDetails?.description}</h5>
-                        </div>
-                        <div className={ReactStyles.image}>
-                            <img className={ReactStyles.topicImage} src={locationDetails?.state?.topicDetails?.imageUrl} alt={locationDetails?.state?.topicDetails?.topicName} />
-                        </div>
-                    </div>
-                    <div className={ReactStyles.addConceptsBtn}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Concept</CommonButton>
-                    </div>
-                    <div className={ReactStyles.concepts}>
-                        <Swiper
-                            slidesPerView={6}
-                            spaceBetween={10}
-                            cssMode={true}
-                            navigation={true}
-                            mousewheel={true}
-                            keyboard={true}
-                            modules={[Navigation, Mousewheel, Keyboard]}
-                            className="mySwiper"
-                        >
-                            <div className={ReactStyles.grid}>
-                                {
-                                    hooksConceptsInfo?.data?.length > 0 ? hooksConceptsInfo?.data?.map((el, index) => (
-                                        <SwiperSlide key={el?.title}>
-                                            <div className={selectedIndex === index ? ReactStyles.topicCardActive : ReactStyles.topicCard} onClick={() => handleContentClick(el, index)}>
-                                                <div className={ReactStyles.topicCardFlex}>
-                                                    <div className={ReactStyles.card__contentHooks}>
-                                                        <h1 className={selectedIndex === index ? ReactStyles.topicCard__headerActive : ReactStyles.topicCard__header}>{el?.title}</h1>
-                                                    </div>
-                                                </div>
-                                                <div className={ReactStyles.icons}>
-                                                    <EditIcon titleAccess='Edit' className={ReactStyles.editIcon} onClick={() => handleEditConcept(el)} />
-                                                    <DeleteIcon titleAccess='Delete' className={ReactStyles.deleteIcon} onClick={() => handleDeleteConcept(el?.title, el)} />
-                                                </div>
-                                            </div>
-                                        </SwiperSlide>
-                                    )) : <><h4 className={ReactStyles.topicsError}>{hooksConceptsInfo?.error}</h4></>}
-                            </div>
-                        </Swiper>
-                        {contentData?.title && <div className={ReactStyles.conceptContent}>
-                            <DisplayContent contentData={contentData} locationDetails={locationDetails} categoryId={params?.categoryId} GetHooks={GetHooks} setSelectedIndex={setSelectedIndex} setContentData={setSelectedIndex} />
-                        </div>}
-                    </div>
-                </div>
-            </div>
             <Drawer anchor={'right'} open={openDrawer} onClose={handleCloseDrawer}>
-                <div className={ReactStyles.addConceptContainer}>
-                    <div className={ReactStyles.addConceptTitle}>
+                <div className={AddConceptStyles.addConceptContainer}>
+                    <div className={AddConceptStyles.addConceptTitle}>
                         <div>
                             <h2>Add Concept</h2>
                         </div>
@@ -538,14 +334,14 @@ const ReactHooks = (props) => {
                             <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
                         </div>
                     </div>
-                    <div className={ReactStyles.addConceptForm}>
-                        <div className={ReactStyles.conceptTitle}>
+                    <div className={AddConceptStyles.addConceptForm}>
+                        <div className={AddConceptStyles.conceptTitle}>
                             <FormControl sx={{ width: '100%' }}>
-                                <label>Title <span className={ReactStyles.required}>*</span></label>
+                                <label>Title <span className={AddConceptStyles.required}>*</span></label>
                                 <TextField
                                     name='title'
                                     value={addConceptTitle}
-                                    onChange={handleTitleChange}
+                                    onChange={(e) => setAddConceptTitle(e.target.value)}
                                     InputProps={{
                                         type: 'text',
                                     }}
@@ -554,15 +350,15 @@ const ReactHooks = (props) => {
                                 />
                             </FormControl>
                         </div>
-                        <div className={ReactStyles.conceptDescription}>
+                        <div className={AddConceptStyles.conceptDescription}>
                             <FormControl sx={{ width: '100%' }}>
                                 {description?.map((el, i) => (
                                     <>
                                         <label>Description {description[i]?.id}</label>
-                                        <div className={ReactStyles.descriptionFlex}>
-                                            <div className={ReactStyles.descriptionDiv}>
+                                        <div className={AddConceptStyles.descriptionFlex}>
+                                            <div className={AddConceptStyles.descriptionDiv}>
                                                 <TextField
-                                                    className={ReactStyles.headerInput}
+                                                    className={AddConceptStyles.headerInput}
                                                     name='header'
                                                     value={el?.header || ""}
                                                     onChange={(e) => handleDescriptionChange(i, e)}
@@ -573,6 +369,7 @@ const ReactHooks = (props) => {
                                                     placeholder={"Enter Header"} size="large"
                                                 />
                                                 <TextField
+                                                    className={AddConceptStyles.headerInput}
                                                     name='data'
                                                     value={el?.data || ""}
                                                     onChange={(e) => handleDescriptionChange(i, e)}
@@ -582,8 +379,8 @@ const ReactHooks = (props) => {
                                                     sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
                                                     placeholder={"Enter Description"} size="large"
                                                 />
-                                                <label className={`btn btn-primary ${ReactStyles.DocUpload}`}>Upload Code Snippet(s)</label>
-                                                <input ref={el => descInputRef.current[i] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={ReactStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
+                                                <label className={`btn btn-primary ${AddConceptStyles.DocUpload}`}>Upload Code Snippet(s)</label>
+                                                <input ref={el => descInputRef.current[i] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={AddConceptStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
                                                 {description[i]?.snippet?.length > 0 &&
                                                     (description[i]?.snippet?.length > 10 ? (
                                                         <p className="error">
@@ -595,25 +392,25 @@ const ReactHooks = (props) => {
                                                     ) : (
                                                         <></>
                                                     ))}
-                                                <div className={ReactStyles.images}>
+                                                <div className={AddConceptStyles.images}>
                                                     {description[i]?.snippet &&
                                                         description[i]?.snippet?.map((image, index) => {
                                                             return (
-                                                                <div key={image} className={ReactStyles.image}>
-                                                                    <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
-                                                                    <div className={ReactStyles.uploadBtnContainer}>
-                                                                        <div className={ReactStyles.imageUploadBtn}>
-                                                                            <button className={ReactStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                                <div key={image} className={AddConceptStyles.image}>
+                                                                    <img src={image?.url} className={AddConceptStyles.descriptionImage} alt="upload" />
+                                                                    <div className={AddConceptStyles.uploadBtnContainer}>
+                                                                        <div className={AddConceptStyles.imageUploadBtn}>
+                                                                            <button className={AddConceptStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
                                                                         </div>
                                                                         <div>
-                                                                            {!image?.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deleteImage(i, image)}>
+                                                                            {!image?.imageUploaded ? <button className={AddConceptStyles.imageDelete} onClick={() => deleteImage(i, image)}>
                                                                                 Remove
-                                                                            </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedImage(i, image?.url, index)}>
+                                                                            </button> : <button className={AddConceptStyles.imageDelete} onClick={() => removeUploadedImage(i, image?.url, index)}>
                                                                                 Cancel Upload
                                                                             </button>}
                                                                         </div>
                                                                     </div>
-                                                                    {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={ReactStyles.uploadErrorAlert}>
+                                                                    {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={AddConceptStyles.uploadErrorAlert}>
                                                                         <Alert autoHideDuration={3000} severity="error">
                                                                             Upload Failed! Try again later.
                                                                         </Alert>
@@ -622,7 +419,7 @@ const ReactHooks = (props) => {
                                                             );
                                                         })}
                                                 </div>
-                                                <div className={ReactStyles.points}>
+                                                <div className={AddConceptStyles.points}>
                                                     <Typography component="label" endDecorator={<Switch sx={{ ml: 1, mt: 1 }} id='points' name='hasPoints' checked={el?.hasPoints} onChange={(e) => handleDescriptionChange(i, e)} />}>
                                                         Add Points
                                                     </Typography>
@@ -630,12 +427,12 @@ const ReactHooks = (props) => {
                                                         <>
                                                             {description[i]?.pointsData?.map((point, idx) => (
                                                                 <>
-                                                                    <div className={ReactStyles.pointsDiv}>
-                                                                        {idx ? <HighlightOffIcon titleAccess='Remove' className={ReactStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
+                                                                    <div className={AddConceptStyles.pointsDiv}>
+                                                                        {idx ? <HighlightOffIcon titleAccess='Remove' className={AddConceptStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
                                                                         <h4>Point {idx + 1}</h4>
                                                                         <label>Enter Point</label>
                                                                         <TextField
-                                                                            className={ReactStyles.pointsInput}
+                                                                            className={AddConceptStyles.pointsInput}
                                                                             name='value'
                                                                             value={point?.value || ""}
                                                                             onChange={(e) => handlePointsChange(idx, e, i)}
@@ -646,8 +443,8 @@ const ReactHooks = (props) => {
                                                                             placeholder={"Enter Value"} size="large"
                                                                         />
                                                                         <div>
-                                                                            <label className={`btn btn-primary ${ReactStyles.DocUpload}`}>Upload Code Snippet(s)</label>
-                                                                            <input ref={el => descPointsInputRef.current[idx] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={ReactStyles.uploadInput} onChange={(e) => handlePointsChange(idx, e, i)} />
+                                                                            <label className={`btn btn-primary ${AddConceptStyles.DocUpload}`}>Upload Code Snippet(s)</label>
+                                                                            <input ref={el => descPointsInputRef.current[idx] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={AddConceptStyles.uploadInput} onChange={(e) => handlePointsChange(idx, e, i)} />
                                                                             {description[i]?.pointsData[idx]?.snippet?.length > 0 &&
                                                                                 (description[i]?.pointsData[idx]?.snippet?.length > 10 ? (
                                                                                     <p className="error">
@@ -659,25 +456,25 @@ const ReactHooks = (props) => {
                                                                                 ) : (
                                                                                     <></>
                                                                                 ))}
-                                                                            <div className={ReactStyles.images}>
+                                                                            <div className={AddConceptStyles.images}>
                                                                                 {description[i]?.pointsData[idx]?.snippet &&
                                                                                     description[i]?.pointsData[idx]?.snippet?.map((image, index) => {
                                                                                         return (
-                                                                                            <div key={image + index} className={ReactStyles.image}>
-                                                                                                <img src={image?.url} className={ReactStyles.descriptionImage} alt="upload" />
-                                                                                                <div className={ReactStyles.uploadBtnContainer}>
-                                                                                                    <div className={ReactStyles.imageUploadBtn}>
-                                                                                                        <button className={ReactStyles.uploadBtn} disabled={image.imageUploaded} onClick={() => uploadPointsImages(idx, i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                                                            <div key={image + index} className={AddConceptStyles.image}>
+                                                                                                <img src={image?.url} className={AddConceptStyles.descriptionImage} alt="upload" />
+                                                                                                <div className={AddConceptStyles.uploadBtnContainer}>
+                                                                                                    <div className={AddConceptStyles.imageUploadBtn}>
+                                                                                                        <button className={AddConceptStyles.uploadBtn} disabled={image.imageUploaded} onClick={() => uploadPointsImages(idx, i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
                                                                                                     </div>
                                                                                                     <div>
-                                                                                                        {!image.imageUploaded ? <button className={ReactStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
+                                                                                                        {!image.imageUploaded ? <button className={AddConceptStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
                                                                                                             Delete
-                                                                                                        </button> : <button className={ReactStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image?.url, idx, index)}>
+                                                                                                        </button> : <button className={AddConceptStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image?.url, idx, index)}>
                                                                                                             Cancel Upload
                                                                                                         </button>}
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={ReactStyles.uploadErrorAlert}>
+                                                                                                {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={AddConceptStyles.uploadErrorAlert}>
                                                                                                     <Alert autoHideDuration={3000} severity="error">
                                                                                                         Upload Failed! Try again later.
                                                                                                     </Alert>
@@ -690,10 +487,10 @@ const ReactHooks = (props) => {
                                                                     </div>
                                                                 </>
                                                             ))}
-                                                            <h6 className={ReactStyles.anotherDescription}><u onClick={() => addAnotherPoint(i)}>Add Another Point</u></h6>
+                                                            <h6 className={AddConceptStyles.anotherDescription}><u onClick={() => addAnotherPoint(i)}>Add Another Point</u></h6>
                                                         </>}
                                                 </div>
-                                                <div className={ReactStyles.table}>
+                                                <div className={AddConceptStyles.table}>
                                                     <Typography component="label" endDecorator={<Switch sx={{ ml: 1, mt: 1 }} id='table' name='hasTable' checked={el?.hasTable} onChange={(e) => handleDescriptionChange(i, e)} />}>
                                                         Add Table
                                                     </Typography>
@@ -703,7 +500,7 @@ const ReactHooks = (props) => {
                                                                 <h4>Table Columns</h4>
                                                                 {description[i]?.tableColumns?.map((el, index) =>
                                                                     <TextField
-                                                                        className={ReactStyles.columnInput}
+                                                                        className={AddConceptStyles.columnInput}
                                                                         name='value'
                                                                         value={el?.value || ""}
                                                                         onChange={(ev) => handleTableChange(index, ev, i)}
@@ -719,10 +516,10 @@ const ReactHooks = (props) => {
                                                                 <h4>Table Data</h4>
                                                                 {description[i]?.tableData?.map((el, index) =>
                                                                     <>
-                                                                        <div className={ReactStyles.tableDataFlex}>
-                                                                            <div className={ReactStyles.tableData}>
+                                                                        <div className={AddConceptStyles.tableDataFlex}>
+                                                                            <div className={AddConceptStyles.tableData}>
                                                                                 <TextField
-                                                                                    className={ReactStyles.columnInput}
+                                                                                    className={AddConceptStyles.columnInput}
                                                                                     name='value1'
                                                                                     value={el?.value1 || ""}
                                                                                     onChange={(ev) => handleTableDataChange(index, ev, i)}
@@ -733,7 +530,7 @@ const ReactHooks = (props) => {
                                                                                     placeholder={"Enter Data"} size="large"
                                                                                 />
                                                                                 <TextField
-                                                                                    className={ReactStyles.columnInput}
+                                                                                    className={AddConceptStyles.columnInput}
                                                                                     name='value2'
                                                                                     value={el?.value2 || ""}
                                                                                     onChange={(ev) => handleTableDataChange(index, ev, i)}
@@ -747,7 +544,7 @@ const ReactHooks = (props) => {
                                                                             <div>
                                                                                 {
                                                                                     index ?
-                                                                                        <HighlightOffIcon titleAccess='Remove' className={ReactStyles.removeIcon} onClick={() => removeRow(index, i)} />
+                                                                                        <HighlightOffIcon titleAccess='Remove' className={AddConceptStyles.removeIcon} onClick={() => removeRow(index, i)} />
                                                                                         : null
                                                                                 }
                                                                             </div>
@@ -755,16 +552,16 @@ const ReactHooks = (props) => {
                                                                     </>
 
                                                                 )}
-                                                                <h6 className={ReactStyles.anotherDescription}><u onClick={() => addAnotherRow(i)}>Add Another Row</u></h6>
+                                                                <h6 className={AddConceptStyles.anotherDescription}><u onClick={() => addAnotherRow(i)}>Add Another Row</u></h6>
                                                             </div>
                                                         </> : null}
 
                                                 </div>
                                             </div>
-                                            <div className={ReactStyles.remove}>
+                                            <div className={AddConceptStyles.remove}>
                                                 {
                                                     i ?
-                                                        <HighlightOffIcon titleAccess='Remove' className={ReactStyles.removeIcon} onClick={() => removeDescription(i)} />
+                                                        <HighlightOffIcon titleAccess='Remove' className={AddConceptStyles.removeIcon} onClick={() => removeDescription(i)} />
                                                         : null
                                                 }
                                             </div>
@@ -773,10 +570,10 @@ const ReactHooks = (props) => {
 
                                     </>
                                 ))}
-                                <h6 className={ReactStyles.anotherDescription}><u onClick={addAnotherDescription}>Add Another Description</u></h6>
+                                <h6 className={AddConceptStyles.anotherDescription}><u onClick={addAnotherDescription}>Add Another Description</u></h6>
                             </FormControl>
                         </div>
-                        <div className={ReactStyles.editBtnContainer}>
+                        <div className={AddConceptStyles.editBtnContainer}>
                             <div>
                                 <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddConcept()} disabled={!addConceptTitle}>Save</CommonButton>
                             </div>
@@ -788,8 +585,8 @@ const ReactHooks = (props) => {
                 </div>
             </Drawer>
             <Dialog open={openPopup} TransitionComponent={Transition} keepMounted onClose={handleCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
-                <div className={ReactStyles.modalinnerwrapper}>
-                    <div><h4 className={ReactStyles.headerText}>{errorMessage?.length > 0 ? 'Failed' : 'Success'}</h4></div>
+                <div className={AddConceptStyles.modalinnerwrapper}>
+                    <div><h4 className={AddConceptStyles.headerText}>{errorMessage?.length > 0 ? 'Failed' : 'Success'}</h4></div>
                     <IconButton aria-label="close" onClick={handleCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
                         <CloseIcon />
                     </IconButton>
@@ -801,64 +598,13 @@ const ReactHooks = (props) => {
                             {errorMessage?.length > 0 ? errorMessage : 'Concept Added Successfully'}
                         </Alert>
                     </DialogContent>
-                    <div className={ReactStyles.modalactionsection}>
+                    <div className={AddConceptStyles.modalactionsection}>
                         <CommonButton variant="contained" bgColor={'white'} color={'#286ce2'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleCloseDialog}>Ok</CommonButton>
                     </div>
                 </div>
             </Dialog>
-            <Dialog open={openConfirmationPopup} TransitionComponent={Transition} keepMounted onClose={handleDeleteConceptCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
-                <div className={ReactStyles.modalinnerwrapper}>
-                    <div><h4 className={ReactStyles.headerText}>Delete {deleteConceptTitle.current}</h4></div>
-                    <IconButton aria-label="close" onClick={handleDeleteConceptCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
-                        <CloseIcon />
-                    </IconButton>
-                    <DialogContent>
-                        Are you sure you want to delete {deleteConceptTitle.current}?
-                    </DialogContent>
-                    <div className={ReactStyles.modalactionsection}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleDeleteConceptConfirm}>Delete</CommonButton>
-                        <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleDeleteConceptCloseDialog}>Cancel</CommonButton>
-                    </div>
-                </div>
-            </Dialog>
-            <ConfirmationDialog openDialog={openDeleteModalInfo?.open} errorMessage={openDeleteModalInfo?.error} successMessage={openDeleteModalInfo?.success} handleCloseDialog={handleDeleteConceptClosePopup} />
-            <Dialog open={openEditTitleModal} TransitionComponent={Transition} keepMounted onClose={handleEditTitleCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
-                <div className={ReactStyles.modalinnerwrapper}>
-                    <div><h4 className={ReactStyles.headerText}>Edit {editConceptInfo?.current?.title}</h4></div>
-                    <IconButton aria-label="close" onClick={handleEditTitleCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
-                        <CloseIcon />
-                    </IconButton>
-                    <DialogContent>
-                        <div>
-                            <label className={ReactStyles.currentLabel}>Current</label>
-                            <TextField
-                                className={ReactStyles.columnInput}
-                                value={editConceptInfo?.current?.title}
-                                size="small"
-                                disabled
-                            />
-                        </div>
-                        <div className={ReactStyles.changeTo}>
-                            <label className={ReactStyles.changeToLabel}>Change To</label>
-                            <TextField
-                                name='changeTitle'
-                                className={ReactStyles.columnInput}
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                size="small"
-                                placeholder='Type here.....'
-                            />
-                        </div>
-                    </DialogContent>
-                    <div className={ReactStyles.modalactionsection}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleEditConceptConfirm}>Edit</CommonButton>
-                        <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleEditTitleCloseDialog}>Cancel</CommonButton>
-                    </div>
-                </div>
-            </Dialog>
-            <ConfirmationDialog openDialog={openEditModalInfo?.open} errorMessage={openEditModalInfo?.error} successMessage={openEditModalInfo?.success} handleCloseDialog={handleEditConceptClosePopup} />
         </>
     )
 }
 
-export default ReactHooks
+export default AddConcept

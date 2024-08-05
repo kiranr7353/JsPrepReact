@@ -7,8 +7,6 @@ const TopicHome = () => {
 
   const location = useLocation();
   const params = useParams();
-  console.log(params);
-  console.log(location);
 
   const selectTopicToRender = () => {
     switch(params?.categoryId){

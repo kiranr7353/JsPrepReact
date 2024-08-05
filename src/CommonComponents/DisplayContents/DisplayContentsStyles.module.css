@@ -1,0 +1,90 @@
+    .tableData {
+        margin-bottom: 15px;
+    }
+
+    .tableDataFlex {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .headerFlex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .contentTitle {
+        font-size: 30px;
+    }
+
+    .addConceptsBtn {
+        float: right;
+        margin-top: 20px;
+    }
+
+    .contentData {
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        margin-top: 20px;
+    }
+
+    .section {
+        background: linear-gradient(90deg, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+        color: black;
+        padding: 0px 30px 10px 30px;
+    }
+
+    .addDescBtn {
+        float: right;
+        width: 50%;
+        display: flex;
+        align-items: end;
+        justify-content: end;
+        gap: 20px;
+    }
+
+    .description {
+        margin-bottom: 40px;
+        margin-top: 85px;
+    }
+
+    .descHeader {
+        font-size: 22px;
+    }
+
+    .descData {
+        font-size: 19px;
+    }
+
+    .descCodeSnippet {
+        font-size: 14px;
+    }
+
+    .descPoint {
+        font-size: 18px;
+    }
+
+    .grid {
+        display: grid;
+        width: 114rem;
+        grid-gap: 3rem;
+        grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+    }
+
+    @media (max-width: 60em) {
+        .grid {
+            grid-gap: 3rem;
+        }
+    }
+
+    .pointsDiv {
+        border: 1px solid #cac3c3;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+
+    .points {
+        margin-bottom: 20px;
+    }
