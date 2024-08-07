@@ -36,8 +36,6 @@ const ReactHooks = (props) => {
 
     const { params, locationDetails } = props;
 
-    console.log(locationDetails, 'locationDetails');
-
     const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [contentData, setContentData] = useState({});

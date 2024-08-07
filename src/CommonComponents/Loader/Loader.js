@@ -18,7 +18,7 @@ const Loader = ({ showLoader }) => {
     return (
         <>
             <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, zIndex: 1000 }}
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={open}
             >
                 <div className={LoaderStyles.spinner}></div>

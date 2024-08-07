@@ -17,10 +17,11 @@ import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import { useFetchAPI } from '../../Hooks/useAPI';
 import { storage } from '../../firebaseConfig';
 import { ref as storageRef, deleteObject } from "firebase/storage";
+import AddSection from '../AddSection/AddSection';
 
 const DisplayContents = (props) => {
 
-  const { contentData, locationDetails, categoryId, getConcepts, setSelectedIndex, setContentData } = props;
+  const { contentData, locationDetails, categoryId, getConcepts, setSelectedIndex, setContentData, params } = props;
 
   const [editClicked, setEditClicked] = useState(false);
   const [addClicked, setAddClicked] = useState(false);
@@ -239,6 +240,7 @@ const DisplayContents = (props) => {
           )) : <AppNoData isImgRequired={false} />}
         </div>
       </div>
+      {addSectionClicked && <AddSection addSectionClicked={addSectionClicked} setAddSectionClicked={setAddSectionClicked} contentData={contentData} locationDetails={locationDetails} categoryId={categoryId} getConcepts={getConcepts} setSelectedIndex={setSelectedIndex} setContentData={setContentData} params={params} />}
     </div>
   )
 }
