@@ -19,7 +19,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSelectedIndex, setContentData, setAddSectionClicked, params }) => {
+const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, setSelectedIndex, setContentData, setAddSectionClicked, params }) => {
 
     const [openDrawer, setOpenDrawer] = useState(false);
     const [description, setDescription] = useState([
@@ -50,7 +50,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
             const selectedFiles = e.target.files;
             const selectedFilesArray = Array.from(selectedFiles);
             const imagesArray = selectedFilesArray.map((file) => {
-                return URL.createObjectURL(file);
+                return { url: URL.createObjectURL(file), imageUploaded: false };
             });
             setDescription((prev) => ({ ...prev, snippet: [description[i]?.snippet.concat(imagesArray)] }));
             newValues[i][e.target.name] = imagesArray;
@@ -88,7 +88,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
             const selectedFiles = e.target.files;
             const selectedFilesArray = Array.from(selectedFiles);
             const imagesArray = selectedFilesArray.map((file) => {
-                return URL.createObjectURL(file);
+                return { url: URL.createObjectURL(file), imageUploaded: false };
             });
             setDescription(prev => {
                 return [...prev.slice(0, i), { ...prev[i], pointsData: { ...description[i].pointsData[idx], snippet: [description[i]?.pointsData[idx]?.snippet.concat(imagesArray)] } }, ...prev.slice(i + 1)]
@@ -166,6 +166,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
         const path = `${`${params?.categoryId}/${params?.topicId}/${contentData.title}/section${uploadImagesSectionId}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        let newValues = [...description];
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
@@ -173,26 +174,26 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
                 getDownloadURL(snapshot.ref)
                     .then((url) => {
                         setIsLoading(false);
-                        let newValues = [...description];
+
                         urls.push(url)
-                        newValues[i].snippet = urls;
-                        newValues[i].imageUploaded = true;
+                        newValues[i].snippet[index].url = url;
+                        newValues[i].snippet[index].imageUploaded = true;
                         setDescription(newValues);
                         return url;
                     })
                     .catch((error) => {
                         setIsLoading(false);
+                        newValues[i].snippet[index].imageUploadedSuccess = false;
                     });
             })
             .catch((error) => {
                 setIsLoading(false);
+                newValues[i].snippet[index].imageUploadedSuccess = false;
             });
     }
 
-    const uploadImages = (i) => {
-        description[i].snippet?.forEach(async (el, index) => {
-            await uploadImageToFireStore(el, i, index)
-        })
+    const uploadImages = async (i, url, imageIndex) => {
+        await uploadImageToFireStore(url, i, imageIndex);
     }
 
     let pointsUrls = [];
@@ -202,15 +203,15 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
         const path = `${`${params?.categoryId}/${params?.topicId}/${contentData.title}/section${uploadImagesSectionId}/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
+        let pointsValues = [...description[i]?.pointsData];
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
             .then((snapshot) => {
                 getDownloadURL(snapshot.ref)
                     .then((url) => {
                         setIsLoading(false);
-                        let pointsValues = [...description[i]?.pointsData];
                         pointsUrls.push(url)
-                        pointsValues[idx].snippet = pointsUrls;
-                        pointsValues[idx].imageUploaded = true;
+                        pointsValues[idx].snippet[index].url = url;
+                        pointsValues[idx].snippet[index].imageUploaded = true;
                         setDescription(prev => {
                             return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
                         })
@@ -218,24 +219,24 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
                     })
                     .catch((error) => {
                         setIsLoading(false);
+                        pointsValues[idx].snippet[index].imageUploadedSuccess = false;
                     });
             })
             .catch((error) => {
                 setIsLoading(false);
+                pointsValues[idx].snippet[index].imageUploadedSuccess = false;
             });
     }
 
-    const uploadPointsImages = (idx, i) => {
-        description[i]?.pointsData[idx]?.snippet?.forEach(async (el, index) => {
-            await uploadPointsImageToFireStore(el, i, index, idx)
-        })
+    const uploadPointsImages = async (idx, i, url, index) => {
+        await uploadPointsImageToFireStore(url, i, index, idx)
     }
 
     const removeUploadedImage = async (i, image) => {
         const imageRef = storageRef(storage, image);
         deleteObject(imageRef).then(() => {
             let newValues = [...description];
-            const index = newValues[i].snippet.findIndex(el => el === image);
+            const index = newValues[i].snippet.findIndex(el => el.url === image);
             newValues[i].snippet.splice(index, 1);
             newValues[i].imageUploaded = false;
             if (newValues[i].snippet?.length === 0) {
@@ -251,7 +252,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
         const imageRef = storageRef(storage, image);
         deleteObject(imageRef).then(() => {
             let pointsValues = [...description[i].pointsData];
-            const index = pointsValues[idx].snippet.findIndex(el => el === image);
+            const index = pointsValues[idx].snippet.findIndex(el => el.url === image);
             pointsValues[idx].snippet.splice(index, 1);
             pointsValues[idx].imageUploaded = false;
             if (pointsValues[idx].snippet?.length === 0) {
@@ -294,7 +295,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
         payload.title = contentData?.title;
         payload.topicId = locationDetails?.state?.topicDetails?.topicId;
         let itemsToAdd = { description, sectionId: payload.sectionId };
-        if(contentData?.data?.length > 0) {
+        if (contentData?.data?.length > 0) {
             contentData.data.push(itemsToAdd)
         } else {
             contentData.data = itemsToAdd;
@@ -309,7 +310,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
         setErrorMessage('')
         if ((res?.status === 200 || res?.status === 201)) {
             setErrorMessage('');
-            GetHooks?.refetch();
+            getConcepts?.refetch();
             setSelectedIndex(contentData.id - 1);
             setOpenPopup(true);
         } else {
@@ -330,7 +331,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
 
     return (
         <>
-            {fetching && <Loader showLoader={fetching} />}
+            {(fetching || isLoading) && <Loader showLoader={fetching || isLoading} />}
             <Drawer anchor={'right'} open={openDrawer} onClose={handleCloseDrawer}>
                 <div className={AddSectionStyles.addConceptContainer}>
                     <div className={AddSectionStyles.addConceptTitle}>
@@ -361,6 +362,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
                                                     placeholder={"Enter Header"} size="large"
                                                 />
                                                 <TextField
+                                                    className={AddSectionStyles.headerInput}
                                                     name='data'
                                                     value={el?.data || ""}
                                                     onChange={(e) => handleDescriptionChange(i, e)}
@@ -381,22 +383,31 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
                                                             </span>
                                                         </p>
                                                     ) : (
-                                                        <button className={AddSectionStyles.uploadBtn} disabled={description[i]?.imageUploaded} onClick={() => uploadImages(i)}>
-                                                            {description[i]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.snippet?.length} Image
-                                                            {description[i]?.snippet?.length === 1 ? "" : "s"}
-                                                        </button>
+                                                        <></>
                                                     ))}
                                                 <div className={AddSectionStyles.images}>
                                                     {description[i]?.snippet &&
                                                         description[i]?.snippet?.map((image, index) => {
                                                             return (
                                                                 <div key={image} className={AddSectionStyles.image}>
-                                                                    <img src={image} className={AddSectionStyles.descriptionImage} alt="upload" />
-                                                                    {!description[i]?.imageUploaded ? <button className={AddSectionStyles.imageDelete} onClick={() => deleteImage(i, image)}>
-                                                                        Delete
-                                                                    </button> : <button className={AddSectionStyles.imageDelete} onClick={() => removeUploadedImage(i, image)}>
-                                                                        Remove
-                                                                    </button>}
+                                                                    <img src={image?.url} className={AddSectionStyles.descriptionImage} alt="upload" />
+                                                                    <div className={AddSectionStyles.uploadBtnContainer}>
+                                                                        <div className={AddSectionStyles.imageUploadBtn}>
+                                                                            <button className={AddSectionStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadImages(i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                                        </div>
+                                                                        <div>
+                                                                            {!image?.imageUploaded ? <button className={AddSectionStyles.imageDelete} onClick={() => deleteImage(i, image)}>
+                                                                                Remove
+                                                                            </button> : <button className={AddSectionStyles.imageDelete} onClick={() => removeUploadedImage(i, image?.url, index)}>
+                                                                                Cancel Upload
+                                                                            </button>}
+                                                                        </div>
+                                                                    </div>
+                                                                    {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={AddSectionStyles.uploadErrorAlert}>
+                                                                        <Alert autoHideDuration={3000} severity="error">
+                                                                            Upload Failed! Try again later.
+                                                                        </Alert>
+                                                                    </div>}
                                                                 </div>
                                                             );
                                                         })}
@@ -436,22 +447,32 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
                                                                                         </span>
                                                                                     </p>
                                                                                 ) : (
-                                                                                    <button className={AddSectionStyles.uploadBtn} disabled={description[i]?.pointsData[idx]?.imageUploaded} onClick={() => uploadPointsImages(idx, i)}>
-                                                                                        {description[i]?.pointsData[idx]?.imageUploaded ? 'Uploaded' : 'Upload'} {description[i]?.pointsData[idx]?.snippet?.length} Image
-                                                                                        {description[i]?.pointsData[idx]?.snippet?.length === 1 ? "" : "s"}
-                                                                                    </button>
+                                                                                    <>
+                                                                                    </>
                                                                                 ))}
                                                                             <div className={AddSectionStyles.images}>
                                                                                 {description[i]?.pointsData[idx]?.snippet &&
                                                                                     description[i]?.pointsData[idx]?.snippet?.map((image, index) => {
                                                                                         return (
-                                                                                            <div key={image} className={AddSectionStyles.image}>
-                                                                                                <img src={image} className={AddSectionStyles.descriptionImage} alt="upload" />
-                                                                                                {!description[i]?.pointsData[idx]?.imageUploaded ? <button className={AddSectionStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
-                                                                                                    Delete
-                                                                                                </button> : <button className={AddSectionStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image, idx)}>
-                                                                                                    Remove
-                                                                                                </button>}
+                                                                                            <div key={image + index} className={AddSectionStyles.image}>
+                                                                                                <img src={image?.url} className={AddSectionStyles.descriptionImage} alt="upload" />
+                                                                                                <div className={AddSectionStyles.uploadBtnContainer}>
+                                                                                                    <div className={AddSectionStyles.imageUploadBtn}>
+                                                                                                        <button className={AddSectionStyles.uploadBtn} disabled={image.imageUploaded} onClick={() => uploadPointsImages(idx, i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                                                                    </div>
+                                                                                                    <div>
+                                                                                                        {!image.imageUploaded ? <button className={AddSectionStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
+                                                                                                            Delete
+                                                                                                        </button> : <button className={AddSectionStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image?.url, idx, index)}>
+                                                                                                            Cancel Upload
+                                                                                                        </button>}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={AddSectionStyles.uploadErrorAlert}>
+                                                                                                    <Alert autoHideDuration={3000} severity="error">
+                                                                                                        Upload Failed! Try again later.
+                                                                                                    </Alert>
+                                                                                                </div>}
                                                                                             </div>
                                                                                         );
                                                                                     })}
