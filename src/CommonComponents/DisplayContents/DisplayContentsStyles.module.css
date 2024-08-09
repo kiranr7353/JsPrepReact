@@ -43,6 +43,7 @@
         align-items: end;
         justify-content: end;
         gap: 20px;
+        padding-top: 20px;
     }
 
     .description {
@@ -107,4 +108,18 @@
 
     .modalactionsection button {
         margin: 10px 10px;
+    }
+    .addSectionIcon {
+        transform: scale(1.5);
+        border: 1px solid;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    .addDescIcon, .deleteSectionIcon {
+        transform: scale(1.5);
+        cursor: pointer;
+    }
+    .editDescIcon, .deleteDescIcon {
+        transform: scale(1.2);
+        cursor: pointer;
     }

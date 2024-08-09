@@ -296,7 +296,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, GetHooks, setSel
         payload.categoryId = categoryId;
         payload.title = contentData?.title;
         payload.topicId = locationDetails?.state?.topicDetails?.topicId;
-        let itemsToAdd = { description, sectionId: payload.sectionId };
+        let itemsToAdd = [{ description, sectionId: payload.sectionId }];
         if (contentData?.data?.length > 0) {
             contentData.data.push(itemsToAdd)
         } else {

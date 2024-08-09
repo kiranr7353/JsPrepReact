@@ -14,6 +14,10 @@ import { CustomizedTable, StyledTableCell, StyledTableRow } from '../TableStyles
 import { Alert, Dialog, DialogContent, Paper, Slide, Table, TableBody, TableHead, TableRow } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import PostAddIcon from '@mui/icons-material/PostAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import { useFetchAPI } from '../../Hooks/useAPI';
@@ -97,7 +101,6 @@ const DisplayContents = (props) => {
   }
 
   const handleDeleteSectionImages = (data) => {
-    console.log(data);
     data[0].description.forEach(el => {
       if (el?.snippet?.length > 0) {
         el?.snippet?.forEach(image => {
@@ -152,7 +155,7 @@ const DisplayContents = (props) => {
     contentData.data = data;
     deleteSectionPayload.data = contentData.data;
     setDeleteSectionPayload(deleteSectionPayload);
-    handleDeleteSectionImages(deletedData)
+    handleDeleteSectionImages(deletedData);
     setCallDeleteDescApi(true);
   }
 
@@ -166,15 +169,15 @@ const DisplayContents = (props) => {
           <div><h2 className={DisplayContentsStyles.contentTitle}>{contentData?.title}</h2></div>
         </div>
         <div>
-          <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddSection()}>Add Section</CommonButton>
+          <AddIcon titleAccess='Add Section' className={DisplayContentsStyles.addSectionIcon} onClick={() => handleAddSection()} />
         </div>
       </div>
       <div className={DisplayContentsStyles.contentData}>
         {contentData?.data ? contentData?.data?.length > 0 && contentData?.data?.map((el, i) => (
           <div className={DisplayContentsStyles.section} key={el?.sectionId + i}>
             <div className={DisplayContentsStyles.addDescBtn}>
-              <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddDescription(el, el?.sectionId)}>Add Description</CommonButton>
-              <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteSection(el, el?.sectionId)}>Delete Section</CommonButton>
+              <PostAddIcon titleAccess='Add Description' onClick={() => handleAddDescription(el, el?.sectionId)} className={DisplayContentsStyles.addDescIcon} />
+              <DeleteIcon titleAccess='Delete Section' onClick={() => handleDeleteSection(el, el?.sectionId)} className={DisplayContentsStyles.deleteSectionIcon} />
             </div>
             {el?.description && el?.description?.length > 0 && el?.description?.map((desc, idx) => (
               <div className={DisplayContentsStyles.description} key={desc?.id + idx}>
@@ -261,8 +264,8 @@ const DisplayContents = (props) => {
                   </div>
                 )}
                 <div className={DisplayContentsStyles.addDescBtn}>
-                  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleEditDescription(desc, el?.sectionId)}>Edit Description</CommonButton>
-                  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'28%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteDescription(desc, el?.sectionId)}>Delete Description</CommonButton>
+                  <EditIcon className={DisplayContentsStyles.editDescIcon} titleAccess='Edit Description' onClick={() => handleEditDescription(desc, el?.sectionId)} />
+                  <DeleteIcon className={DisplayContentsStyles.deleteDescIcon} titleAccess='Delete Description' onClick={() => handleDeleteDescription(desc, el?.sectionId)} />
                 </div>
               </div>
             ))}

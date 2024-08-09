@@ -98,20 +98,38 @@ const DisplayContent = (props) => {
         }
     }
 
+    const handleDeleteSectionImages = (data) => {
+        data[0].description.forEach(el => {
+          if (el?.snippet?.length > 0) {
+            el?.snippet?.forEach(image => {
+              removeUploadedImage(image?.url);
+            })
+          }
+          if (el?.pointsData?.length > 0) {
+            el?.pointsData?.forEach(point => {
+              point?.snippet?.forEach(pountimage => {
+                removeUploadedImage(pountimage?.url);
+              })
+            })
+          }
+        })
+      }
+
     const onDeleteSuccess = res => {
         setCallDeleteDescApi(false);
-        setDeleteSectionClicked(false);
         setErrorMessage('')
         if ((res?.status === 200 || res?.status === 201)) {
             setErrorMessage('');
             GetHooks?.refetch();
             setSelectedIndex(contentData.id - 1);
             setOpenPopup(true);
-            handleDeleteImages();
+            !deleteSectionClicked && handleDeleteImages();
         } else {
             setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later');
             setOpenPopup(true);
+            GetHooks?.refetch();
         }
+        setDeleteSectionClicked(false);
     }
 
     const handleCloseDialog = () => {
@@ -131,9 +149,11 @@ const DisplayContent = (props) => {
         deleteSectionPayload.title = contentData?.title;
         deleteSectionPayload.topicId = locationDetails?.state?.topicDetails?.topicId;
         let data = contentData.data.filter(el => el.sectionId !== sectionId);
+        let deletedData = contentData.data.filter(el => el.sectionId === sectionId);
         contentData.data = data;
         deleteSectionPayload.data = contentData.data;
         setDeleteSectionPayload(deleteSectionPayload);
+        handleDeleteSectionImages(deletedData);
         setCallDeleteDescApi(true);
     }
 

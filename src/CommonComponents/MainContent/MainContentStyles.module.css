@@ -130,15 +130,19 @@
 .modalactionsection button {
   margin: 10px 10px;
 }
+
 .currentLabel {
   padding-right: 31px;
-  }
-  .changeToLabel {
+}
+
+.changeToLabel {
   padding-right: 10px;
-  }
-  .columnInput {
-    margin-right: 20px !important;
-    }
-    .changeTo {
-      margin-top: 10px;
-      }
+}
+
+.columnInput {
+  margin-right: 20px !important;
+}
+
+.changeTo {
+  margin-top: 10px;
+}

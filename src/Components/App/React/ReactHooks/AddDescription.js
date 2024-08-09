@@ -161,7 +161,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
     const uploadImageToFireStore = async (img, i, index) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`react/reactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         let newValues = [...description];
@@ -195,7 +195,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
     const uploadPointsImageToFireStore = async (img, i, index, idx) => {
         let blob = await fetch(img).then(r => r.blob());
         const type = blob?.type.split('/')[1];
-        const path = `${`React/ReactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
+        const path = `${`react/reactHooks/${contentData.title}/section${sectionId}/description${description[i].id}/point${description[i].pointsData[idx].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
         let pointsValues = [...description[i]?.pointsData];
