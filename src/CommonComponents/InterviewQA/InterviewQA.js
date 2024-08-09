@@ -1,35 +1,103 @@
 import React, { useState } from 'react'
 import InterviewQAStyles from './InterviewQAStyles.module.css'
 import CommonButton from '../CommonButton'
+import PropTypes from 'prop-types';
 import parse from "html-react-parser";
 import AddQA from '../AddQA/AddQA';
+import { AntTab, AntTabs } from './TabsStyles';
+import { useFetchAPI } from '../../Hooks/useAPI';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { CommonHeaders } from '../CommonHeaders';
+import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
+import { Accordion, AccordionDetails, AccordionSummary, Fade, Typography } from '@mui/material';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Loader from '../Loader/Loader';
 
 const InterviewQA = (props) => {
 
     const { params, locationDetails } = props;
 
     const [addQAClicked, setAddQAClicked] = useState(false);
+    const [value, setValue] = useState(0);
+    const [allInterviewQAData, setAllInterviewQAData] = useState([]);
+
+    const TabPanel = (props) => {
+        const { children, value, index, ...other } = props;
+        return (
+            <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other} style={{ marginTop: 20 }}>
+                {value === index && (<>{children}</>)}
+            </div>);
+    }
+    TabPanel.propTypes = { children: PropTypes.node, index: PropTypes.number.isRequired, value: PropTypes.number.isRequired };
+    function a11yProps(index) { return { id: `simple-tab-${index}`, 'aria-controls': `simple-tabpanel-${index}`, }; }
+
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    }
 
     const toggleDrawer = () => {
         setAddQAClicked(true);
     }
 
-    let data = [
-        { answer: 'There are many ways to create objects in javascript as below', snippets: [{ url:'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }], hasTable: true, hasPoints: true, pointsData: [{ pointHeader: 'Object constructor:', data: 'The simplest way to create an empty object is using the Object constructor. Currently this approach is not recommended.', snippets: [{ url: 'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }] },{ pointHeader:'Objects create method', data: 'The create method of Object creates a new object by passing the prototype object as a parameter', snippets: [{ url: 'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }] }], hasNote: true, note: 'The create method of Object creates a new object by passing the prototype object as a parameter' },
-        { answer: 'sfdfdsfsdf', snippets: [{ url:'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }], hasTable: true, hasPoints: true, pointsData: [{ data: 'ssdsd', snippets: [{ url: 'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }] },{ data: 'ssdsd', snippets: [{ url: 'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }] }], hasNote: true, note: 'sasa' }
-    ]
-    let data2 = [
-        { answer: '<b>Prototype</b> chaining is used to build new types of objects based on existing ones. It is similar to inheritance in a class based language.', snippets: [{ url:'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }], hasTable: true, hasPoints: true, pointsData: [{ pointHeader: '', data: '', snippets: [{ url: '', imageUploaded: true }] }], hasNote: true, note: '' },
-        { answer: "The prototype on object instance is available through Object.getPrototypeOf(object) or proto property whereas prototype on constructors function is available through Object.prototype.", snippets: [{ url:'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48', imageUploaded: true }], hasTable: true, hasPoints: true, pointsData: [{ data: '', snippets: [{ url: '', imageUploaded: true }] },{ data: '', snippets: [{ url: '', imageUploaded: true }] }], hasNote: true, note: '' }
-    ]
+    const onGetQASuccess = res => {
+        console.log(res);
+        if ((res?.status === 200 || res?.status === 201)) {
+            setAllInterviewQAData(res?.data?.data);
+        } else {
+            setAllInterviewQAData([])
+        }
+    }
+
+    const getQA = useFetchAPI("createQA", `/categories/getInterviewQA/${params?.topicId}/${params?.categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onGetQASuccess));
+
+    const fetching = getQA?.Loading || getQA?.Fetching;
 
     return (
         <>
+            {(fetching) && <Loader showLoader={fetching} />}
             <div className={InterviewQAStyles.mainContentContainer}>
                 <div className={InterviewQAStyles.addQuestionBtn}>
                     <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Question</CommonButton>
                 </div>
-                { addQAClicked && <AddQA setAddQAClicked={setAddQAClicked} params={params} locationDetails={locationDetails} /> }
+                <div className={InterviewQAStyles.tabs}>
+                    <AntTabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                        <AntTab label="All Interview Question and Answers" {...a11yProps(0)} />
+                        <AntTab label="Bookmarked Interview Question and Answers" {...a11yProps(1)} />
+                    </AntTabs>
+                    <TabPanel value={value} index={0}>
+                        {allInterviewQAData && allInterviewQAData?.length > 0 && allInterviewQAData?.map((el, i) => (
+                            <Accordion
+                            slotProps={{ transition: { timeout: 400 } }}>
+                                <AccordionSummary
+                                    expandIcon={<ArrowDownwardIcon />}
+                                    aria-controls="panel1-content"
+                                    id="panel1-header"
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
+                                        <div>
+                                            <Typography>{el?.question}</Typography>
+                                        </div>
+                                        <div>
+                                            <CancelIcon />
+                                        </div>
+                                    </div>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <Typography>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+                                        malesuada lacus ex, sit amet blandit leo lobortis eget.
+                                    </Typography>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </TabPanel>
+                    <TabPanel value={value} index={1}>
+
+                    </TabPanel>
+                </div>
+                {addQAClicked && <AddQA setAddQAClicked={setAddQAClicked} params={params} locationDetails={locationDetails} getQA={getQA} />}
                 {/* { data2?.map((el, index) => (
                         <>
                         <p>{parse(el.answer)}</p>
