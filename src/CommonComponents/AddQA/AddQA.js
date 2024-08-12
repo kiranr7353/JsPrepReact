@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import AddQAStyles from './AddQAStyles.module.css'
 
-import { Alert, Drawer, FormControl, Switch, TextField, Typography } from '@mui/material';
+import { Alert, Drawer, FormControl, InputLabel, MenuItem, Select, Switch, TextField, Typography } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +16,7 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 
 const AddQA = (props) => {
 
-    const { setAddQAClicked, params, locationDetails, getQA } = props;
+    const { setAddQAClicked, setEditClicked, editClicked, editItem, params, locationDetails, getQA } = props;
 
     const [openDrawer, setOpenDrawer] = useState(false);
     const [question, setQuestion] = useState('');
@@ -27,20 +27,30 @@ const AddQA = (props) => {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [QA, setQA] = useState([
-        { id: 1, answer: '', snippets: [], hasPoints: false, pointsData: [], hasTable: false, tableColumns: [], tableData: [], hasNote: false, note: '' }
+        { id: 1, answer: '', snippets: [], hasPoints: false, pointsData: [], hasTable: false, showPointsStyles: false, pointsStyles: '', tableColumns: [], tableData: [], hasNote: false, note: '' }
     ])
     const QAInputRef = useRef([]);
     const QAPointsInputRef = useRef([]);
 
+    const listStyles = ['none', 'armenian', 'circle', 'decimal', 'decimal-leading-zero', 'disc', 'georgian', 'inside', 'lower-alpha', 'lower-greek', 'lower-latin', 'lower-roman', 'square', 'outside', 'upper-alpha', 'upper-greek', 'upper-latin', 'upper-roman'];
+
+    console.log(editItem);
+    
+
     useEffect(() => {
         setOpenDrawer(true);
         const uuid = uuidv4();
-        setQuestionId(`${params?.categoryId}-${params?.topicId}-${uuid}`)
+        editClicked ? setQuestionId(editItem?.questionId) : setQuestionId(`${params?.categoryId}-${params?.topicId}-${uuid}`);
+        if(editClicked) {
+            setQuestion(editItem?.question);
+            setQA(editItem?.data)
+        }
     }, [])
 
     const handleCloseDrawer = () => {
         setOpenDrawer(false);
         setAddQAClicked(false);
+        setEditClicked(false);
     }
 
     const handleQAChange = (i, e) => {
@@ -59,7 +69,7 @@ const AddQA = (props) => {
                 if (newValues[i]['hasPoints']) {
                     newValues[i]['pointsData'].push({ id: 1, pointHeader: '', value: '', snippets: [] });
                 } else {
-                    newValues[i]['pointsData'] = []
+                    newValues[i]['pointsData'] = [];
                 }
             } else if (e.target.id === 'table') {
                 newValues[i]['hasTable'] = e.target.checked;
@@ -77,6 +87,13 @@ const AddQA = (props) => {
                     newValues[i]['note'] = '';
                 } else {
                     newValues[i]['note'] = '';
+                }
+            } else if (e.target.id === 'showPointsStyles') {
+                newValues[i]['showPointsStyles'] = e.target.checked;
+                if (newValues[i]['showPointsStyles']) {
+
+                } else {
+                    newValues[i]['pointsStyles'] = 'none'
                 }
             }
         } else if (e.target.name === 'noOfColumns') {
@@ -164,8 +181,22 @@ const AddQA = (props) => {
         });
     }
 
-    const removePoint = (idx, i) => {
+    const genericRemoveUploadedImage = (image) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => {
+        }).catch((error) => {
+        });
+    }
+
+    const removePoint = (idx, i, point) => {
         let pointsValues = [...QA[i].pointsData];
+        if(point?.snippets && point?.snippets?.length > 0) {
+            point?.snippets?.forEach(img => {
+                if(img?.imageUploaded) {
+                    genericRemoveUploadedImage(img?.url);
+                }
+            })
+        }
         pointsValues.splice(idx);
         setQA(prev => {
             return [...prev.slice(0, i), { ...prev[i], pointsData: pointsValues }, ...prev.slice(i + 1)]
@@ -271,10 +302,10 @@ const AddQA = (props) => {
     }
 
     const addAnotherAnswer = () => {
-        setQA([...QA, { id: QA?.length + 1, answer: "", snippets: [], hasPoints: false, pointsData: [], hasTable: false, tableColumns: [], tableData: [], hasNote: false, note: '' }])
+        setQA([...QA, { id: QA?.length + 1, answer: "", snippets: [], hasPoints: false, pointsData: [], showPointsStyles: false, pointsStyles: '', hasTable: false, tableColumns: [], tableData: [], hasNote: false, note: '' }])
     }
 
-    const removeAnswer = (i) => {
+    const removeAnswer = (i, el) => {
         let newValues = [...QA];
         if (newValues[i]?.snippets?.length > 0) {
             if (newValues[i]?.imageUploaded) {
@@ -282,6 +313,17 @@ const AddQA = (props) => {
                     removeUploadedImage(i, image);
                 });
             }
+        }
+        if (newValues[i]?.pointsData?.length > 0) {
+            newValues[i]?.pointsData?.forEach(point => {
+                if(point?.snippets?.length > 0) {
+                    point?.snippets?.forEach(image => {
+                        if(image?.imageUploaded) {
+                            genericRemoveUploadedImage(image?.url);
+                        }
+                    })
+                }
+            })
         }
         newValues.splice(i, 1);
         setQA(newValues);
@@ -307,6 +349,7 @@ const AddQA = (props) => {
         if ((res?.status === 200 || res?.status === 201)) {
             setOpenDrawer(false);
             setAddQAClicked(false);
+            setEditClicked(false);
             setOpenModal(true);
             getQA.refetch();
             setErrorMessage('');
@@ -334,7 +377,7 @@ const AddQA = (props) => {
                 <div className={AddQAStyles.addQAContainer}>
                     <div className={AddQAStyles.addQATitle}>
                         <div>
-                            <h2>Add Question</h2>
+                            <h2>{ editClicked ? 'Edit Question and Answer' :'Add Question and Answer'}</h2>
                         </div>
                         <div>
                             <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
@@ -433,10 +476,26 @@ const AddQA = (props) => {
                                                     </Typography>
                                                     {QA[i]?.hasPoints &&
                                                         <>
+                                                            <div className={AddQAStyles.pointsStylesFlex}>
+                                                                <div>
+                                                                    <Typography component="label">
+                                                                        Show Points Style
+                                                                        <Switch id='showPointsStyles' name='showPointsStyles' checked={el?.showPointsStyles} onChange={(e) => handleQAChange(i, e)} />
+                                                                    </Typography>
+                                                                </div>
+                                                                {QA[i]?.showPointsStyles && <div className={AddQAStyles.pointsStylesDropdown}>
+                                                                    <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1rem' }}>Points Styles</p>
+                                                                    <select name='pointsStyles' defaultValue={'none'} value={el?.pointsStyles} onChange={(e) => handleQAChange(i, e)}>
+                                                                        {listStyles?.map((el, listIndex) => (
+                                                                            <option key={listIndex + el}>{el}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>}
+                                                            </div>
                                                             {QA[i]?.pointsData?.map((point, idx) => (
                                                                 <>
                                                                     <div className={AddQAStyles.pointsDiv}>
-                                                                        {idx ? <HighlightOffIcon titleAccess='Remove' className={AddQAStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
+                                                                        {idx ? <HighlightOffIcon titleAccess='Remove' className={AddQAStyles.removeIconPoint} onClick={() => removePoint(idx, i, point)} /> : null}
                                                                         <h4>Point {idx + 1}</h4>
                                                                         <label>Enter Point</label>
                                                                         <TextField
@@ -607,7 +666,7 @@ const AddQA = (props) => {
                                             <div className={AddQAStyles.remove}>
                                                 {
                                                     i ?
-                                                        <HighlightOffIcon titleAccess='Remove' className={AddQAStyles.removeIcon} onClick={() => removeAnswer(i)} />
+                                                        <HighlightOffIcon titleAccess='Remove' className={AddQAStyles.removeIcon} onClick={() => removeAnswer(i, el)} />
                                                         : null
                                                 }
                                             </div>

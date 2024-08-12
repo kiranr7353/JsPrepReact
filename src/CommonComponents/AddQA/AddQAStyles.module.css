@@ -144,3 +144,15 @@
 .modalactionsection button {
     margin: 10px 10px;
 }
+.pointsStylesFlex {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+.pointsStylesDropdown {
+    margin-top: -10px;
+}
+.pointsStylesDropdown select {
+    height: 38px;
+    margin-bottom: 10px;
+}
