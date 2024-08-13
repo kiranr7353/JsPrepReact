@@ -23,9 +23,11 @@ const AddQA = (props) => {
     const [questionId, setQuestionId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [callCreateQAApi, setCallCreateQAApi] = useState(false);
+    const [callEditQAApi, setCallEditQAApi] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [enabled, setEnabled] = useState(true);
     const [QA, setQA] = useState([
         { id: 1, answer: '', snippets: [], hasPoints: false, pointsData: [], hasTable: false, showPointsStyles: false, pointsStyles: '', tableColumns: [], tableData: [], hasNote: false, note: '' }
     ])
@@ -43,7 +45,8 @@ const AddQA = (props) => {
         editClicked ? setQuestionId(editItem?.questionId) : setQuestionId(`${params?.categoryId}-${params?.topicId}-${uuid}`);
         if(editClicked) {
             setQuestion(editItem?.question);
-            setQA(editItem?.data)
+            setQA(editItem?.data);
+            setEnabled(editItem?.enabled)
         }
     }, [])
 
@@ -334,26 +337,25 @@ const AddQA = (props) => {
         topicId: params?.topicId,
         questionId,
         question,
-        data: QA
+        data: QA,
+        enabled: editClicked ? enabled : undefined
     };
 
     const handleAddQuestion = () => {
-        console.log(addQAPayload, 'addQAPayload');
-        setCallCreateQAApi(true);
+        editClicked ? setCallEditQAApi(true) : setCallCreateQAApi(true);
     }
 
     const onAddQASuccess = res => {
-        setCallCreateQAApi(false);
+        editClicked ? setCallEditQAApi(false) : setCallCreateQAApi(false);
         setErrorMessage('');
         setSuccessMessage('')
         if ((res?.status === 200 || res?.status === 201)) {
             setOpenDrawer(false);
             setAddQAClicked(false);
-            setEditClicked(false);
             setOpenModal(true);
             getQA.refetch();
             setErrorMessage('');
-            setSuccessMessage(`QA added successfully`);
+            setSuccessMessage(editClicked ? 'QA updated successfully' :`QA added successfully`);
         } else {
             setOpenModal(true);
             setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later')
@@ -362,13 +364,15 @@ const AddQA = (props) => {
 
     const handleClosePopup = () => {
         setOpenModal(false);
+        setEditClicked(false);
     }
 
     console.log(QA, 'QA');
 
     const createQA = useFetchAPI("createQA", `/categories/createInterviewQuestions`, "POST", addQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddQASuccess, "", callCreateQAApi));
+    const editQA = useFetchAPI("editQAQA", `/categories/updateInterviewQuestion`, "POST", addQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddQASuccess, "", callEditQAApi));
 
-    const fetching = createQA?.Loading || createQA?.Fetching;
+    const fetching = createQA?.Loading || createQA?.Fetching || editQA?.Loading || editQA?.Fetching;
 
     return (
         <>
@@ -385,6 +389,10 @@ const AddQA = (props) => {
                     </div>
                     <div className={AddQAStyles.addQAForm}>
                         <div className={AddQAStyles.QATitle}>
+                            { editClicked && <Typography component="label" sx={{ float: 'right' }}>
+                                Enable
+                                <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+                            </Typography> }
                             <FormControl sx={{ width: '100%' }}>
                                 <label>Question ID <span className={AddQAStyles.required}>*</span></label>
                                 <TextField

@@ -20,9 +20,13 @@
 
 .editQAIcon,
 .deleteQAIcon,
-.bookmarkQAIcon {
+.bookmarkQAIcon,
+.removeBookmarkIcon {
     cursor: pointer;
-    transform: scale(0.8);
+    transform: scale(0.9);
+}
+.bookmarkedIcon {
+    transform: scale(0.9);
 }
 
 .iconsDiv {
@@ -65,4 +69,10 @@
 
 .modalactionsection button {
     margin: 10px 10px;
+}
+.pagination{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0 20px 0;
 }
