@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import LoginStyles from './Login.module.css';
 import GoogleImg from '../../Images/google.png';
 import EmailIcon from '@mui/icons-material/Email';
@@ -37,7 +37,7 @@ const LoginHome = () => {
   const { infoObject, setObject } = useContext(UserContext);
 
   const [passwordVisibility, setPasswordVisibility] = useState(true);
-  const [formValues, setFormValues] = useState({ email: '', password: '' });
+  const [formValues, setFormValues] = useState({ email: '', password: '', rememberMe: false });
   const [loginPayload, setLoginPayload] = useState({});
   const [callLoginApi, setCallLoginApi] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -46,12 +46,32 @@ const LoginHome = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [openLoginErrorDialog, setOpenLoginErrorDialog] = useState(false);
 
+  const value = JSON.parse(localStorage.getItem('rememberMe'));
+
+  useEffect(() => {
+    if (localStorage.getItem('rememberMe') !== null) {
+      setFormValues(prev => ({ ...prev, email: value?.email, rememberMe: value?.rememberMe }));
+    }
+  }, [value?.rememberMe])
+
+
   const handleRegisterText = () => {
     navigate('/register');
   }
 
   const handleLoginForm = (event) => {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
+  }
+
+  const handleRemeberMe = (e) => {
+    setFormValues(prev => ({ ...prev, rememberMe: e.target.checked }));
+    if (e.target.checked) {
+      localStorage.setItem('rememberMe', JSON.stringify({ email: formValues?.email && formValues?.email, rememberMe: e.target.checked }))
+    } else {
+      if (localStorage.getItem('rememberMe') !== null) {
+        localStorage.removeItem('rememberMe')
+      }
+    }
   }
 
   const handleLoginErrors = (errors) => {
@@ -75,11 +95,20 @@ const LoginHome = () => {
     }
   }
 
+  const handleKeyDown = (e) => {
+    if (e.keyCode === 13 || e.key === "Enter") {
+      if(!formValues?.email || !formValues?.password) {
+        return;
+      } else {
+        handleLogin();
+      }
+    }
+  }
+
   const handleLogin = () => {
     setIsFetching(true);
     signInWithEmailAndPassword(auth, formValues?.email, formValues?.password).then((user) => {
       setIsFetching(false);
-      console.log(user?.user);
       setLoginPayload({
         idToken: user?.user?.stsTokenManager?.accessToken,
         refreshToken: user?.user?.stsTokenManager?.refreshToken
@@ -103,12 +132,11 @@ const LoginHome = () => {
 
   const onLoginSuccess = res => {
     setCallLoginApi(false);
-    console.log(res);
     if ((res?.status === 200 || res?.status === 201)) {
-        navigate('/home');
+      navigate('/home');
     } else {
-        setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
-        setOpenLoginErrorDialog(true);
+      setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
+      setOpenLoginErrorDialog(true);
     }
   }
 
@@ -132,6 +160,7 @@ const LoginHome = () => {
                   name='email'
                   value={formValues?.email}
                   onChange={handleLoginForm}
+                  onKeyDown={handleKeyDown}
                   InputProps={{
                     type: 'text',
                     startAdornment: <InputAdornment position="start"><EmailIcon /></InputAdornment>
@@ -144,6 +173,7 @@ const LoginHome = () => {
                   name='password'
                   value={formValues?.password}
                   onChange={handleLoginForm}
+                  onKeyDown={handleKeyDown}
                   InputProps={{
                     type: passwordVisibility ? 'password' : 'text',
                     startAdornment: <InputAdornment position="start"><LockIcon /></InputAdornment>,
@@ -156,7 +186,7 @@ const LoginHome = () => {
 
               <div className={LoginStyles.loginOptions}>
                 <label>
-                  <input type="checkbox" /> <span className={LoginStyles.remember}>Remember me</span>
+                  <input type="checkbox" value={formValues?.rememberMe} onChange={handleRemeberMe} /> <span className={LoginStyles.remember}>Remember me</span>
                 </label>
                 <a href="/forgot-password" className={LoginStyles.forgotPassword}>Forgot your password?</a>
               </div>

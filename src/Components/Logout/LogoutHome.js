@@ -10,7 +10,7 @@ const LogoutHome = () => {
   const sessionExpired = searchParams.get("sessionExpired") || '';
 
   useEffect(() => {
-    localStorage.clear();
+    // localStorage.clear();
     RemoveAllCookies();
   }, []);
 

@@ -15,7 +15,6 @@ import CodeSnippets from './CodeSnippets';
 const ReactHome = (props) => {
 
   const { params, locationDetails } = props;
-  console.log(params);
 
   const selectSectionToRender = () => {
     switch (params?.topicId) {

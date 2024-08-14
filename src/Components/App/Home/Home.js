@@ -159,6 +159,8 @@ const Home = () => {
     }
 
     const handleTopicEdit = (el) => {
+        console.log(el);
+        
         setOpenEditTopicModal(true);
         setEditTopicInfo({ name: el?.topicName, desc: el?.description ? el?.description : '', image: [{ url: el?.imageUrl, imageUploaded: true }], enabled: el?.enabled !== undefined ? el?.enabled : true });
     }

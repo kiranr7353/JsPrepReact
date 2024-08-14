@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import CommonButton from '../../CommonComponents/CommonButton'
 import { InputAdornment, TextField, Dialog, DialogContent, DialogContentText, Slide } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
 import HeaderStyles from './HeaderStyles.module.css';
-import { signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useFetchAPI } from '../../Hooks/useAPI';
@@ -60,6 +60,16 @@ const Header = () => {
             setIsFetching(false);
         })
     }
+
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+            } else {
+                navigate('/logout', { replace: true })
+            }
+        });
+        return () => unsub();
+    }, []);
 
     const handleDetailErrorModalClose = () => {
         setOpenDetailErrorDialog(false);

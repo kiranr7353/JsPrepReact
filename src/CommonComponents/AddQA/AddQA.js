@@ -36,9 +36,6 @@ const AddQA = (props) => {
 
     const listStyles = ['none', 'armenian', 'circle', 'decimal', 'decimal-leading-zero', 'disc', 'georgian', 'inside', 'lower-alpha', 'lower-greek', 'lower-latin', 'lower-roman', 'square', 'outside', 'upper-alpha', 'upper-greek', 'upper-latin', 'upper-roman'];
 
-    console.log(editItem);
-    
-
     useEffect(() => {
         setOpenDrawer(true);
         const uuid = uuidv4();
@@ -366,8 +363,6 @@ const AddQA = (props) => {
         setOpenModal(false);
         setEditClicked(false);
     }
-
-    console.log(QA, 'QA');
 
     const createQA = useFetchAPI("createQA", `/categories/createInterviewQuestions`, "POST", addQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddQASuccess, "", callCreateQAApi));
     const editQA = useFetchAPI("editQAQA", `/categories/updateInterviewQuestion`, "POST", addQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddQASuccess, "", callEditQAApi));

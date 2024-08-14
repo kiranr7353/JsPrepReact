@@ -9,11 +9,13 @@ const TopicHome = () => {
   const params = useParams();
 
   const selectTopicToRender = () => {
-    switch(params?.categoryId){
-      case 'react': 
-       return <ReactHome params={params} locationDetails={location} />
-       case 'javascript': 
-       return <JavascriptHome params={params} />
+    switch (params?.categoryId) {
+      case 'react':
+        return <ReactHome params={params} locationDetails={location} />
+      case 'javascript':
+        return <JavascriptHome params={params} locationDetails={location} />
+      default:
+        return <JavascriptHome params={params} locationDetails={location} />
     }
   }
 
