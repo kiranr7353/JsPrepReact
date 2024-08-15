@@ -200,7 +200,7 @@ const LoginHome = () => {
             </p>
           </div>
           <div className={LoginStyles.loginRight}>
-            <img src={'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48'} alt="Background Design" className={LoginStyles.backgroundImage} />
+            <img src={'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48'} loading='lazy' alt="Background Design" className={LoginStyles.backgroundImage} />
           </div>
         </div>
       </div>

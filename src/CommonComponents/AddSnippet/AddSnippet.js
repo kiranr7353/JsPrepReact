@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AddSnippetStyles from './AddSnippetStyles.module.css';
 import { v4 as uuidv4 } from 'uuid';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Drawer, FormControl, Switch, TextField, Typography } from '@mui/material';
+import { Alert, Drawer, FormControl, Switch, TextField, Typography } from '@mui/material';
+import CommonButton from '../CommonButton';
+import { toPng } from 'html-to-image';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { getDownloadURL, ref as storageRef, uploadBytesResumable, deleteObject } from "firebase/storage";
+import { storage } from '../../firebaseConfig';
 
 const AddSnippet = (props) => {
 
@@ -13,9 +18,12 @@ const AddSnippet = (props) => {
     const [titleId, setTitleId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [snippet, setSnippet] = useState([
-        { id: 1, explanation: '', snippets: [], hasNote: false, note: '' }
+        { id: 1, code: '', explanation: [{ id: 1, value: '' }], snippet: [], hasNote: false, note: '', imageConverted: false },
     ])
     const [enabled, setEnabled] = useState(true);
+    const snippetInputRef = useRef([]);
+    const ref = useRef([]);
+    const textareaRef = useRef(null);
 
     useEffect(() => {
         setOpenDrawer(true);
@@ -27,6 +35,142 @@ const AddSnippet = (props) => {
         setOpenDrawer(false);
         setAddSnippetClicked(false);
         setEditClicked(false);
+    }
+
+    const addAnotherCode = () => {
+        setSnippet([...snippet, { id: snippet?.length + 1, code: "", explanation: [{ id: 1, value: '' }], snippet: [], hasNote: false, note: '', imageConverted: false }])
+    }
+
+    const base64toObjectUrl = (bytesBase64, i, snippet) => {
+        let mimeType = bytesBase64.split(',')[0].split(':')[1].split(';')[0]
+        var fileUrl = "data:" + mimeType + ";base64," + bytesBase64;
+        let newValues = [...snippet];
+        console.log(snippet);
+        fetch(bytesBase64)
+            .then(response => response.blob())
+            .then(blob => {
+                let url = window.URL.createObjectURL(blob, { type: mimeType });
+                console.log(url, 'object url');
+                if (url) {
+                    const image = [{ url: url, imageUploaded: false }];
+                    setSnippet((prev) => ({ ...prev, snippet: [snippet[i]?.snippet.concat(image)] }));
+                    newValues[i]['snippet'] = image;
+                    newValues[i].imageConverted = true;
+                    setSnippet(newValues);
+                }
+            });
+    }
+
+    console.log(snippet, 'snippet');
+
+
+    const onButtonClick = useCallback((i, snippet) => {
+        if (ref.current[i] === null) {
+            return;
+        }
+        toPng(ref.current[i], { cacheBust: true, })
+            .then((dataUrl) => {
+                console.log(dataUrl);
+                base64toObjectUrl(dataUrl, i, snippet)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }, [ref])
+
+    const handleSnippetChange = (i, e) => {
+        let newValues = [...snippet];
+        if (e.target.type === 'checkbox') {
+            if (e.target.id === 'note') {
+                newValues[i]['hasNote'] = e.target.checked;
+                if (newValues[i]['hasNote']) {
+                    newValues[i]['note'] = '';
+                } else {
+                    newValues[i]['note'] = '';
+                }
+            }
+        }
+        else {
+            newValues[i][e.target.name] = e.target.value;
+            newValues[i].imageConverted = false;
+        }
+        setSnippet(newValues);
+    }
+
+    const removeUploadedImage = async (i, image) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => {
+            let newValues = [...snippet];
+            const index = newValues[i].snippet.findIndex(el => el.url === image);
+            newValues[i].snippet.splice(index, 1);
+            // if (newValues[i].snippet?.length === 0) {
+            //     QAInputRef.current[i].value = '';
+            // }
+            setSnippet(newValues);
+        }).catch((error) => {
+
+        });
+    }
+
+    const genericRemoveUploadedImage = (image) => {
+        const imageRef = storageRef(storage, image);
+        deleteObject(imageRef).then(() => {
+        }).catch((error) => {
+        });
+    }
+
+    const removeCode = (i) => {
+        let newValues = [...snippet];
+        if (newValues[i]?.snippet?.length > 0) {
+            if (newValues[i]?.imageUploaded) {
+                newValues[i]?.snippet.forEach((image) => {
+                    removeUploadedImage(i, image);
+                });
+            }
+        }
+        newValues.splice(i, 1);
+        setSnippet(newValues);
+    }
+
+    const handleExplanationChange = (idx, e, i) => {
+        let explainValues = [...snippet[i].explanation];
+        explainValues[idx][e.target.name] = e.target.value;
+        setSnippet(prev => {
+            return [...prev.slice(0, i), { ...prev[i], explanation: explainValues }, ...prev.slice(i + 1)]
+        })
+    }
+
+    const addAnotherExplanation = (i) => {
+        setSnippet(prev => {
+            return [...prev.slice(0, i), { ...prev[i], explanation: [...prev[i].explanation, { id: snippet[i]?.explanation?.length + 1, value: '' }] }, ...prev.slice(i + 1)]
+        })
+    }
+
+    const removeExplanation = (idx, i, point) => {
+        let explainValues = [...snippet[i].explanation];
+        explainValues.splice(idx);
+        setSnippet(prev => {
+            return [...prev.slice(0, i), { ...prev[i], explanation: explainValues }, ...prev.slice(i + 1)]
+        })
+    }
+
+    const handleCodeConvert = (i) => {
+        onButtonClick(i, snippet)
+    }
+
+    const handleCancel = (i) => {
+        let newValues = [...snippet];
+        newValues[i].code = '';
+        newValues[i].snippet = [];
+        setSnippet(newValues);
+    }
+
+    const uploadImages = () => {
+
+    }
+
+    const deleteImage = () => {
+
     }
 
     return (
@@ -43,12 +187,12 @@ const AddSnippet = (props) => {
                     </div>
                     <div className={AddSnippetStyles.addQAForm}>
                         <div className={AddSnippetStyles.QATitle}>
-                            { editClicked && <Typography component="label" sx={{ float: 'right' }}>
+                            {editClicked && <Typography component="label" sx={{ float: 'right' }}>
                                 Enable
                                 <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-                            </Typography> }
+                            </Typography>}
                             <FormControl sx={{ width: '100%' }}>
-                                <label>Question ID <span className={AddSnippetStyles.required}>*</span></label>
+                                <label>Question/Title ID <span className={AddSnippetStyles.required}>*</span></label>
                                 <TextField
                                     name='titleId'
                                     value={titleId}
@@ -59,7 +203,7 @@ const AddSnippet = (props) => {
                                     sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
                                     disabled
                                 />
-                                <label>Question <span className={AddSnippetStyles.required}>*</span></label>
+                                <label>Question/Title <span className={AddSnippetStyles.required}>*</span></label>
                                 <TextField
                                     name='title'
                                     value={title}
@@ -72,40 +216,39 @@ const AddSnippet = (props) => {
                                 />
                             </FormControl>
                         </div>
-                        {/* <div className={AddSnippetStyles.conceptDescription}>
+                        <div className={AddSnippetStyles.conceptDescription}>
                             <FormControl sx={{ width: '100%' }}>
-                                {QA?.map((el, i) => (
+                                {snippet?.map((el, i) => (
                                     <>
-                                        <label>Answer {QA[i]?.id}</label>
+                                        <label>Code {snippet[i]?.id}</label>
                                         <div className={AddSnippetStyles.QAFlex}>
                                             <div className={AddSnippetStyles.QADiv}>
-                                                <TextField
+                                                <textarea
+                                                    ref={textareaRef}
                                                     className={AddSnippetStyles.headerInput}
-                                                    name='answer'
-                                                    value={el?.answer || ""}
-                                                    onChange={(e) => handleQAChange(i, e)}
-                                                    InputProps={{
-                                                        type: 'text',
-                                                    }}
-                                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                    placeholder={"Enter Answer"} size="large"
-                                                />
-                                                <label className={`btn btn-primary ${AddSnippetStyles.DocUpload}`}>Upload Code Snippet(s)</label>
-                                                <input ref={el => QAInputRef.current[i] = el} name='snippets' type='file' accept='.jpg,.jpeg,.png' multiple className={AddSnippetStyles.uploadInput} onChange={(e) => handleQAChange(i, e)} />
-                                                {QA[i]?.snippets?.length > 0 &&
-                                                    (QA[i]?.snippets?.length > 10 ? (
-                                                        <p className="error">
-                                                            You can't upload more than 10 images! <br />
-                                                            <span>
-                                                                please delete <b> {QA[i]?.snippets.length - 10} </b> of them{" "}
-                                                            </span>
-                                                        </p>
-                                                    ) : (
-                                                        <></>
-                                                    ))}
+                                                    name='code'
+                                                    style={{ height: 200 }}
+                                                    value={el?.code || ""}
+                                                    onChange={(e) => handleSnippetChange(i, e)}
+                                                    placeholder={"Enter Code"} size="large"
+                                                ></textarea>
+                                                {snippet[i].code?.length > 0 && <div>
+                                                    <h5>Output</h5>
+                                                    <div className={AddSnippetStyles.codeDiv} ref={els => ref.current[i] = els}>
+                                                        <pre>
+                                                            <code>
+                                                                {snippet[i].code}
+                                                            </code>
+                                                        </pre>
+                                                    </div>
+                                                </div>}
+                                                {snippet[i].code?.length > 0 && <div style={{ marginBottom: 10 }}>
+                                                    { !snippet[i]?.imageConverted && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'40%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleCodeConvert(i)}>Convert this code to image</CommonButton> }
+                                                    <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'20%'} height={'45px'} margin={'20px 0 0 10px'} onClick={() => handleCancel(i)}>Cancel</CommonButton>
+                                                </div>}
                                                 <div className={AddSnippetStyles.images}>
-                                                    {QA[i]?.snippets &&
-                                                        QA[i]?.snippets?.map((image, index) => {
+                                                    {snippet[i]?.snippet &&
+                                                        snippet[i]?.snippet?.map((image, index) => {
                                                             return (
                                                                 <div key={image} className={AddSnippetStyles.image}>
                                                                     <img src={image?.url} className={AddSnippetStyles.QAImage} alt="upload" />
@@ -130,180 +273,33 @@ const AddSnippet = (props) => {
                                                             );
                                                         })}
                                                 </div>
-                                                <div className={AddSnippetStyles.points}>
-                                                    <Typography component="label">
-                                                        Add Points
-                                                        <Switch id='points' name='hasPoints' checked={el?.hasPoints} onChange={(e) => handleQAChange(i, e)} />
-                                                    </Typography>
-                                                    {QA[i]?.hasPoints &&
-                                                        <>
-                                                            <div className={AddSnippetStyles.pointsStylesFlex}>
-                                                                <div>
-                                                                    <Typography component="label">
-                                                                        Show Points Style
-                                                                        <Switch id='showPointsStyles' name='showPointsStyles' checked={el?.showPointsStyles} onChange={(e) => handleQAChange(i, e)} />
-                                                                    </Typography>
-                                                                </div>
-                                                                {QA[i]?.showPointsStyles && <div className={AddSnippetStyles.pointsStylesDropdown}>
-                                                                    <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1rem' }}>Points Styles</p>
-                                                                    <select name='pointsStyles' defaultValue={'none'} value={el?.pointsStyles} onChange={(e) => handleQAChange(i, e)}>
-                                                                        {listStyles?.map((el, listIndex) => (
-                                                                            <option key={listIndex + el}>{el}</option>
-                                                                        ))}
-                                                                    </select>
-                                                                </div>}
-                                                            </div>
-                                                            {QA[i]?.pointsData?.map((point, idx) => (
-                                                                <>
-                                                                    <div className={AddSnippetStyles.pointsDiv}>
-                                                                        {idx ? <HighlightOffIcon titleAccess='Remove' className={AddSnippetStyles.removeIconPoint} onClick={() => removePoint(idx, i, point)} /> : null}
-                                                                        <h4>Point {idx + 1}</h4>
-                                                                        <label>Enter Point</label>
-                                                                        <TextField
-                                                                            className={AddSnippetStyles.pointsInput}
-                                                                            name='pointHeader'
-                                                                            value={point?.pointHeader || ""}
-                                                                            onChange={(e) => handlePointsChange(idx, e, i)}
-                                                                            InputProps={{
-                                                                                type: 'text',
-                                                                            }}
-                                                                            sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                                            placeholder={"Enter Header"} size="large"
-                                                                            style={{ marginBottom: 20 }}
-                                                                        />
-                                                                        <TextField
-                                                                            className={AddSnippetStyles.pointsInput}
-                                                                            name='value'
-                                                                            value={point?.value || ""}
-                                                                            onChange={(e) => handlePointsChange(idx, e, i)}
-                                                                            InputProps={{
-                                                                                type: 'text',
-                                                                            }}
-                                                                            sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                                            placeholder={"Enter Value"} size="large"
-                                                                        />
-                                                                        <div>
-                                                                            <label className={`btn btn-primary ${AddSnippetStyles.DocUpload}`}>Upload Code Snippet(s)</label>
-                                                                            <input ref={el => QAPointsInputRef.current[idx] = el} name='snippets' type='file' accept='.jpg,.jpeg,.png' multiple className={AddSnippetStyles.uploadInput} onChange={(e) => handlePointsChange(idx, e, i)} />
-                                                                            {QA[i]?.pointsData[idx]?.snippets?.length > 0 &&
-                                                                                (QA[i]?.pointsData[idx]?.snippets?.length > 10 ? (
-                                                                                    <p className="error">
-                                                                                        You can't upload more than 10 images! <br />
-                                                                                        <span>
-                                                                                            please delete <b> {QA[i]?.pointsData[idx]?.snippets.length - 10} </b> of them{" "}
-                                                                                        </span>
-                                                                                    </p>
-                                                                                ) : (
-                                                                                    <></>
-                                                                                ))}
-                                                                            <div className={AddSnippetStyles.images}>
-                                                                                {QA[i]?.pointsData[idx]?.snippets &&
-                                                                                    QA[i]?.pointsData[idx]?.snippets?.map((image, index) => {
-                                                                                        return (
-                                                                                            <div key={image + index} className={AddSnippetStyles.image}>
-                                                                                                <img src={image?.url} className={AddSnippetStyles.QAImage} alt="upload" />
-                                                                                                <div className={AddSnippetStyles.uploadBtnContainer}>
-                                                                                                    <div className={AddSnippetStyles.imageUploadBtn}>
-                                                                                                        <button className={AddSnippetStyles.uploadBtn} disabled={image.imageUploaded} onClick={() => uploadPointsImages(idx, i, image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
-                                                                                                    </div>
-                                                                                                    <div>
-                                                                                                        {!image.imageUploaded ? <button className={AddSnippetStyles.imageDelete} onClick={() => deletePointsImage(i, image, idx)}>
-                                                                                                            Delete
-                                                                                                        </button> : <button className={AddSnippetStyles.imageDelete} onClick={() => removeUploadedPointsImage(i, image?.url, idx, index)}>
-                                                                                                            Cancel Upload
-                                                                                                        </button>}
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                {image?.imageUploadedSuccess && image?.imageUploadedSuccess === false && <div className={AddSnippetStyles.uploadErrorAlert}>
-                                                                                                    <Alert autoHideDuration={3000} severity="error">
-                                                                                                        Upload Failed! Try again later.
-                                                                                                    </Alert>
-                                                                                                </div>}
-                                                                                            </div>
-                                                                                        );
-                                                                                    })}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </>
-                                                            ))}
-                                                            <h6 className={AddSnippetStyles.anotherAnswer}><u onClick={() => addAnotherPoint(i)}>Add Another Point</u></h6>
-                                                        </>}
-                                                </div>
-                                                <div className={AddSnippetStyles.table}>
-                                                    <Typography component="label">
-                                                        Add Table
-                                                        <Switch id='table' name='hasTable' checked={el?.hasTable} onChange={(e) => handleQAChange(i, e)} />
-                                                    </Typography>
-                                                    {QA[i].hasTable ?
-                                                        <>
-                                                            <div>
-                                                                <h4>Table Columns</h4>
-                                                                {QA[i]?.tableColumns?.map((el, index) =>
-                                                                    <TextField
-                                                                        className={AddSnippetStyles.columnInput}
-                                                                        name='value'
-                                                                        value={el?.value || ""}
-                                                                        onChange={(ev) => handleTableChange(index, ev, i)}
-                                                                        InputProps={{
-                                                                            type: 'text',
-                                                                        }}
-                                                                        sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                                        placeholder={"Enter Column Name"} size="large"
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <h4>Table Data</h4>
-                                                                {QA[i]?.tableData?.map((el, index) =>
-                                                                    <>
-                                                                        <div className={AddSnippetStyles.tableDataFlex}>
-                                                                            <div className={AddSnippetStyles.tableData}>
-                                                                                <TextField
-                                                                                    className={AddSnippetStyles.columnInput}
-                                                                                    name='value1'
-                                                                                    value={el?.value1 || ""}
-                                                                                    onChange={(ev) => handleTableDataChange(index, ev, i)}
-                                                                                    InputProps={{
-                                                                                        type: 'text',
-                                                                                    }}
-                                                                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                                                    placeholder={"Enter Data"} size="large"
-                                                                                />
-                                                                                <TextField
-                                                                                    className={AddSnippetStyles.columnInput}
-                                                                                    name='value2'
-                                                                                    value={el?.value2 || ""}
-                                                                                    onChange={(ev) => handleTableDataChange(index, ev, i)}
-                                                                                    InputProps={{
-                                                                                        type: 'text',
-                                                                                    }}
-                                                                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                                                    placeholder={"Enter Data"} size="large"
-                                                                                />
-                                                                            </div>
-                                                                            <div>
-                                                                                {
-                                                                                    index ?
-                                                                                        <HighlightOffIcon titleAccess='Remove' className={AddSnippetStyles.removeIcon} onClick={() => removeRow(index, i)} />
-                                                                                        : null
-                                                                                }
-                                                                            </div>
-                                                                        </div>
-                                                                    </>
-
-                                                                )}
-                                                                <h6 className={AddSnippetStyles.anotherAnswer}><u onClick={() => addAnotherRow(i)}>Add Another Row</u></h6>
-                                                            </div>
-                                                        </> : null}
-
-                                                </div>
+                                                {snippet[i]?.explanation?.map((explain, idx) => (
+                                                    <>
+                                                        <div className={AddSnippetStyles.pointsDiv}>
+                                                            {idx ? <HighlightOffIcon titleAccess='Remove' className={AddSnippetStyles.removeIconPoint} onClick={() => removeExplanation(idx, i, explain)} /> : null}
+                                                            <h4>Explanation {idx + 1}</h4>
+                                                            <label>Enter Explanation</label>
+                                                            <TextField
+                                                                className={AddSnippetStyles.headerInput}
+                                                                name='value'
+                                                                value={explain?.value || ""}
+                                                                onChange={(e) => handleExplanationChange(idx, e, i)}
+                                                                InputProps={{
+                                                                    type: 'text',
+                                                                }}
+                                                                sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                                                placeholder={"Enter Explanation"} size="large"
+                                                            />
+                                                        </div>
+                                                    </>
+                                                ))}
+                                                <h6 className={AddSnippetStyles.anotherAnswer}><u onClick={() => addAnotherExplanation(i)}>Add Another Explanation</u></h6>
                                                 <div className={AddSnippetStyles.note}>
                                                     <Typography component="label">
                                                         Add Note
-                                                        <Switch id='note' name='hasNote' checked={el?.hasNote} onChange={(e) => handleQAChange(i, e)} />
+                                                        <Switch id='note' name='hasNote' checked={el?.hasNote} onChange={(e) => handleSnippetChange(i, e)} />
                                                     </Typography>
-                                                    {QA[i].hasNote ?
+                                                    {snippet[i].hasNote ?
                                                         <>
                                                             <div>
                                                                 <h4>Note</h4>
@@ -311,7 +307,7 @@ const AddSnippet = (props) => {
                                                                     className={AddSnippetStyles.columnInput}
                                                                     name='note'
                                                                     value={el?.note || ""}
-                                                                    onChange={(e) => handleQAChange(i, e)}
+                                                                    onChange={(e) => handleSnippetChange(i, e)}
                                                                     InputProps={{
                                                                         type: 'text',
                                                                     }}
@@ -327,18 +323,17 @@ const AddSnippet = (props) => {
                                             <div className={AddSnippetStyles.remove}>
                                                 {
                                                     i ?
-                                                        <HighlightOffIcon titleAccess='Remove' className={AddSnippetStyles.removeIcon} onClick={() => removeAnswer(i, el)} />
+                                                        <HighlightOffIcon titleAccess='Remove' className={AddSnippetStyles.removeIcon} onClick={() => removeCode(i, el)} />
                                                         : null
                                                 }
                                             </div>
-
                                         </div>
 
                                     </>
                                 ))}
-                                <h6 className={AddSnippetStyles.anotherAnswer}><u onClick={addAnotherAnswer}>Add Another Answer</u></h6>
+                                <h6 className={AddSnippetStyles.anotherAnswer}><u onClick={addAnotherCode}>Add Another Code</u></h6>
                             </FormControl>
-                        </div> */}
+                        </div>
                         {/* <div className={AddSnippetStyles.editBtnContainer}>
                             <div>
                                 <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddQuestion()} disabled={!question}>Save</CommonButton>

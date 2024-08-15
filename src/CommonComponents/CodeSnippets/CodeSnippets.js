@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CodeSnippetsStyles from './CodeSnippetsStyles.module.css';
 import CommonButton from '../CommonButton';
 import { AntTab, AntTabs } from '../InterviewQA/TabsStyles';
@@ -37,6 +37,7 @@ const CodeSnippets = (props) => {
     const toggleDrawer = () => {
         setAddSnippetClicked(true);
     }
+    
 
     return (
         <>
@@ -44,12 +45,18 @@ const CodeSnippets = (props) => {
                 <div className={CodeSnippetsStyles.addQuestionBtn}>
                     <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Snippet</CommonButton>
                 </div>
+                
                 <div className={CodeSnippetsStyles.tabs}>
                     <AntTabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         <AntTab label="All Snippets" {...a11yProps(0)} />
                         <AntTab label="Bookmarked Snippets" {...a11yProps(1)} />
                         {/* {showHiddenTab && <AntTab label="Hidden Interview Question and Answers" {...a11yProps(2)} />} */}
                     </AntTabs>
+                    <TabPanel value={value} index={0}>
+                        <div>
+                    <img src={'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/image%20(1).png?alt=media&token=361ac614-7b0a-403c-8caa-dad9dfe345c8'} />
+                    </div>
+                    </TabPanel>
                     {/* <TabPanel value={value} index={0}>
                         {fetching ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
                             (allInterviewQAData && allInterviewQAData?.length > 0) ? allInterviewQAData?.map((el, i) => {
