@@ -15,7 +15,7 @@ import { useFetchAPI } from '../../Hooks/useAPI';
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../../firebaseConfig';
 import { UserContext } from '../../CommonComponents/UserContextProvider';
-import { SetCookie } from '../../Utils/util-functions';
+import { GetCookie, SetCookie } from '../../Utils/util-functions';
 import { useDispatch } from 'react-redux';
 import { setUserInfo } from '../../Redux/Actions/ReduxOperations';
 import Loader from '../../CommonComponents/Loader/Loader';
@@ -49,11 +49,16 @@ const LoginHome = () => {
   const value = JSON.parse(localStorage.getItem('rememberMe'));
 
   useEffect(() => {
+    if(GetCookie('userTokenInfo') || GetCookie('userInfo')) {
+      navigate('/home');
+    }
+  }, [])
+  
+  useEffect(() => {
     if (localStorage.getItem('rememberMe') !== null) {
       setFormValues(prev => ({ ...prev, email: value?.email, rememberMe: value?.rememberMe }));
     }
   }, [value?.rememberMe])
-
 
   const handleRegisterText = () => {
     navigate('/register');

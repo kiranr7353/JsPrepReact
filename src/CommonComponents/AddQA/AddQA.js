@@ -139,7 +139,7 @@ const AddQA = (props) => {
                         setIsLoading(false);
                         newValues[i].snippets[index].url = url;
                         newValues[i].snippets[index].imageUploaded = true;
-                        QA(newValues);
+                        setQA(newValues);
                         return url;
                     })
                     .catch((error) => {

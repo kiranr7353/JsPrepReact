@@ -8,10 +8,15 @@ import { toPng } from 'html-to-image';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { getDownloadURL, ref as storageRef, uploadBytesResumable, deleteObject } from "firebase/storage";
 import { storage } from '../../firebaseConfig';
+import Loader from '../Loader/Loader';
+import { useFetchAPI } from '../../Hooks/useAPI';
+import { CommonHeaders } from '../CommonHeaders';
+import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
+import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 
 const AddSnippet = (props) => {
 
-    const { setAddSnippetClicked, setEditClicked, editClicked, editItem, params } = props;
+    const { setAddSnippetClicked, setEditClicked, editClicked, editItem, params, getSnippet } = props;
 
     const [openDrawer, setOpenDrawer] = useState(false);
     const [title, setTitle] = useState('');
@@ -21,14 +26,23 @@ const AddSnippet = (props) => {
         { id: 1, code: '', explanation: [{ id: 1, value: '' }], snippet: [], hasNote: false, note: '', imageConverted: false },
     ])
     const [enabled, setEnabled] = useState(true);
-    const snippetInputRef = useRef([]);
     const ref = useRef([]);
     const textareaRef = useRef(null);
+    const [callCreateSnippetApi, setCallCreateSnippetApi] = useState(false);
+    const [callEditSnippetApi, setCallEditSnippetApi] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         setOpenDrawer(true);
         const uuid = uuidv4();
         editClicked ? setTitleId(editItem?.titleId) : setTitleId(`${params?.categoryId}-${params?.topicId}-${uuid}`);
+        if(editClicked) {
+            setTitle(editItem?.title);
+            setSnippet(editItem?.data);
+            setEnabled(editItem?.enabled)
+        }
     }, [])
 
     const handleCloseDrawer = () => {
@@ -45,7 +59,6 @@ const AddSnippet = (props) => {
         let mimeType = bytesBase64.split(',')[0].split(':')[1].split(';')[0]
         var fileUrl = "data:" + mimeType + ";base64," + bytesBase64;
         let newValues = [...snippet];
-        console.log(snippet);
         fetch(bytesBase64)
             .then(response => response.blob())
             .then(blob => {
@@ -62,7 +75,6 @@ const AddSnippet = (props) => {
     }
 
     console.log(snippet, 'snippet');
-
 
     const onButtonClick = useCallback((i, snippet) => {
         if (ref.current[i] === null) {
@@ -99,16 +111,15 @@ const AddSnippet = (props) => {
 
     const removeUploadedImage = async (i, image) => {
         const imageRef = storageRef(storage, image);
+        setIsLoading(true);
         deleteObject(imageRef).then(() => {
             let newValues = [...snippet];
             const index = newValues[i].snippet.findIndex(el => el.url === image);
             newValues[i].snippet.splice(index, 1);
-            // if (newValues[i].snippet?.length === 0) {
-            //     QAInputRef.current[i].value = '';
-            // }
             setSnippet(newValues);
+            setIsLoading(false);
         }).catch((error) => {
-
+            setIsLoading(false);
         });
     }
 
@@ -162,19 +173,93 @@ const AddSnippet = (props) => {
         let newValues = [...snippet];
         newValues[i].code = '';
         newValues[i].snippet = [];
+        newValues[i].imageConverted = false;
         setSnippet(newValues);
     }
 
-    const uploadImages = () => {
-
+    const uploadImageToFireStore = async (img, i, index) => {
+        let blob = await fetch(img).then(r => r.blob());
+        const type = blob?.type.split('/')[1];
+        const path = `${`${params?.categoryId}/${params?.topicId}/${titleId}/code${snippet[i].id}/snippets/image${index + 1}.${type}`}`;
+        const imageRef = storageRef(storage, path, { contentType: blob?.type });
+        setIsLoading(true);
+        let newValues = [...snippet];
+        uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
+            .then((snapshot) => {
+                getDownloadURL(snapshot.ref)
+                    .then((url) => {
+                        setIsLoading(false);
+                        newValues[i].snippet[index].url = url;
+                        newValues[i].snippet[index].imageUploaded = true;
+                        setSnippet(newValues);
+                        return url;
+                    })
+                    .catch((error) => {
+                        setIsLoading(false);
+                        newValues[i].snippet[index].imageUploadedSuccess = false;
+                    });
+            })
+            .catch((error) => {
+                setIsLoading(false);
+                newValues[i].snippet[index].imageUploadedSuccess = false;
+            });
     }
 
-    const deleteImage = () => {
-
+    const uploadImages = async (i, url, imageIndex) => {
+        await uploadImageToFireStore(url, i, imageIndex)
     }
+
+    const deleteImage = (i, image) => {
+        let newValues = [...snippet];
+        const filtered = newValues[i]?.snippet?.findIndex((e) => e === image);
+        newValues[i]?.snippet?.splice(filtered, 1);
+        setSnippet(newValues);
+        URL.revokeObjectURL(image);
+    }
+
+    let addSnippetPayload = {
+        categoryId: params?.categoryId,
+        topicId: params?.topicId,
+        titleId,
+        title,
+        data: snippet,
+        enabled: editClicked ? enabled : undefined
+    };
+
+    const handleAddSnippet = () => {
+        editClicked ? setCallEditSnippetApi(true) : setCallCreateSnippetApi(true);
+    }
+
+    const onAddSnippetSuccess = res => {
+        editClicked ? setCallEditSnippetApi(false) : setCallCreateSnippetApi(false);
+        setErrorMessage('');
+        setSuccessMessage('')
+        if ((res?.status === 200 || res?.status === 201)) {
+            setOpenDrawer(false);
+            setAddSnippetClicked(false);
+            setOpenModal(true);
+            getSnippet.refetch();
+            setErrorMessage('');
+            setSuccessMessage(editClicked ? 'Snippet updated successfully' :`Snippet added successfully`);
+        } else {
+            setOpenModal(true);
+            setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later')
+        }
+    }
+
+    const handleClosePopup = () => {
+        setOpenModal(false);
+        setEditClicked(false);
+    }
+
+    const createSnippet = useFetchAPI("createSnippet", `/snippets/addSnippet`, "POST", addSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddSnippetSuccess, "", callCreateSnippetApi));
+    const editSnippet = useFetchAPI("editSnippet", `/snippets/updateSnippet`, "POST", addSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddSnippetSuccess, "", callEditSnippetApi));
+
+    const fetching = createSnippet?.Loading || createSnippet?.Fetching || editSnippet?.Loading || editSnippet?.Fetching;
 
     return (
         <>
+            {(fetching || isLoading) && <Loader showLoader={fetching || isLoading} />}
             <Drawer anchor={'right'} open={openDrawer} onClose={handleCloseDrawer}>
                 <div className={AddSnippetStyles.addQAContainer}>
                     <div className={AddSnippetStyles.addQATitle}>
@@ -231,6 +316,7 @@ const AddSnippet = (props) => {
                                                     value={el?.code || ""}
                                                     onChange={(e) => handleSnippetChange(i, e)}
                                                     placeholder={"Enter Code"} size="large"
+                                                    disabled={ snippet[i]?.snippet[0]?.imageUploaded }
                                                 ></textarea>
                                                 {snippet[i].code?.length > 0 && <div>
                                                     <h5>Output</h5>
@@ -243,8 +329,8 @@ const AddSnippet = (props) => {
                                                     </div>
                                                 </div>}
                                                 {snippet[i].code?.length > 0 && <div style={{ marginBottom: 10 }}>
-                                                    { !snippet[i]?.imageConverted && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'40%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleCodeConvert(i)}>Convert this code to image</CommonButton> }
-                                                    <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'20%'} height={'45px'} margin={'20px 0 0 10px'} onClick={() => handleCancel(i)}>Cancel</CommonButton>
+                                                     <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'40%'} height={'45px'} margin={'20px 0 0 0'} disabled={snippet[i]?.imageConverted || snippet[i]?.snippet[0]?.imageUploaded} onClick={() => handleCodeConvert(i)}>Convert this code to image</CommonButton>
+                                                    <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'20%'} height={'45px'} margin={'20px 0 0 10px'} disabled={ snippet[i]?.snippet[0]?.imageUploaded } onClick={() => handleCancel(i)}>Cancel</CommonButton>
                                                 </div>}
                                                 <div className={AddSnippetStyles.images}>
                                                     {snippet[i]?.snippet &&
@@ -334,17 +420,18 @@ const AddSnippet = (props) => {
                                 <h6 className={AddSnippetStyles.anotherAnswer}><u onClick={addAnotherCode}>Add Another Code</u></h6>
                             </FormControl>
                         </div>
-                        {/* <div className={AddSnippetStyles.editBtnContainer}>
+                        <div className={AddSnippetStyles.editBtnContainer}>
                             <div>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddQuestion()} disabled={!question}>Save</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddSnippet()} disabled={!title}>Save</CommonButton>
                             </div>
                             <div>
                                 <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleCloseDrawer}>Cancel</CommonButton>
                             </div>
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </Drawer>
+            <ConfirmationDialog openDialog={openModal} errorMessage={errorMessage} successMessage={successMessage} handleCloseDialog={handleClosePopup} />
         </>
     )
 }
