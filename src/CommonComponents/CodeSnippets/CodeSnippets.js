@@ -101,12 +101,12 @@ const CodeSnippets = (props) => {
         setGetSnippetPayload(prev => ({ ...prev, pageNumber: value }))
     }
 
-    const handleQAEdit = el => {
+    const handleSnippetEdit = el => {
         setEditClicked(true);
         setEditItem(el);
     }
 
-    const handleQADelete = el => {
+    const handleSnippetDelete = el => {
         setOpenDeleteModal(true);
         setDeleteInfo(el);
     }
@@ -255,7 +255,7 @@ const CodeSnippets = (props) => {
                                                     </div>
                                                     <h3><u>Code Image</u></h3>
                                                     <div className={CodeSnippetsStyles.ansImageDiv}>
-                                                        {snippet.snippet.map(img => (
+                                                        {snippet?.snippet?.map(img => (
                                                             <Zoom>
                                                                 <img src={img.url} alt={img?.url} />
                                                             </Zoom>
@@ -271,9 +271,9 @@ const CodeSnippets = (props) => {
                                                 </div>
                                             ))}
                                             <div className={CodeSnippetsStyles.iconsDiv}>
-                                                <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => handleQAEdit(el)} />
+                                                <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => handleSnippetEdit(el)} />
                                                 {el?.bookmarked ? <BookmarkAddedIcon titleAccess='Bookmarked' className={CodeSnippetsStyles.bookmarkedIcon} /> : <BookmarkBorderIcon titleAccess='Bookmark' className={CodeSnippetsStyles.bookmarkQAIcon} onClick={() => handleBookmark(el)} />}
-                                                <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => handleQADelete(el)} />
+                                                <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => handleSnippetDelete(el)} />
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>
@@ -284,7 +284,7 @@ const CodeSnippets = (props) => {
                         </div>}
                     </TabPanel>
                     <TabPanel value={value} index={1}>
-                        <BookmarkedSnippet getBookmarkSnippet={getBookmarkSnippet} setGetBookmarkedSnippetPayload={setGetBookmarkedSnippetPayload} setBookmarkedPageState={setBookmarkedPageState} bookmarkedSnippetData={bookmarkedSnippetData} bookmarkedPageState={bookmarkedPageState} handleQAEdit={handleQAEdit} handleQADelete={handleQADelete} setcallBookmarkedSnippetApi={setcallBookmarkedSnippetApi} getSnippet={getSnippet} setValue={setValue} />
+                        <BookmarkedSnippet getBookmarkSnippet={getBookmarkSnippet} setGetBookmarkedSnippetPayload={setGetBookmarkedSnippetPayload} setBookmarkedPageState={setBookmarkedPageState} bookmarkedSnippetData={bookmarkedSnippetData} bookmarkedPageState={bookmarkedPageState} handleSnippetEdit={handleSnippetEdit} handleSnippetDelete={handleSnippetDelete} setcallBookmarkedSnippetApi={setcallBookmarkedSnippetApi} getSnippet={getSnippet} setValue={setValue} />
                     </TabPanel>
                     {showHiddenTab && <TabPanel value={value} index={2}>
                         {fetching ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
@@ -305,10 +305,17 @@ const CodeSnippets = (props) => {
                                             </div>
                                         </AccordionSummary>
                                         <AccordionDetails sx={{ background: '#fcfcfc' }}>
-                                            {el?.data?.map((snippet, index) => (
+                                        {el?.data?.map((snippet, index) => (
                                                 <div key={snippet.code + index}>
+                                                    <h3><u>Code</u></h3>
+                                                    <div className={CodeSnippetsStyles.codeBlock}>
+                                                        <pre>
+                                                            <code className={CodeSnippetsStyles.code}>{snippet?.code}</code>
+                                                        </pre>
+                                                    </div>
+                                                    <h3><u>Code Image</u></h3>
                                                     <div className={CodeSnippetsStyles.ansImageDiv}>
-                                                        {snippet.snippet.map(img => (
+                                                        {snippet?.snippet?.map(img => (
                                                             <Zoom>
                                                                 <img src={img.url} alt={img?.url} />
                                                             </Zoom>
@@ -316,16 +323,16 @@ const CodeSnippets = (props) => {
                                                     </div>
                                                     { snippet?.explanation?.map(( explain, idx ) => (
                                                         <div key={ explain?.value + idx }> 
-                                                            <Typography>Explanation {explain.id}</Typography>
+                                                            <h3><u>Explanation {explain.id}</u></h3>
                                                             <Typography>{explain.value}</Typography>
                                                         </div>
                                                     )) }
-                                                    {el?.note && <Typography>Note : {el?.note}</Typography>}
+                                                    {snippet?.note && <Typography sx={{ paddingTop: 3 }}><b>Note:</b> {snippet?.note}</Typography>}
                                                 </div>
                                             ))}
                                             <div className={CodeSnippetsStyles.iconsDiv}>
-                                                <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => handleQAEdit(el)} />
-                                                <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => handleQADelete(el)} />
+                                                <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => handleSnippetEdit(el)} />
+                                                <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => handleSnippetDelete(el)} />
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>

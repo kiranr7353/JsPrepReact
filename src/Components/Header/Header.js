@@ -34,7 +34,11 @@ const Header = () => {
         if ((res?.status === 200 || res?.status === 201)) {
             setDetailsResponse(res?.data?.userInfo);
         } else {
-            setDetailErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
+            if(res?.status === 401) {
+                setDetailErrorMessage("Session Expired. Please login again!!");
+            } else {
+                setDetailErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
+            }
             setOpenDetailErrorDialog(true);
         }
     }

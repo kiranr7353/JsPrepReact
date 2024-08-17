@@ -51,7 +51,7 @@ const BookmarkedTab = (props) => {
         setRemoveBookmarkPayload({});
     }    
 
-    const removeBookmark = useFetchAPI("getBookmarkQA", `/categories/removeBookmark`, "POST", removeBookmarkPayload, CommonHeaders(), fetchQueryParams("", "", "", onRemoveBookmarkSuccess, "", callRemoveBookmarkApi));
+    const removeBookmark = useFetchAPI("removeBookmark", `/categories/removeBookmark`, "POST", removeBookmarkPayload, CommonHeaders(), fetchQueryParams("", "", "", onRemoveBookmarkSuccess, "", callRemoveBookmarkApi));
 
     return (
         <>
