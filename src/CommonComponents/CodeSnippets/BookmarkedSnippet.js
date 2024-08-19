@@ -30,7 +30,7 @@ const BookmarkedSnippet = (props) => {
   }
 
   const handleRemoveBookmark = (el) => {
-    setRemoveBookmarkPayload({ questionId: el?.questionId });
+    setRemoveBookmarkPayload({ titleId: el?.titleId });
     setCallRemoveBookmarkApi(true);
   }
 

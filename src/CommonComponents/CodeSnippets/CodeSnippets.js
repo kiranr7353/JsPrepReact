@@ -3,7 +3,7 @@ import CodeSnippetsStyles from './CodeSnippetsStyles.module.css';
 import CommonButton from '../CommonButton';
 import { AntTab, AntTabs } from '../InterviewQA/TabsStyles';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionDetails, AccordionSummary, Pagination, Skeleton, Slide, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, Pagination, Skeleton, Slide, Typography } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Zoom from 'react-medium-image-zoom'
@@ -22,6 +22,7 @@ import { storage } from '../../firebaseConfig';
 import { useFetchAPI } from '../../Hooks/useAPI';
 import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
+import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -111,7 +112,7 @@ const CodeSnippets = (props) => {
         setDeleteInfo(el);
     }
 
-    const handleQACloseDialog = () => {
+    const handleSnippetCloseDialog = () => {
         setOpenDeleteModal(false);
     }
 
@@ -122,7 +123,7 @@ const CodeSnippets = (props) => {
         });
     }
 
-    const handleDeleteQAConfirm = () => {
+    const handleDeleteSnippetConfirm = () => {
         deleteInfo?.data?.forEach(el => {
             if (el?.snippets?.length > 0) {
                 el?.snippets?.forEach(img => {
@@ -141,7 +142,7 @@ const CodeSnippets = (props) => {
         })
         setDeletePayload({ questionId: deleteInfo?.questionId });
         setCallDeleteApi(true);
-        handleQACloseDialog(false);
+        handleSnippetCloseDialog(false);
     }
 
     const onDeleteSuccess = (res) => {
@@ -154,14 +155,14 @@ const CodeSnippets = (props) => {
         }
     }
 
-    const handleDeleteQAClosePopup = () => {
+    const handleDeleteSnippetClosePopup = () => {
         setDeleteConfirmationInfo({ open: false, successMsg: '', errorMsg: '' });
         setDeleteInfo({});
         setDeletePayload({});
     }
 
     const handleBookmark = el => {
-        setBookmarkSnippetPayload({ questionId: el?.questionId });
+        setBookmarkSnippetPayload({ titleId: el?.titleId });
         setCallBookmarkApi(true);
     }
 
@@ -175,22 +176,22 @@ const CodeSnippets = (props) => {
         }
     }
 
-    const handleBookmarkQAClosePopup = () => {
+    const handleBookmarkSnippetClosePopup = () => {
         setBookmarkApiInfo({ open: false, successMsg: '', errorMsg: '' });
         setBookmarkSnippetPayload({});
     }
 
-    const checkBookmarked = (allQA, bookmarkedQA) => {
-        const results = allQA?.filter(({ questionId: id1 }) => bookmarkedQA?.some(({ questionId: id2 }) => id2 === id1));
-        if(results?.length > 0) {
+    const checkBookmarked = (allSnippets, bookmarkedSnippet) => {
+        const results = allSnippets?.filter(({ titleId: id1 }) => bookmarkedSnippet?.some(({ titleId: id2 }) => id2 === id1));
+        if (results?.length > 0) {
             const modified = results?.map(el => ({ ...el, bookmarked: true }));
-            if(modified && modified?.length > 0) {
+            if (modified && modified?.length > 0) {
                 const res = allSnippetData?.map(el => {
-                    let item = modified?.find(id => id.questionId === el.questionId)
-                    if(item) {
+                    let item = modified?.find(id => id.titleId === el.titleId)
+                    if (item) {
                         return item;
                     }
-                    return el; 
+                    return el;
                 })
                 setAllInterviewSnippetData(res);
             }
@@ -205,8 +206,8 @@ const CodeSnippets = (props) => {
         } else {
             setBookmarkedSnippetData([]);
         }
-    }    
-    
+    }
+
     const getSnippet = useFetchAPI("getSnippet", `/snippets/getSnippets`, "POST", getSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onGetSnippetSuccess));
     const deleteSnippet = useFetchAPI("deleteSnippet", `/snippets/deleteSnippet`, "POST", deletePayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteSuccess, "", callDeleteApi));
     const bookmarkSnippet = useFetchAPI("bookmarkSnippet", `/snippets/bookmarkSnippet`, "POST", bookmarkSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onBookmarkSuccess, "", callBookmarkApi));
@@ -261,12 +262,12 @@ const CodeSnippets = (props) => {
                                                             </Zoom>
                                                         ))}
                                                     </div>
-                                                    { snippet?.explanation?.map(( explain, idx ) => (
-                                                        <div key={ explain?.value + idx }> 
+                                                    {snippet?.explanation?.map((explain, idx) => (
+                                                        <div key={explain?.value + idx}>
                                                             <h3><u>Explanation {explain.id}</u></h3>
                                                             <Typography>{explain.value}</Typography>
                                                         </div>
-                                                    )) }
+                                                    ))}
                                                     {snippet?.note && <Typography sx={{ paddingTop: 3 }}><b>Note:</b> {snippet?.note}</Typography>}
                                                 </div>
                                             ))}
@@ -305,7 +306,7 @@ const CodeSnippets = (props) => {
                                             </div>
                                         </AccordionSummary>
                                         <AccordionDetails sx={{ background: '#fcfcfc' }}>
-                                        {el?.data?.map((snippet, index) => (
+                                            {el?.data?.map((snippet, index) => (
                                                 <div key={snippet.code + index}>
                                                     <h3><u>Code</u></h3>
                                                     <div className={CodeSnippetsStyles.codeBlock}>
@@ -321,12 +322,12 @@ const CodeSnippets = (props) => {
                                                             </Zoom>
                                                         ))}
                                                     </div>
-                                                    { snippet?.explanation?.map(( explain, idx ) => (
-                                                        <div key={ explain?.value + idx }> 
+                                                    {snippet?.explanation?.map((explain, idx) => (
+                                                        <div key={explain?.value + idx}>
                                                             <h3><u>Explanation {explain.id}</u></h3>
                                                             <Typography>{explain.value}</Typography>
                                                         </div>
-                                                    )) }
+                                                    ))}
                                                     {snippet?.note && <Typography sx={{ paddingTop: 3 }}><b>Note:</b> {snippet?.note}</Typography>}
                                                 </div>
                                             ))}
@@ -345,6 +346,23 @@ const CodeSnippets = (props) => {
                 </div>
                 {(addSnippetClicked || editClicked) && <AddSnippet setAddSnippetClicked={setAddSnippetClicked} setEditClicked={setEditClicked} editClicked={editClicked} params={params} locationDetails={locationDetails} getSnippet={getSnippet} editItem={editItem} />}
             </div>
+            <Dialog open={openDeleteModal} TransitionComponent={Transition} keepMounted onClose={handleSnippetCloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
+                <div className={CodeSnippetsStyles.modalinnerwrapper}>
+                    <div><h4 className={CodeSnippetsStyles.headerText}>Delete Snippet</h4></div>
+                    <IconButton aria-label="close" onClick={handleSnippetCloseDialog} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent>
+                        Are you sure you want to delete this snippet?
+                    </DialogContent>
+                    <div className={CodeSnippetsStyles.modalactionsection}>
+                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleDeleteSnippetConfirm}>Delete</CommonButton>
+                        <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleSnippetCloseDialog}>Cancel</CommonButton>
+                    </div>
+                </div>
+            </Dialog>
+            <ConfirmationDialog openDialog={deleteConfirmationInfo?.open} errorMessage={deleteConfirmationInfo?.errorMsg} successMessage={deleteConfirmationInfo?.successMsg} handleCloseDialog={handleDeleteSnippetClosePopup} />
+            <ConfirmationDialog openDialog={bookmarkApiInfo?.open} errorMessage={bookmarkApiInfo?.errorMsg} successMessage={bookmarkApiInfo?.successMsg} handleCloseDialog={handleBookmarkSnippetClosePopup} />
         </>
     )
 }

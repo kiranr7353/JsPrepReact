@@ -11,6 +11,7 @@ import InterviewQuestions from './InterviewQuestions';
 import ApiCall from './ApiCall';
 import ReactAdvanced from './ReactAdvanced';
 import CodeSnippets from './CodeSnippets';
+import ReactCodeSnippets from './CodeSnippets';
 
 const ReactHome = (props) => {
 
@@ -37,7 +38,7 @@ const ReactHome = (props) => {
       case 'apiCallInReact':
         return <ApiCall params={params} locationDetails={locationDetails} />
       case 'reactCodeSnippets':
-        return <CodeSnippets params={params} locationDetails={locationDetails} />
+        return <ReactCodeSnippets params={params} locationDetails={locationDetails} />
       case 'interviewQuestions':
         return <InterviewQuestions params={params} locationDetails={locationDetails} />
       case 'reactRedux':

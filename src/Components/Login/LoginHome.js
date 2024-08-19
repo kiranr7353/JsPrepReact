@@ -191,7 +191,7 @@ const LoginHome = () => {
 
               <div className={LoginStyles.loginOptions}>
                 <label>
-                  <input type="checkbox" value={formValues?.rememberMe} onChange={handleRemeberMe} /> <span className={LoginStyles.remember}>Remember me</span>
+                  <input type="checkbox" value={formValues?.rememberMe} checked={formValues?.rememberMe} onChange={handleRemeberMe} /> <span className={LoginStyles.remember}>Remember me</span>
                 </label>
                 <a href="/forgot-password" className={LoginStyles.forgotPassword}>Forgot your password?</a>
               </div>

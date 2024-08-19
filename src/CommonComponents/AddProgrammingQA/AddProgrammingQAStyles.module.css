@@ -1,0 +1,161 @@
+.addQAContainer {
+    width: 700px;
+    padding: 20px;
+}
+.addQATitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.addQAForm label {
+    display: block;
+    font-weight: bold;
+    margin-top: 20px;
+    padding-bottom: 5px;
+}
+.QAFlex {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.QADiv {
+    flex: 12;
+    border: 1px solid #9a9696;
+    padding: 10px;
+}
+.headerInput {
+    margin-bottom: 15px !important;
+    width: 100%;
+}
+.uploadInput {
+    width: 100%;
+}
+.images {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.image {
+    margin: 1rem 0.5rem;
+    position: relative;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+.QAImage {
+    height: 100px;
+    width: 180px;
+}
+.uploadBtnContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.imageUploadBtn {
+    margin-top: -10px;
+}
+.uploadBtn {
+    background: lightblue;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.imageDelete {
+    display: block;
+    background: #f27f97;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.uploadErrorAlert {
+    margin-top: 10px;
+}
+.pointsDiv {
+    border: 1px solid #cac3c3;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.pointsInput {
+    width: 100%;
+}
+
+.points {
+    margin-bottom: 20px;
+}
+.removeIconPoint {
+    float: right;
+    color: red;
+    cursor: pointer;
+}
+
+.anotherAnswer {
+    color: blue;
+    font-size: 12px;
+    cursor: pointer;
+}
+.columnInput {
+    margin-right: 20px !important;
+}
+.tableData {
+    margin-bottom: 15px;
+}
+
+.tableDataFlex {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.removeIcon {
+    color: red;
+    cursor: pointer;
+    margin-top: 15px;
+}
+.remove {
+    flex: 1;
+}
+.editBtnContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: end;
+}
+
+.modalinnerwrapper {
+    padding: 20px;
+    min-width: 300px;
+}
+
+.headerText {
+    font-weight: bold;
+    font-size: 20px;
+    opacity: 0.7;
+    margin-top: -5px;
+}
+
+.modalactionsection {
+    text-align: center;
+}
+
+.modalactionsection button {
+    margin: 10px 10px;
+}
+.pointsStylesFlex {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+.pointsStylesDropdown {
+    margin-top: -10px;
+}
+.pointsStylesDropdown select {
+    height: 38px;
+    margin-bottom: 10px;
+}
+.codeDiv {
+    padding: 30px 20px 30px 20px;
+}
