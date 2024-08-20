@@ -16,7 +16,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import NoEncryptionGmailerrorredIcon from '@mui/icons-material/NoEncryptionGmailerrorred';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { storage } from '../../../firebaseConfig';
 
 // Import Swiper styles
@@ -80,6 +81,8 @@ const Home = () => {
     const [hiddenData, setHiddenData] = useState([]);
     const [showCategoryHiddenBtn, setShowCategoryHiddenBtn] = useState(false);
     const [showTopicHiddenBtn, setShowTopicHiddenBtn] = useState(false);
+    const [callFavTopicsApi, setCallFavTopicsApi] = useState(false);
+    const [favoriteTopics, setFavoriteTopics] = useState([]);
 
     const onCategoriesListSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
@@ -150,6 +153,17 @@ const Home = () => {
         }
     }
 
+    let favoriteTopicObj = { favoriteTopic: {} };
+
+    const handleFavoriteEdit = el => {
+        favoriteTopicObj.favoriteTopic = el;
+        callFavTopicsApi(true);
+    }
+
+    const handleRemoveFavoriteEdit = el => {
+        
+    }
+
     const handleTopicCardClick = (el) => {
         setTopicDetails(el)
     }
@@ -174,6 +188,13 @@ const Home = () => {
         setEditTopicPayload({ categoryId: categoryId, topicId: topicDetails?.topicId, topicName: editTopicInfo?.name, description: editTopicInfo?.desc, imageUrl: editTopicInfo?.image[0].url, enabled: editTopicInfo?.enabled })
         setCallEditTopic(true);
         handleEditTopicCloseDialog();
+    }
+
+    const onFavoriteTopicsSuccess = res => {
+        if ((res?.status === 200 || res?.status === 201)) {
+            setFavoriteTopics(res?.data?.favoriteTopics)
+        } else {
+        }
     }
 
     const onEditTopicSuccess = (res) => {
@@ -534,6 +555,7 @@ const Home = () => {
     }
 
     let getCategoriesList = useFetchAPI("GetCategoriesList", `/categories/getCategoryList`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesListSuccess));
+    let favTopics = useFetchAPI("favTopics", `/user/getFavoriteTopics`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onFavoriteTopicsSuccess));
     let getCategories = useFetchAPI("GetCategories", `/categories/getCategoriesFromList/${categoryType}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesSuccess, "", callCategoryApi));
     let getTopics = useFetchAPI("GetTopics", `/categories/getTopics/${categoryId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onTopicsSuccess, "", callTopicApi));
     let EditTopic = useFetchAPI("EditTopic", `/categories/editTopic`, "POST", editTopicPayload, CommonHeaders(), fetchQueryParams("", "", "", onEditTopicSuccess, "", callEditTopic));
@@ -550,6 +572,45 @@ const Home = () => {
                 <div className={HomeStyles.imageSection}>
                     <img src={Image} alt='Image' />
                 </div>
+                { favoriteTopics && favoriteTopics?.length > 0 &&  <div className={HomeStyles.topics}>
+                    {favoriteTopics && favoriteTopics?.length > 0 && <h4 className={HomeStyles.categoriesText}>Favorite Topics</h4>}
+                    <Swiper
+                        slidesPerView={4}
+                        spaceBetween={0}
+                        cssMode={true}
+                        navigation={true}
+                        mousewheel={true}
+                        keyboard={true}
+                        modules={[Navigation, Mousewheel, Keyboard]}
+                        className="mySwiper"
+                    >
+                        <div className={HomeStyles.grid}>
+                            {(favTopics?.Loading || favTopics?.Fetching) ? <Skeleton variant="rectangular" width={'100%'} height={200} sx={{ marginBottom: 10 }} /> :
+                                favoriteTopics?.length > 0 ? favoriteTopics?.map((el, index) => {
+                                    if (el?.enabled) return (
+                                        <SwiperSlide key={el?.topicId}>
+                                            <div className={HomeStyles.topicCard} onClick={() => handleTopicCardClick(el)}>
+                                                <div className={HomeStyles.topicCardFlex} onClick={() => handleTopicClick(el)}>
+                                                    <div className={HomeStyles.imageDiv}>
+                                                        <img className={HomeStyles.card__imgTopic} src={el?.imageUrl} alt={el?.topicName} />
+                                                    </div>
+                                                    <div className={HomeStyles.card__content}>
+                                                        <h1 className={HomeStyles.topicCard__header}>{el?.topicName}</h1>
+                                                        <h6 className={HomeStyles.topicCard__desc}>{el?.description}</h6>
+                                                    </div>
+                                                </div>
+                                                <div className={HomeStyles.cardIcons}>
+                                                    <CancelIcon titleAccess='Remove Favorite' onClick={() => handleRemoveFavoriteEdit(el)} />
+                                                    <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
+                                                    <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
+                                                </div>
+                                            </div>
+                                        </SwiperSlide>
+                                    )
+                                }) : <></>}
+                        </div>
+                    </Swiper>
+                </div> }
                 <div className={HomeStyles.categoryList}>
                     <h4 className={HomeStyles.categoriesText}>Categories</h4>
                     <div className={HomeStyles.addCategoryBtn}>
@@ -637,6 +698,7 @@ const Home = () => {
                                                     </div>
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
+                                                    <FavoriteBorderIcon titleAccess='Set Favorite' onClick={() => handleFavoriteEdit(el)} />
                                                     <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
                                                     <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
                                                 </div>
