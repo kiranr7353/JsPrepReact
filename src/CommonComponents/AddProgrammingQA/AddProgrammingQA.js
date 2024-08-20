@@ -16,7 +16,7 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 
 const AddProgrammingQA = (props) => {
 
-    const { setAddPQAClicked, setEditClicked, editClicked, editItem, params, getSnippet } = props;
+    const { setAddPQAClicked, setEditClicked, editClicked, editItem, params, getPQA } = props;
 
     const [openDrawer, setOpenDrawer] = useState(false);
     const [title, setTitle] = useState('');
@@ -28,8 +28,8 @@ const AddProgrammingQA = (props) => {
     const [enabled, setEnabled] = useState(true);
     const ref = useRef([]);
     const textareaRef = useRef(null);
-    const [callCreateSnippetApi, setCallCreateSnippetApi] = useState(false);
-    const [callEditSnippetApi, setCallEditSnippetApi] = useState(false);
+    const [callCreatePQAApi, setCallCreatePQAApi] = useState(false);
+    const [callEditPQAApi, setCallEditPQAApi] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -135,12 +135,16 @@ const AddProgrammingQA = (props) => {
 
     const removeCode = (i) => {
         let newValues = [...pQA];
-        if (newValues[i]?.snippet?.length > 0) {
-            if (newValues[i]?.imageUploaded) {
-                newValues[i]?.snippet.forEach((image) => {
-                    removeUploadedImage(i, image);
-                });
-            }
+        if (newValues[i]?.approachCode?.length > 0) {
+            newValues[i]?.approachCode.forEach((appCode) => {
+                if (appCode?.snippet?.length > 0) {
+                    appCode?.snippet?.forEach(image => {
+                        if (image?.imageUploaded) {
+                            genericRemoveUploadedImage(image?.url);
+                        }
+                    })
+                }
+            });
         }
         newValues.splice(i, 1);
         setPQA(newValues);
@@ -163,6 +167,13 @@ const AddProgrammingQA = (props) => {
 
     const removeAppCode = (idx, i) => {
         let codeValues = [...pQA[i].approachCode];
+        if (codeValues[idx].snippet?.length > 0) {
+            codeValues[idx].snippet?.forEach(image => {
+                if (image?.imageUploaded) {
+                    genericRemoveUploadedImage(image?.url);
+                }
+            })
+        }
         codeValues.splice(idx);
         setPQA(prev => {
             return [...prev.slice(0, i), { ...prev[i], approachCode: codeValues }, ...prev.slice(i + 1)]
@@ -189,25 +200,27 @@ const AddProgrammingQA = (props) => {
         const path = `${`${params?.categoryId}/${params?.topicId}/${titleId}/approach${pQA[i].id}/code${pQA[i].approachCode[index2].id}/snippets/image${index + 1}.${type}`}`;
         const imageRef = storageRef(storage, path, { contentType: blob?.type });
         setIsLoading(true);
-        let newValues = [...pQA];
+        let newValues = [...pQA[i].approachCode];
         uploadBytesResumable(imageRef, blob, { contentType: blob?.type })
             .then((snapshot) => {
                 getDownloadURL(snapshot.ref)
                     .then((url) => {
                         setIsLoading(false);
-                        newValues[i].snippet[index].url = url;
-                        newValues[i].snippet[index].imageUploaded = true;
-                        setPQA(newValues);
+                        newValues[index2].snippet[0].url = url;
+                        newValues[index2].snippet[0].imageUploaded = true;
+                        setPQA(prev => {
+                            return [...prev.slice(0, i), { ...prev[i], approachCode: newValues }, ...prev.slice(i + 1)]
+                        })
                         return url;
                     })
                     .catch((error) => {
                         setIsLoading(false);
-                        newValues[i].snippet[index].imageUploadedSuccess = false;
+                        newValues[index2].snippet[0].imageUploadedSuccess = false;
                     });
             })
             .catch((error) => {
                 setIsLoading(false);
-                newValues[i].snippet[index].imageUploadedSuccess = false;
+                newValues[index2].snippet[0].imageUploadedSuccess = false;
             });
     }
 
@@ -223,7 +236,7 @@ const AddProgrammingQA = (props) => {
         URL.revokeObjectURL(image);
     }
 
-    let addSnippetPayload = {
+    let addPQAPayload = {
         categoryId: params?.categoryId,
         topicId: params?.topicId,
         titleId,
@@ -233,20 +246,20 @@ const AddProgrammingQA = (props) => {
     };
 
     const handleAddSnippet = () => {
-        editClicked ? setCallEditSnippetApi(true) : setCallCreateSnippetApi(true);
+        editClicked ? setCallEditPQAApi(true) : setCallCreatePQAApi(true);
     }
 
-    const onAddSnippetSuccess = res => {
-        editClicked ? setCallEditSnippetApi(false) : setCallCreateSnippetApi(false);
+    const onAddPQASuccess = res => {
+        editClicked ? setCallEditPQAApi(false) : setCallCreatePQAApi(false);
         setErrorMessage('');
         setSuccessMessage('')
         if ((res?.status === 200 || res?.status === 201)) {
             setOpenDrawer(false);
             setAddPQAClicked(false);
             setOpenModal(true);
-            getSnippet.refetch();
+            getPQA.refetch();
             setErrorMessage('');
-            setSuccessMessage(editClicked ? 'Snippet updated successfully' : `Snippet added successfully`);
+            setSuccessMessage(editClicked ? 'Programmming QA updated successfully' : `Programmming QA added successfully`);
         } else {
             setOpenModal(true);
             setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later')
@@ -258,10 +271,10 @@ const AddProgrammingQA = (props) => {
         setEditClicked(false);
     }
 
-    const createSnippet = useFetchAPI("createSnippet", `/snippets/addSnippet`, "POST", addSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddSnippetSuccess, "", callCreateSnippetApi));
-    const editSnippet = useFetchAPI("editSnippet", `/snippets/updateSnippet`, "POST", addSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddSnippetSuccess, "", callEditSnippetApi));
+    const createPQA = useFetchAPI("createPQA", `/programmingQA/addProgrammingQA`, "POST", addPQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddPQASuccess, "", callCreatePQAApi));
+    const editPQA = useFetchAPI("editPQA", `/programmingQA/updateProgrammingQA`, "POST", addPQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddPQASuccess, "", callEditPQAApi));
 
-    const fetching = createSnippet?.Loading || createSnippet?.Fetching || editSnippet?.Loading || editSnippet?.Fetching;
+    const fetching = createPQA?.Loading || createPQA?.Fetching || editPQA?.Loading || editPQA?.Fetching;
 
     return (
         <>

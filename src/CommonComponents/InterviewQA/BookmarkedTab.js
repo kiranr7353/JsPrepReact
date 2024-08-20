@@ -49,7 +49,7 @@ const BookmarkedTab = (props) => {
     const handleRemoveBookmarkClosePopup = () => {
         setRemoveBookmarkInfo({ open: false, successMsg: '', errorMsg: '' });
         setRemoveBookmarkPayload({});
-    }    
+    }
 
     const removeBookmark = useFetchAPI("removeBookmark", `/categories/removeBookmark`, "POST", removeBookmarkPayload, CommonHeaders(), fetchQueryParams("", "", "", onRemoveBookmarkSuccess, "", callRemoveBookmarkApi));
 
@@ -57,82 +57,83 @@ const BookmarkedTab = (props) => {
         <>
             {(removeBookmark?.Loading || removeBookmark?.Fetching) && <Loader showLoader={removeBookmark?.Loading || removeBookmark?.Fetching} />}
             {(getBookmarkQA?.Loading || getBookmarkQA?.Fetching) ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
-                (bookmarkedInterviewQAData && bookmarkedInterviewQAData?.data?.length > 0) ? bookmarkedInterviewQAData?.data?.map((el, i) => (
-                    <Accordion key={el?.questionId}
-                        slotProps={{ transition: { timeout: 400 } }}>
-                        <AccordionSummary
-                            expandIcon={<ArrowDownwardIcon sx={{ color: 'white' }} />}
-                            aria-controls="panel1-content"
-                            id="panel1-header"
-                            sx={{ background: 'black', color: 'white', marginBottom: '10px' }}
-                        >
-                            <div className={InterviewQAStyles.questionFlex}>
-                                <div>
-                                    <Typography sx={{ fontWeight: 'bolder' }}>{el?.question}</Typography>
-                                </div>
-
-                            </div>
-                        </AccordionSummary>
-                        <AccordionDetails sx={{ background: '#fcfcfc' }}>
-                            {el?.data?.map((ans, index) => (
-                                <div key={ans.answer + index}>
-                                    <Typography>{ans.answer}</Typography>
-                                    <div className={InterviewQAStyles.ansImageDiv}>
-                                        {ans.snippets.map(img => (
-                                            <Zoom>
-                                                <img src={img.url} alt={img?.url} />
-                                            </Zoom>
-                                        ))}
+                (bookmarkedInterviewQAData && bookmarkedInterviewQAData?.data?.length > 0) ? bookmarkedInterviewQAData?.data?.map((el, i) => {
+                    if (el?.enabled) return (
+                        <Accordion key={el?.questionId}
+                            slotProps={{ transition: { timeout: 400 } }}>
+                            <AccordionSummary
+                                expandIcon={<ArrowDownwardIcon sx={{ color: 'white' }} />}
+                                aria-controls="panel1-content"
+                                id="panel1-header"
+                                sx={{ background: 'black', color: 'white', marginBottom: '10px' }}
+                            >
+                                <div className={InterviewQAStyles.questionFlex}>
+                                    <div>
+                                        <Typography sx={{ fontWeight: 'bolder' }}>{el?.question}</Typography>
                                     </div>
-                                    {ans?.hasPoints && ans?.pointsData?.map((ele, i) => (
-                                        <>
 
-                                            {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
-                                            <Typography>{ele.value}</Typography>
-                                            <div className={InterviewQAStyles.ansImageDiv}>
-                                                {ele?.snippets?.map(imge => (
-                                                    <Zoom>
-                                                        <img src={imge?.url} alt={imge?.url} />
-                                                    </Zoom>
-                                                ))}
-                                            </div>
-                                        </>
-                                    ))}
-                                    {ans?.hasTable && (
-                                        <div className={InterviewQAStyles.tableDiv}>
-                                            <CustomizedTable component={Paper} elevation={6}>
-                                                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            {ans?.tableColumns?.map((column, i) => (
-                                                                <StyledTableCell align="center" key={i}>{column?.value}</StyledTableCell>
-                                                            ))}
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {ans?.tableData?.map((res, tableIndex) => (
-                                                            <StyledTableRow key={tableIndex} sx={{ '&:first-of-type td, &:first-of-type th': { border: 0 } }}>
-                                                                <StyledTableCell align="center">{res.value1}</StyledTableCell>
-                                                                <StyledTableCell align="center">{res?.value2}</StyledTableCell>
-                                                            </StyledTableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </CustomizedTable>
-                                        </div>
-                                    )}
-                                    {el?.note && <Typography>Note : {el?.note}</Typography>}
                                 </div>
-                            ))}
-                            <div className={InterviewQAStyles.iconsDiv}>
-                                <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => props.handleQAEdit(el)} />
-                                <BookmarkRemoveIcon titleAccess='Remove Bookmark' className={InterviewQAStyles.removeBookmarkIcon} onClick={() => handleRemoveBookmark(el)} />
-                                <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => props.handleQADelete(el)} />
-                            </div>
-                        </AccordionDetails>
-                    </Accordion>
-                )
-                ) : <AppNoData />}
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ background: '#fcfcfc' }}>
+                                {el?.data?.map((ans, index) => (
+                                    <div key={ans.answer + index}>
+                                        <Typography>{ans.answer}</Typography>
+                                        <div className={InterviewQAStyles.ansImageDiv}>
+                                            {ans.snippets.map(img => (
+                                                <Zoom>
+                                                    <img src={img.url} alt={img?.url} />
+                                                </Zoom>
+                                            ))}
+                                        </div>
+                                        {ans?.hasPoints && ans?.pointsData?.map((ele, i) => (
+                                            <>
+
+                                                {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
+                                                <Typography>{ele.value}</Typography>
+                                                <div className={InterviewQAStyles.ansImageDiv}>
+                                                    {ele?.snippets?.map(imge => (
+                                                        <Zoom>
+                                                            <img src={imge?.url} alt={imge?.url} />
+                                                        </Zoom>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        ))}
+                                        {ans?.hasTable && (
+                                            <div className={InterviewQAStyles.tableDiv}>
+                                                <CustomizedTable component={Paper} elevation={6}>
+                                                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                {ans?.tableColumns?.map((column, i) => (
+                                                                    <StyledTableCell align="center" key={i}>{column?.value}</StyledTableCell>
+                                                                ))}
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {ans?.tableData?.map((res, tableIndex) => (
+                                                                <StyledTableRow key={tableIndex} sx={{ '&:first-of-type td, &:first-of-type th': { border: 0 } }}>
+                                                                    <StyledTableCell align="center">{res.value1}</StyledTableCell>
+                                                                    <StyledTableCell align="center">{res?.value2}</StyledTableCell>
+                                                                </StyledTableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </CustomizedTable>
+                                            </div>
+                                        )}
+                                        {el?.note && <Typography>Note : {el?.note}</Typography>}
+                                    </div>
+                                ))}
+                                <div className={InterviewQAStyles.iconsDiv}>
+                                    <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => props.handleQAEdit(el)} />
+                                    <BookmarkRemoveIcon titleAccess='Remove Bookmark' className={InterviewQAStyles.removeBookmarkIcon} onClick={() => handleRemoveBookmark(el)} />
+                                    <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => props.handleQADelete(el)} />
+                                </div>
+                            </AccordionDetails>
+                        </Accordion>
+                    )
+                }) : <AppNoData />}
             {bookmarkedInterviewQAData?.totalCount > 10 && <div className={InterviewQAStyles.pagination}>
                 <Pagination count={bookmarkedInterviewQAData?.totalCount} page={bookmarkedPageState} onChange={handleBookmarkedPageChange} color="primary" />
             </div>}

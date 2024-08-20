@@ -125,22 +125,13 @@ const CodeSnippets = (props) => {
 
     const handleDeleteSnippetConfirm = () => {
         deleteInfo?.data?.forEach(el => {
-            if (el?.snippets?.length > 0) {
-                el?.snippets?.forEach(img => {
+            if (el?.snippet?.length > 0) {
+                el?.snippet?.forEach(img => {
                     genericRemoveUploadedImage(img?.url)
                 })
             }
-            if (el?.pointsData?.length > 0) {
-                el?.pointsData?.forEach(point => {
-                    if (point?.snippets?.length > 0) {
-                        point?.snippets?.forEach(image => {
-                            genericRemoveUploadedImage(image?.url);
-                        })
-                    }
-                })
-            }
         })
-        setDeletePayload({ questionId: deleteInfo?.questionId });
+        setDeletePayload({ titleId: deleteInfo?.titleId });
         setCallDeleteApi(true);
         handleSnippetCloseDialog(false);
     }
