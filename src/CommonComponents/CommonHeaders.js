@@ -13,7 +13,7 @@ export const CommonHeaders = () => {
         "localId": userInfo ? userInfo.localId : '',
         "Authorization": userTokenInfo ? "Bearer " + userTokenInfo : '',
         "meta-timezone": moment_timezone.tz.guess() || "Asia/Calcutta",
-        "refreshToken": refreshToken
+        "Refreshtoken": refreshToken
         // "operationid": operationId ? operationId : ''
     }
 }

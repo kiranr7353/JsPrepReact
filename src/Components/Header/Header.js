@@ -105,7 +105,7 @@ const Header = () => {
                                     }}
                                     sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
                                     className={HeaderStyles.textField}
-                                    placeholder={"Search for anything"} size="large"
+                                    placeholder={"Search Topics"} size="large"
                                 />
                             </div>
                             <div className={HeaderStyles.requestSection}>

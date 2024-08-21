@@ -84,7 +84,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <UserContextProvider>
             <PersistGate persistor={persistor}>
-              {isUserLogged ? <IdleTimerComponent env={{ apiURL: env.apiURL, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''}
+              {/* {isUserLogged ? <IdleTimerComponent env={{ apiURL: env.apiURL, reactLogoutUrl: env.reactLogoutUrl }} contextPath={env.contextPath} /> : ''} */}
               <div>
                 <div className='sshui-body-wrappper'>
                   <Suspense fallback={<Skeleton />}>

@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { useFetchAPI } from '../../../Hooks/useAPI';
 import { fetchQueryParams } from '../../../Hooks/fetchQueryParams';
 import { CommonHeaders } from '../../../CommonComponents/CommonHeaders';
-import { Alert, Dialog, DialogContent, Drawer, FormControl, Skeleton, Slide, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Dialog, DialogContent, Drawer, FormControl, Skeleton, Slide, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import Switch from '@mui/joy/Switch';
 import Image from '../../../Images/learning.png';
 import Loader from '../../../CommonComponents/Loader/Loader';
@@ -18,6 +18,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import CancelIcon from '@mui/icons-material/Cancel';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { storage } from '../../../firebaseConfig';
 
 // Import Swiper styles
@@ -83,6 +84,13 @@ const Home = () => {
     const [showTopicHiddenBtn, setShowTopicHiddenBtn] = useState(false);
     const [callFavTopicsApi, setCallFavTopicsApi] = useState(false);
     const [favoriteTopics, setFavoriteTopics] = useState([]);
+    const [favoriteTopicObj, setFavoriteTopicObj] = useState({ topicDetails: {} });
+    const [removeFavoriteTopicObj, setRemoveFavoriteTopicObj] = useState({ topicDetails: {} });
+    const [callRemoveFavApi, setCallRemoveFavApi] = useState(false);
+    const [favTopicInfo, setFavTopicInfo] = useState({ successMsg: "", errorMsg: "" })
+    const [removeFavTopicInfo, setremoveFavTopicInfo] = useState({ successMsg: "", errorMsg: "" })
+    const [snackSetFavBarOpen, setSnackSetFavBarOpen] = useState(false);
+    const [snackRemoveFavBarOpen, setSnackRemoveFavBarOpen] = useState(false);
 
     const onCategoriesListSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
@@ -124,13 +132,12 @@ const Home = () => {
     }
 
     const handleCategoryClicked = (el, idx) => {
-        setSelectedCategoryIndex(idx)
+        setSelectedCategoryIndex(idx);
         setCategoryId(el?.categoryId);
         setCallTopicApi(true);
     }
 
     const onTopicsSuccess = res => {
-        console.log(res);
         setCallTopicApi(false);
         setTopicInfo({ data: [], error: '' });
         if ((res?.status === 200 || res?.status === 201)) {
@@ -141,7 +148,23 @@ const Home = () => {
                 if (keyA > keyB) return 1;
                 return 0;
             })
-            setTopicInfo({ data: res?.data?.topics, error: '' });
+            const results = res?.data?.topics?.filter(({ topicId: id1 }) => favoriteTopics?.some(({ topicId: id2 }) => id2 === id1));
+            let setFavTopic = [];
+            if(results?.length > 0) {
+                const modified = results?.map(el => ({ ...el, favorite: true }));
+                if(modified && modified?.length > 0) {
+                    setFavTopic = res?.data?.topics?.map(el => {
+                        let item = modified?.find(id => id.topicId === el.topicId)
+                        if(item) {
+                            return item;
+                        }
+                        return el; 
+                    })
+                    setTopicInfo({ data: setFavTopic, error: '' });
+                }
+            } else {
+                setTopicInfo({ data: res?.data?.topics, error: '' });
+            }
             let filterHidden = res?.data?.topics?.filter(el => !el?.enabled);
             if(filterHidden && filterHidden?.length > 0) {
                 setShowTopicHiddenBtn(true);
@@ -152,16 +175,41 @@ const Home = () => {
             setTopicInfo({ data: [], error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
         }
     }
-
-    let favoriteTopicObj = { favoriteTopic: {} };
-
+    
     const handleFavoriteEdit = el => {
-        favoriteTopicObj.favoriteTopic = el;
-        callFavTopicsApi(true);
+        setFavoriteTopicObj({ topicDetails: el })
+        setCallFavTopicsApi(true);
     }
 
-    const handleRemoveFavoriteEdit = el => {
-        
+    const onSetFavTopicSuccess = res => {
+        setCallFavTopicsApi(false);
+        if ((res?.status === 200 || res?.status === 201)) {
+            setFavTopicInfo(({ successMsg: "Favorite set successfully", error: "" }))
+            setSnackSetFavBarOpen(true);
+            favTopics?.refetch();
+            getTopics?.refetch();
+        } else {
+            setFavTopicInfo(({ successMsg: "", error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' }));
+            setSnackSetFavBarOpen(true);
+        }
+    }
+
+    const handleRemoveFavorite = el => {
+        setRemoveFavoriteTopicObj({ topicDetails: el });
+        setCallRemoveFavApi(true);
+    }
+
+    const onRemoveFavTopicSuccess = res => {
+        setCallRemoveFavApi(false);
+        if ((res?.status === 200 || res?.status === 201)) {
+            setremoveFavTopicInfo(({ successMsg: "Favorite removed successfully", error: "" }));
+            setSnackRemoveFavBarOpen(true)
+            favTopics?.refetch();
+            getTopics?.refetch();
+        } else {
+            setremoveFavTopicInfo(({ successMsg: "", error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' }))
+            setSnackRemoveFavBarOpen(true)
+        }
     }
 
     const handleTopicCardClick = (el) => {
@@ -169,12 +217,10 @@ const Home = () => {
     }
 
     const handleTopicClick = (el) => {
-        navigate(`/home/topic/${categoryId}/${el?.topicId}`, { state: { topicDetails: el, categoryDetails: categoriesInfo?.data } })
+        navigate(`/home/topic/${el?.topicCategoryId ? el?.topicCategoryId : categoryId}/${el?.topicId}`, { state: { topicDetails: el, categoryDetails: categoriesInfo?.data } })
     }
 
     const handleTopicEdit = (el) => {
-        console.log(el);
-        
         setOpenEditTopicModal(true);
         setEditTopicInfo({ name: el?.topicName, desc: el?.description ? el?.description : '', image: [{ url: el?.imageUrl, imageUploaded: true }], enabled: el?.enabled !== undefined ? el?.enabled : true });
     }
@@ -554,6 +600,14 @@ const Home = () => {
         }
     }
 
+    const handleSetFavSnackBarClose = () => {
+        setSnackSetFavBarOpen(false);
+    }
+
+    const handleRemoveFavSnackBarClose = () => {
+        setSnackRemoveFavBarOpen(false);
+    }
+
     let getCategoriesList = useFetchAPI("GetCategoriesList", `/categories/getCategoryList`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesListSuccess));
     let favTopics = useFetchAPI("favTopics", `/user/getFavoriteTopics`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onFavoriteTopicsSuccess));
     let getCategories = useFetchAPI("GetCategories", `/categories/getCategoriesFromList/${categoryType}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onCategoriesSuccess, "", callCategoryApi));
@@ -562,8 +616,10 @@ const Home = () => {
     let EditCategory = useFetchAPI("EditCategory", `/categories/editCategory`, "POST", editCategoryPayload, CommonHeaders(), fetchQueryParams("", "", "", onEditCategorySuccess, "", callEditCategory));
     let AddTopic = useFetchAPI("AddTopic", `/categories/addTopic`, "POST", addTopicPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddTopicSuccess, "", callAddTopic));
     let DeleteTopic = useFetchAPI("DeleteTopic", `/categories/deleteTopic`, "POST", deleteTopicPayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteTopicSuccess, "", callDeleteTopic));
+    let setFavTopics = useFetchAPI("setFavTopics", `/categories/setFavoriteTopic`, "POST", favoriteTopicObj, CommonHeaders(), fetchQueryParams("", "", "", onSetFavTopicSuccess, "", callFavTopicsApi));
+    let removeFavTopics = useFetchAPI("removeFavTopics", `/categories/removeFavoriteTopic`, "POST", removeFavoriteTopicObj, CommonHeaders(), fetchQueryParams("", "", "", onRemoveFavTopicSuccess, "", callRemoveFavApi));
 
-    const fetching = getCategoriesList?.Loading || getCategoriesList?.Fetching || EditTopic?.Loading || EditTopic?.Fetching || AddTopic?.Loading || AddTopic?.Fetching || DeleteTopic?.Loading || DeleteTopic?.Fetching || EditCategory?.Loading || EditCategory?.Fetching;
+    const fetching = getCategoriesList?.Loading || getCategoriesList?.Fetching || EditTopic?.Loading || EditTopic?.Fetching || AddTopic?.Loading || AddTopic?.Fetching || DeleteTopic?.Loading || DeleteTopic?.Fetching || EditCategory?.Loading || EditCategory?.Fetching || setFavTopics?.Loading || setFavTopics?.Fetching || removeFavTopics?.Loading || removeFavTopics?.Fetching;
 
     return (
         <>
@@ -600,7 +656,7 @@ const Home = () => {
                                                     </div>
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
-                                                    <CancelIcon titleAccess='Remove Favorite' onClick={() => handleRemoveFavoriteEdit(el)} />
+                                                    <CancelIcon titleAccess='Remove Favorite' onClick={() => handleRemoveFavorite(el)} />
                                                     <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
                                                     <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
                                                 </div>
@@ -698,7 +754,7 @@ const Home = () => {
                                                     </div>
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
-                                                    <FavoriteBorderIcon titleAccess='Set Favorite' onClick={() => handleFavoriteEdit(el)} />
+                                                    { el?.favorite ? <FavoriteIcon sx={{ color: 'blue' }} onClick={() => handleRemoveFavorite(el)} /> : <FavoriteBorderIcon titleAccess='Set Favorite' onClick={() => handleFavoriteEdit(el)} /> }
                                                     <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
                                                     <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
                                                 </div>
@@ -992,6 +1048,12 @@ const Home = () => {
                     </div>
                 </div>
             </Drawer>
+            <Snackbar autoHideDuration={3000} open={snackSetFavBarOpen} onClose={handleSetFavSnackBarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }} >
+                <Alert severity={ favTopicInfo?.errorMsg > 0 ? "error" : "success"} onClose={handleSetFavSnackBarClose} sx={{ width: '100%' }}>{ favTopicInfo?.errorMsg > 0 ? favTopicInfo?.errorMsg : favTopicInfo?.successMsg }</Alert>
+            </Snackbar>
+            <Snackbar autoHideDuration={3000} open={snackRemoveFavBarOpen} onClose={handleRemoveFavSnackBarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }} >
+                <Alert severity={ removeFavTopicInfo?.length > 0 ? "error" : "success"} onClose={handleRemoveFavSnackBarClose} sx={{ width: '100%' }}>{ removeFavTopicInfo?.errorMsg > 0 ? removeFavTopicInfo?.errorMsg : removeFavTopicInfo?.successMsg }</Alert>
+            </Snackbar>
         </>
     )
 }
