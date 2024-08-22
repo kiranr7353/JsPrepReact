@@ -247,6 +247,7 @@ const Home = () => {
         setCallEditTopic(false);
         if ((res?.status === 200 || res?.status === 201)) {
             getTopics?.refetch();
+            favTopics?.refetch();
             setOpenEditTopicModalInfo({ open: true, success: `Updated Successfully`, error: '' });
             setEditTopicInfo({});
         } else {
@@ -457,6 +458,7 @@ const Home = () => {
         setCallDeleteTopic(false);
         if ((res?.status === 200 || res?.status === 201)) {
             getTopics?.refetch();
+            favTopics?.refetch();
             handleTopicImageDelete();
             setOpenDeleteTopicModalInfo({ open: true, success: `Deleted Successfully`, error: '' });
             deleteTopicInfo.current = null;

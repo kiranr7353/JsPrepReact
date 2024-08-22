@@ -40,7 +40,7 @@
 }
 
 .textField div input {
-  width: 782px;
+  width: 750px;
 }
 
 .searchIcon {
@@ -120,6 +120,80 @@
   font-weight: bold;
   color: #514e4e;
   font-size: 19px;
+}
+
+.header {
+  padding: 20px;
+}
+
+.topicsInfo {
+  /* padding: 20px; */
+}
+
+.grid {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.topicCard {
+  background-color: #fff;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+  height: 344px;
+  margin: 0 20px 50px 20px;
+  width: 20%;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.topicCardFlex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+}
+
+.imageDiv {
+  width: 100%;
+  height: 165px;
+}
+
+.card__imgTopic {
+  width: inherit;
+  height: inherit;
+}
+
+.card__content {
+  /* padding: 3rem 1rem 0rem 1rem; */
+}
+
+.topicCard__header {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0d0d0d;
+  text-align: center;
+}
+
+.topicCard__desc {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0d0d0d;
+  text-align: center;
+  margin-top: 0px;
+  height: 85px;
+  overflow: hidden;
+}
+
+.topicsError {
+  color: red;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 @media screen and (max-width: 1440px) {

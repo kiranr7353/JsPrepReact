@@ -16,6 +16,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import appStore from './Redux/Reducers/AppReducer';
 import PrivateRoutes from './Components/PrivateRoutes';
 import Header from './Components/Header/Header';
+import SearchResults from './Components/Header/SearchResults';
 
 const LoginHome = lazy(() => import('./Components/Login/LoginHome'));
 const LogoutHome = lazy(() => import('./Components/Logout/LogoutHome'));
@@ -95,6 +96,7 @@ function App() {
                       <Route path="/logout" element={<LogoutHome />} />
                       <Route path='/home' element={<Header />} >
                         <Route index element={<Home />} />
+                        <Route path='search' element={<SearchResults />} />
                         <Route path='topic/:categoryId/:topicId' element={<TopicHome />} />
                       </Route>
                     </Routes>

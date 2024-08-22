@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import CommonButton from '../../CommonComponents/CommonButton'
-import { InputAdornment, TextField, Dialog, DialogContent, DialogContentText, Slide } from '@mui/material';
+import { InputAdornment, TextField, Dialog, DialogContent, DialogContentText, Slide, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,6 +29,9 @@ const Header = () => {
     const [isFetching, setIsFetching] = useState(false);
     const [detailErrorMessage, setDetailErrorMessage] = useState('');
     const [openDetailErrorDialog, setOpenDetailErrorDialog] = useState(false);
+    const [callSearchApi, setCallSearchApi] = useState(false);
+    const [searchApiInfo, setsearchApiInfo] = useState({ data: [], successMsg: '', errorMsg: '' });
+    const [snackBarOpen, setSnackBarOpen] = useState(false);
 
     const onDetailSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
@@ -54,7 +57,6 @@ const Header = () => {
 
     const handleLogout = () => {
         setIsFetching(true);
-        console.log(auth);
         signOut(auth).then((result) => {
             setIsFetching(false);
             if (result) {
@@ -80,8 +82,32 @@ const Header = () => {
         navigate('/login');
     }
 
+    const handleKeyDown = e => {
+        if (e.keyCode === 13 || e.key === "Enter") {
+            setCallSearchApi(true);
+        }
+    }
+
+    const onSearchSuccess = res => {
+        setCallSearchApi(false);
+        if ((res?.status === 200 || res?.status === 201)) {
+            setsearchApiInfo({ data: res?.data?.topics, successMsg: 'Success', errorMsg: '' });
+            navigate(`/home/search`, { state: { topics: res?.data?.topics, inputText: searchInput } })
+        } else {
+            setsearchApiInfo({ data: [], successMsg: '', errorMsg: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
+            navigate(`/home/search`, { state: { topics: [], inputText: searchInput, errorMsg: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' } })
+            // setSnackBarOpen(true);
+        }
+    }
+
+    const handleSnackBarClose = () => {
+        setSnackBarOpen(false);
+    }
+
     let detailsApi = useFetchAPI("DetailsApi", `/user/${appState?.userInfo?.localId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onDetailSuccess));
-    const fetching = detailsApi?.Loading || detailsApi?.Fetching;
+    let searchApi = useFetchAPI("searchApi", `/categories/searchTopics/${searchInput}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onSearchSuccess, "", callSearchApi));
+
+    const fetching = detailsApi?.Loading || detailsApi?.Fetching || searchApi?.Loading || searchApi?.Fetching;
 
     return (
         <>
@@ -98,6 +124,7 @@ const Header = () => {
                                     name='search'
                                     value={searchInput}
                                     onChange={handleChange}
+                                    onKeyDown={handleKeyDown}
                                     InputProps={{
                                         type: 'text',
                                         startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? HeaderStyles.searchIcon : HeaderStyles.searchIconDisabled} /></InputAdornment>,
@@ -159,6 +186,9 @@ const Header = () => {
             <div>
                 <Outlet />
             </div>
+            {/* <Snackbar autoHideDuration={3000} open={snackBarOpen} onClose={handleSnackBarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }} >
+                <Alert severity={"error"} onClose={handleSnackBarClose} sx={{ width: '100%' }}>{ searchApiInfo?.errorMsg > 0 && searchApiInfo?.errorMsg }</Alert>
+            </Snackbar> */}
         </>
     )
 }
