@@ -11,7 +11,7 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 45px;
+  justify-content: space-between;
 }
 
 .requestSectionContainer {
@@ -194,6 +194,137 @@
   color: red;
   font-weight: bold;
   font-size: 18px;
+}
+
+.headerTextVoice {
+  font-size: 20px !important;
+  font-weight: bold;
+  margin-top: -3px;
+  margin-right: 10px;
+}
+.speakNow > h6 {
+   text-align: center;
+   font-weight: bold;
+   font-size: 18px;
+}
+.speakNowErr > span:nth-child(1) {
+   text-align: center;
+   font-weight: bold;
+   font-size: 18px;
+}
+.speakNowErr > span:nth-child(2) {
+  text-align: center;
+  font-size: 14px;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0 40px 0;
+  cursor: pointer;
+}
+.centerMicOff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 60px 0 60px 0;
+  cursor: pointer;
+}
+.microphoneActive {
+  height: 100px;
+  width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #689efb;
+  position: relative;
+  box-shadow: -18px 18px 24px -5px rgba(246, 241, 241, 0.78);
+  -webkit-box-shadow: -18px 18px 24px -5px rgba(0, 0, 0, 0.78);
+  -moz-box-shadow: -18px 18px 24px -5px rgba(0, 0, 0, 0.78);
+}
+.microphoneActive::before {
+  content: "";
+  position: absolute;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  border: 1px solid #77f373;
+  border-radius: 50%;
+  animation: animate 1.5s linear infinite;
+
+}
+.microphoneActive::after {
+  content: "";
+  position: absolute;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  border: 1px solid #77f373;
+  border-radius: 50%;
+  animation: animate 1.5s linear infinite;
+  animation-delay: 0.4s;
+}
+.microphoneInActive::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid red;
+  border-radius: 50%;
+  margin-left: -61px;
+  margin-top: -36px;
+}
+@keyframes animate {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.micIconActive {
+  transform: scale(2);
+  color: white;
+}
+.micIconInactive {
+  transform: scale(2);
+  color: black;
+}
+.transcript {
+  padding-top: 22px;
+  font-weight: bold;
+  color: #514e4e;
+  font-size: 19px;
+}
+
+.modalabuttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loading {
+  font-weight: bold;
+  display:inline-block;
+  font-family: monospace;
+  font-size: 30px;
+  clip-path: inset(0 3ch 0 0);
+  animation: l 1s steps(4) infinite;
+}
+
+.listeningLoading {
+  font-weight: bold;
+  display:inline-block;
+  font-family: monospace;
+  clip-path: inset(0 3ch 0 0);
+  animation: l 1s steps(4) infinite;
 }
 
 @media screen and (max-width: 1440px) {

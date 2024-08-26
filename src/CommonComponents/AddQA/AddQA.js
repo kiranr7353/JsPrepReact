@@ -29,7 +29,7 @@ const AddQA = (props) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [enabled, setEnabled] = useState(true);
     const [QA, setQA] = useState([
-        { id: 1, answer: '', snippets: [], hasPoints: false, pointsData: [], hasTable: false, showPointsStyles: false, pointsStyles: '', tableColumns: [], tableData: [], hasNote: false, note: '' }
+        { id: 1, answer: '', snippets: [], code: '', hasPoints: false, pointsData: [], hasTable: false, showPointsStyles: false, pointsStyles: '', tableColumns: [], tableData: [], hasNote: false, note: '' }
     ])
     const QAInputRef = useRef([]);
     const QAPointsInputRef = useRef([]);
@@ -40,7 +40,7 @@ const AddQA = (props) => {
         setOpenDrawer(true);
         const uuid = uuidv4();
         editClicked ? setQuestionId(editItem?.questionId) : setQuestionId(`${params?.categoryId}-${params?.topicId}-${uuid}`);
-        if(editClicked) {
+        if (editClicked) {
             setQuestion(editItem?.question);
             setQA(editItem?.data);
             setEnabled(editItem?.enabled)
@@ -67,7 +67,7 @@ const AddQA = (props) => {
             if (e.target.id === 'points') {
                 newValues[i]['hasPoints'] = e.target.checked;
                 if (newValues[i]['hasPoints']) {
-                    newValues[i]['pointsData'].push({ id: 1, pointHeader: '', value: '', snippets: [] });
+                    newValues[i]['pointsData'].push({ id: 1, pointHeader: '', value: '', snippets: [], code: '' });
                 } else {
                     newValues[i]['pointsData'] = [];
                 }
@@ -190,9 +190,9 @@ const AddQA = (props) => {
 
     const removePoint = (idx, i, point) => {
         let pointsValues = [...QA[i].pointsData];
-        if(point?.snippets && point?.snippets?.length > 0) {
+        if (point?.snippets && point?.snippets?.length > 0) {
             point?.snippets?.forEach(img => {
-                if(img?.imageUploaded) {
+                if (img?.imageUploaded) {
                     genericRemoveUploadedImage(img?.url);
                 }
             })
@@ -267,7 +267,7 @@ const AddQA = (props) => {
 
     const addAnotherPoint = (i) => {
         setQA(prev => {
-            return [...prev.slice(0, i), { ...prev[i], pointsData: [...prev[i].pointsData, { id: QA[i]?.pointsData?.length + 1, pointHeader: '', value: '', snippets: [] }] }, ...prev.slice(i + 1)]
+            return [...prev.slice(0, i), { ...prev[i], pointsData: [...prev[i].pointsData, { id: QA[i]?.pointsData?.length + 1, pointHeader: '', value: '', snippets: [], code: '' }] }, ...prev.slice(i + 1)]
         })
     }
 
@@ -302,7 +302,7 @@ const AddQA = (props) => {
     }
 
     const addAnotherAnswer = () => {
-        setQA([...QA, { id: QA?.length + 1, answer: "", snippets: [], hasPoints: false, pointsData: [], showPointsStyles: false, pointsStyles: '', hasTable: false, tableColumns: [], tableData: [], hasNote: false, note: '' }])
+        setQA([...QA, { id: QA?.length + 1, answer: "", snippets: [], code: '', hasPoints: false, pointsData: [], showPointsStyles: false, pointsStyles: '', hasTable: false, tableColumns: [], tableData: [], hasNote: false, note: '' }])
     }
 
     const removeAnswer = (i, el) => {
@@ -316,9 +316,9 @@ const AddQA = (props) => {
         }
         if (newValues[i]?.pointsData?.length > 0) {
             newValues[i]?.pointsData?.forEach(point => {
-                if(point?.snippets?.length > 0) {
+                if (point?.snippets?.length > 0) {
                     point?.snippets?.forEach(image => {
-                        if(image?.imageUploaded) {
+                        if (image?.imageUploaded) {
                             genericRemoveUploadedImage(image?.url);
                         }
                     })
@@ -352,7 +352,7 @@ const AddQA = (props) => {
             setOpenModal(true);
             getQA.refetch();
             setErrorMessage('');
-            setSuccessMessage(editClicked ? 'QA updated successfully' :`QA added successfully`);
+            setSuccessMessage(editClicked ? 'QA updated successfully' : `QA added successfully`);
         } else {
             setOpenModal(true);
             setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later')
@@ -376,7 +376,7 @@ const AddQA = (props) => {
                 <div className={AddQAStyles.addQAContainer}>
                     <div className={AddQAStyles.addQATitle}>
                         <div>
-                            <h2>{ editClicked ? 'Edit Question and Answer' :'Add Question and Answer'}</h2>
+                            <h2>{editClicked ? 'Edit Question and Answer' : 'Add Question and Answer'}</h2>
                         </div>
                         <div>
                             <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
@@ -384,10 +384,10 @@ const AddQA = (props) => {
                     </div>
                     <div className={AddQAStyles.addQAForm}>
                         <div className={AddQAStyles.QATitle}>
-                            { editClicked && <Typography component="label" sx={{ float: 'right' }}>
+                            {editClicked && <Typography component="label" sx={{ float: 'right' }}>
                                 Enable
                                 <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-                            </Typography> }
+                            </Typography>}
                             <FormControl sx={{ width: '100%' }}>
                                 <label>Question ID <span className={AddQAStyles.required}>*</span></label>
                                 <TextField
@@ -421,17 +421,23 @@ const AddQA = (props) => {
                                         <label>Answer {QA[i]?.id}</label>
                                         <div className={AddQAStyles.QAFlex}>
                                             <div className={AddQAStyles.QADiv}>
-                                                <TextField
+                                                <textarea
                                                     className={AddQAStyles.headerInput}
                                                     name='answer'
                                                     value={el?.answer || ""}
                                                     onChange={(e) => handleQAChange(i, e)}
-                                                    InputProps={{
-                                                        type: 'text',
-                                                    }}
-                                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
-                                                    placeholder={"Enter Answer"} size="large"
-                                                />
+                                                    placeholder={"Enter Answer"}
+                                                    style={{ height: 100 }}
+                                                ></textarea>
+                                                <label>Code (if any)</label>
+                                                <textarea
+                                                    className={AddQAStyles.headerInput}
+                                                    name='code'
+                                                    style={{ height: 200 }}
+                                                    value={el?.code || ""}
+                                                    onChange={(e) => handleQAChange(i, e)}
+                                                    placeholder={"Enter Code"} size="large"
+                                                ></textarea>
                                                 <label className={`btn btn-primary ${AddQAStyles.DocUpload}`}>Upload Code Snippet(s)</label>
                                                 <input ref={el => QAInputRef.current[i] = el} name='snippets' type='file' accept='.jpg,.jpeg,.png' multiple className={AddQAStyles.uploadInput} onChange={(e) => handleQAChange(i, e)} />
                                                 {QA[i]?.snippets?.length > 0 &&
@@ -524,6 +530,15 @@ const AddQA = (props) => {
                                                                             sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
                                                                             placeholder={"Enter Value"} size="large"
                                                                         />
+                                                                        <label>Code (if any)</label>
+                                                                        <textarea
+                                                                            className={AddQAStyles.headerInput}
+                                                                            name='code'
+                                                                            style={{ height: 200 }}
+                                                                            value={point?.code || ""}
+                                                                            onChange={(e) => handlePointsChange(idx, e, i)}
+                                                                            placeholder={"Enter Code"} size="large"
+                                                                        ></textarea>
                                                                         <div>
                                                                             <label className={`btn btn-primary ${AddQAStyles.DocUpload}`}>Upload Code Snippet(s)</label>
                                                                             <input ref={el => QAPointsInputRef.current[idx] = el} name='snippets' type='file' accept='.jpg,.jpeg,.png' multiple className={AddQAStyles.uploadInput} onChange={(e) => handlePointsChange(idx, e, i)} />
@@ -650,7 +665,7 @@ const AddQA = (props) => {
                                                             <div>
                                                                 <h4>Note</h4>
                                                                 <TextField
-                                                                    className={AddQAStyles.columnInput}
+                                                                    className={AddQAStyles.headerInput}
                                                                     name='note'
                                                                     value={el?.note || ""}
                                                                     onChange={(e) => handleQAChange(i, e)}

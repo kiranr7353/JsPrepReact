@@ -7,12 +7,14 @@ import AddQA from '../AddQA/AddQA';
 import { AntTab, AntTabs } from './TabsStyles';
 import { useFetchAPI } from '../../Hooks/useAPI';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import ClearIcon from '@mui/icons-material/Clear';
 import CloseIcon from '@mui/icons-material/Close';
 import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
-import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, Fade, Pagination, Paper, Skeleton, Slide, Table, TableBody, TableHead, TableRow, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, Fade, InputAdornment, Pagination, Paper, Skeleton, Slide, Table, TableBody, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -56,7 +58,8 @@ const InterviewQA = (props) => {
     const [deleteConfirmationInfo, setDeleteConfirmationInfo] = useState({ open: false, successMsg: '', errorMsg: '' });
     const [bookmarkQuestionPayload, setBookmarkQuestionPayload] = useState({});
     const [callBookmarkApi, setCallBookmarkApi] = useState(false);
-    const [bookmarkApiInfo, setBookmarkApiInfo] = useState({ open: false, successMsg: '', errorMsg: '' })
+    const [bookmarkApiInfo, setBookmarkApiInfo] = useState({ open: false, successMsg: '', errorMsg: '' });
+    const searchInput = useRef('');
 
     const TabPanel = (props) => {
         const { children, value, index, ...other } = props;
@@ -185,15 +188,15 @@ const InterviewQA = (props) => {
 
     const checkBookmarked = (allQA, bookmarkedQA) => {
         const results = allQA?.filter(({ questionId: id1 }) => bookmarkedQA?.some(({ questionId: id2 }) => id2 === id1));
-        if(results?.length > 0) {
+        if (results?.length > 0) {
             const modified = results?.map(el => ({ ...el, bookmarked: true }));
-            if(modified && modified?.length > 0) {
+            if (modified && modified?.length > 0) {
                 const res = allInterviewQAData?.map(el => {
                     let item = modified?.find(id => id.questionId === el.questionId)
-                    if(item) {
+                    if (item) {
                         return item;
                     }
-                    return el; 
+                    return el;
                 })
                 setAllInterviewQAData(res);
             }
@@ -208,7 +211,26 @@ const InterviewQA = (props) => {
         } else {
             setBookmarkedInterviewQAData([]);
         }
-    }    
+    }
+
+    const handleInputChange = (e) => {
+        // console.log(inputValue);
+        searchInput.current = e.target.value
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.keyCode === 13 || e.key === "Enter") {
+            console.log(searchInput.current);
+        }
+      
+    }
+
+    const handleClear = () => {
+
+    }
+
+    console.log(searchInput.current);
+    
 
     const getQA = useFetchAPI("getQA", `/categories/getInterviewQA`, "POST", getInterviewQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onGetQASuccess));
     const deleteQA = useFetchAPI("deleteQA", `/categories/deleteInterviewQuestion`, "POST", deletePayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteSuccess, "", callDeleteApi));
@@ -231,6 +253,26 @@ const InterviewQA = (props) => {
                         {showHiddenTab && <AntTab label="Hidden Interview Question and Answers" {...a11yProps(2)} />}
                     </AntTabs>
                     <TabPanel value={value} index={0}>
+                        <div className={InterviewQAStyles.searchBar}>
+                            <TextField
+                                name='search'
+                                ref={searchInput}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                InputProps={{
+                                    type: 'text',
+                                    startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? InterviewQAStyles.searchIcon : InterviewQAStyles.searchIconDisabled} /></InputAdornment>,
+                                    endAdornment: (
+                                        <>
+                                            <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={InterviewQAStyles.clearIcon} onClick={handleClear} />}</InputAdornment>
+                                        </>
+                                    )
+                                }}
+                                sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
+                                className={InterviewQAStyles.textField}
+                                placeholder={'Search Question'} size="large"
+                            />
+                        </div>
                         {fetching ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
                             (allInterviewQAData && allInterviewQAData?.length > 0) ? allInterviewQAData?.map((el, i) => {
                                 if (el?.enabled) return (
@@ -253,6 +295,14 @@ const InterviewQA = (props) => {
                                             {el?.data?.map((ans, index) => (
                                                 <div key={ans.answer + index}>
                                                     <Typography>{ans.answer}</Typography>
+                                                    {ans?.code && <div>
+                                                        <h3><u>Code</u></h3>
+                                                        <div className={InterviewQAStyles.codeBlock}>
+                                                            <pre>
+                                                                <code className={InterviewQAStyles.code}>{ans?.code}</code>
+                                                            </pre>
+                                                        </div>
+                                                    </div>}
                                                     <div className={InterviewQAStyles.ansImageDiv}>
                                                         {ans.snippets.map(img => (
                                                             <Zoom>
@@ -265,6 +315,14 @@ const InterviewQA = (props) => {
 
                                                             {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
                                                             <Typography>{ele.value}</Typography>
+                                                            {ele?.code && <div>
+                                                                <h3><u>Code</u></h3>
+                                                                <div className={InterviewQAStyles.codeBlock}>
+                                                                    <pre>
+                                                                        <code className={InterviewQAStyles.code}>{ele?.code}</code>
+                                                                    </pre>
+                                                                </div>
+                                                            </div>}
                                                             <div className={InterviewQAStyles.ansImageDiv}>
                                                                 {ele?.snippets?.map(imge => (
                                                                     <Zoom>
@@ -302,19 +360,19 @@ const InterviewQA = (props) => {
                                             ))}
                                             <div className={InterviewQAStyles.iconsDiv}>
                                                 <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => handleQAEdit(el)} />
-                                                { el?.bookmarked ? <BookmarkAddedIcon titleAccess='Bookmarked' className={InterviewQAStyles.bookmarkedIcon} /> : <BookmarkBorderIcon titleAccess='Bookmark' className={InterviewQAStyles.bookmarkQAIcon} onClick={() => handleBookmark(el)} />}
+                                                {el?.bookmarked ? <BookmarkAddedIcon titleAccess='Bookmarked' className={InterviewQAStyles.bookmarkedIcon} /> : <BookmarkBorderIcon titleAccess='Bookmark' className={InterviewQAStyles.bookmarkQAIcon} onClick={() => handleBookmark(el)} />}
                                                 <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => handleQADelete(el)} />
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        { totalDocs > 10 &&<div className={InterviewQAStyles.pagination}>
+                        {totalDocs > 10 && <div className={InterviewQAStyles.pagination}>
                             <Pagination count={totalDocs} page={pageState} onChange={handlePageChange} color="primary" />
-                        </div> }
+                        </div>}
                     </TabPanel>
                     <TabPanel value={value} index={1}>
-                       <BookmarkedTab getBookmarkQA={getBookmarkQA} setGetBookmarkedQAPayload={setGetBookmarkedQAPayload} setBookmarkedPageState={setBookmarkedPageState} bookmarkedInterviewQAData={bookmarkedInterviewQAData} bookmarkedPageState={bookmarkedPageState} handleQAEdit={handleQAEdit} handleQADelete={handleQADelete} setcallBookmarkedQAApi={setcallBookmarkedQAApi} getQA={getQA} setValue={setValue} />
+                        <BookmarkedTab getBookmarkQA={getBookmarkQA} setGetBookmarkedQAPayload={setGetBookmarkedQAPayload} setBookmarkedPageState={setBookmarkedPageState} bookmarkedInterviewQAData={bookmarkedInterviewQAData} bookmarkedPageState={bookmarkedPageState} handleQAEdit={handleQAEdit} handleQADelete={handleQADelete} setcallBookmarkedQAApi={setcallBookmarkedQAApi} getQA={getQA} setValue={setValue} />
                     </TabPanel>
                     {showHiddenTab && <TabPanel value={value} index={2}>
                         {fetching ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
@@ -339,25 +397,25 @@ const InterviewQA = (props) => {
                                             {el?.data?.map((ans, index) => (
                                                 <div key={ans.answer + index}>
                                                     <Typography>{ans.answer}</Typography>
-                                                    <div className={InterviewQAStyles.ansImageDiv}>
+                                                    {ans?.snippets?.length > 0 && <div className={InterviewQAStyles.ansImageDiv}>
                                                         {ans.snippets.map(img => (
                                                             <Zoom>
                                                                 <img src={img.url} alt={img?.url} />
                                                             </Zoom>
                                                         ))}
-                                                    </div>
+                                                    </div>}
                                                     {ans?.hasPoints && ans?.pointsData?.map((ele, i) => (
                                                         <>
 
                                                             {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
                                                             <Typography>{ele.value}</Typography>
-                                                            <div className={InterviewQAStyles.ansImageDiv}>
+                                                            {ele?.snippets?.length > 0 && <div className={InterviewQAStyles.ansImageDiv}>
                                                                 {ele?.snippets?.map(imge => (
                                                                     <Zoom>
                                                                         <img src={imge?.url} alt={imge?.url} />
                                                                     </Zoom>
                                                                 ))}
-                                                            </div>
+                                                            </div>}
                                                         </>
                                                     ))}
                                                     {ans?.hasTable && (
@@ -394,9 +452,9 @@ const InterviewQA = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                            { totalDocs > 10 &&<div className={InterviewQAStyles.pagination}>
+                        {totalDocs > 10 && <div className={InterviewQAStyles.pagination}>
                             <Pagination count={totalDocs} page={hiddenPageState} onChange={handleHiddenPageChange} color="primary" />
-                        </div> }
+                        </div>}
                     </TabPanel>}
                 </div>
                 {(addQAClicked || editClicked) && <AddQA setAddQAClicked={setAddQAClicked} setEditClicked={setEditClicked} editClicked={editClicked} params={params} locationDetails={locationDetails} getQA={getQA} editItem={editItem} />}

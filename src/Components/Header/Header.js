@@ -5,6 +5,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
+import MicIcon from '@mui/icons-material/Mic';
 import HeaderStyles from './HeaderStyles.module.css';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
@@ -14,6 +15,7 @@ import { useSelector } from 'react-redux';
 import { CommonHeaders } from '../../CommonComponents/CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import Loader from '../../CommonComponents/Loader/Loader';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -31,13 +33,23 @@ const Header = () => {
     const [openDetailErrorDialog, setOpenDetailErrorDialog] = useState(false);
     const [callSearchApi, setCallSearchApi] = useState(false);
     const [searchApiInfo, setsearchApiInfo] = useState({ data: [], successMsg: '', errorMsg: '' });
+    const [openMicDialog, setOpenMicDialog] = useState(false);
     const [snackBarOpen, setSnackBarOpen] = useState(false);
+    const [openMicSnackbar, setOpenMicSnackbar] = useState(false);
+    const [micPermissionError, setMicPermissionError] = useState('');
+    const [transcribing, setTranscribing] = useState(true);
+    const [placeholder, setPlaceholder] = useState('');
+    const [clearTranscriptOnListen, setClearTranscriptOnListen] = useState(true)
+    const toggleTranscribing = () => setTranscribing(!transcribing)
+    const toggleClearTranscriptOnListen = () => setClearTranscriptOnListen(!clearTranscriptOnListen)
+
+    const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition, isMicrophoneAvailable } = useSpeechRecognition({ toggleClearTranscriptOnListen });
 
     const onDetailSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
             setDetailsResponse(res?.data?.userInfo);
         } else {
-            if(res?.status === 401) {
+            if (res?.status === 401) {
                 setDetailErrorMessage("Session Expired. Please login again!!");
             } else {
                 setDetailErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
@@ -104,8 +116,100 @@ const Header = () => {
         setSnackBarOpen(false);
     }
 
+    useEffect(() => {
+        if (!isMicrophoneAvailable) {
+            setMicPermissionError("Please allow access to the microphone");
+            setOpenMicSnackbar(true);
+            setOpenMicDialog(false);
+        }
+    }, [isMicrophoneAvailable])
+
+    useEffect(() => {
+        if (!browserSupportsSpeechRecognition) {
+            setMicPermissionError("This Browser doesn't support speech recognition. Please try again with differnt browser");
+            setOpenMicSnackbar(true);
+            setOpenMicDialog(false);
+        }
+    }, [browserSupportsSpeechRecognition])
+
+    const handleMicIconClick = () => {
+        resetTranscript();
+        setMicPermissionError('');
+        setOpenMicSnackbar(false);
+        if (!browserSupportsSpeechRecognition) {
+            setMicPermissionError("This Browser doesn't support speech recognition. Please try again with differnt browser");
+            setOpenMicSnackbar(true);
+            setOpenMicDialog(false);
+        } else if (!isMicrophoneAvailable) {
+            setMicPermissionError("Please allow access to the microphone");
+            setOpenMicSnackbar(true);
+            setOpenMicDialog(false);
+        } else {
+            setOpenMicDialog(true);
+            setTimeout(() => {
+                SpeechRecognition.startListening({ continuous: true });
+            }, 100);
+        }
+    }
+
+    const handleMicDialogClose = () => {
+        resetTranscript();
+        setOpenMicDialog(false);
+        setMicPermissionError('');
+        setOpenMicSnackbar(false);
+        setTimeout(() => {
+            SpeechRecognition.abortListening();
+            SpeechRecognition.stopListening();
+        }, 100);
+    }
+
+    const handleMicToggle = () => {
+        resetTranscript();
+        if(!listening) {
+            SpeechRecognition.startListening({ continuous: true });
+            setTimeout(() => {
+                if (transcript?.length === 0) {
+                    SpeechRecognition.stopListening();
+                }
+            }, 4000);
+        } else {
+            SpeechRecognition.stopListening();
+        }
+    }
+
+    const handleOk = () => {
+        setSearchInput(transcript);
+        setCallSearchApi(true);
+        handleMicDialogClose();
+        setTimeout(() => {
+           SpeechRecognition.stopListening();
+           SpeechRecognition.abortListening();
+        }, 100);
+    }
+
+    const handleReset = () => {
+        resetTranscript();
+    }
+
+    const randomPlaceholder = (arr,min, max) => { 
+        return arr[Math.floor(Math.random()  
+                * (max - min + 1)) + min]; 
+    }; 
+
+    const onPlaceholderSuccess = res => {
+        if ((res?.status === 200 || res?.status === 201)) {
+              let data = res?.data?.placeholders?.length > 0 ? res?.data?.placeholders : ['Topics'];
+              setInterval(() => {
+                setPlaceholder(randomPlaceholder(data, 0, data.length - 1))
+              }, 2000);
+        } else {
+              setPlaceholder('Topics');
+        }
+    }
+
     let detailsApi = useFetchAPI("DetailsApi", `/user/${appState?.userInfo?.localId}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onDetailSuccess));
     let searchApi = useFetchAPI("searchApi", `/categories/searchTopics/${searchInput}`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onSearchSuccess, "", callSearchApi));
+    let placeholderApi = useFetchAPI("placeholderApi", `/config/getPlaceholders`, "GET", '', CommonHeaders(), fetchQueryParams("", "", "", onPlaceholderSuccess));
 
     const fetching = detailsApi?.Loading || detailsApi?.Fetching || searchApi?.Loading || searchApi?.Fetching;
 
@@ -128,18 +232,23 @@ const Header = () => {
                                     InputProps={{
                                         type: 'text',
                                         startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? HeaderStyles.searchIcon : HeaderStyles.searchIconDisabled} /></InputAdornment>,
-                                        endAdornment: <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={HeaderStyles.clearIcon} onClick={handleClear} />}</InputAdornment>
+                                        endAdornment: (
+                                            <>
+                                                <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={HeaderStyles.clearIcon} onClick={handleClear} />}</InputAdornment>
+                                                <MicIcon titleAccess='Ask by voice' onClick={handleMicIconClick} sx={{ cursor: 'pointer', color: '#296CE2', marginRight: '20px' }} />
+                                            </>
+                                        )
                                     }}
                                     sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
                                     className={HeaderStyles.textField}
-                                    placeholder={"Search Topics"} size="large"
+                                    placeholder={'Search ' + placeholder} size="large"
                                 />
                             </div>
                             <div className={HeaderStyles.requestSection}>
                                 <div className={HeaderStyles.requestSectionContainer}>
-                                    <div>
+                                    {/* <div>
                                         <h5 className={HeaderStyles.requestText}>Request a Category</h5>
-                                    </div>
+                                    </div> */}
                                     <div>
                                         <h5 className={HeaderStyles.requestText}>Request a Topic</h5>
                                     </div>
@@ -189,6 +298,49 @@ const Header = () => {
             {/* <Snackbar autoHideDuration={3000} open={snackBarOpen} onClose={handleSnackBarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }} >
                 <Alert severity={"error"} onClose={handleSnackBarClose} sx={{ width: '100%' }}>{ searchApiInfo?.errorMsg > 0 && searchApiInfo?.errorMsg }</Alert>
             </Snackbar> */}
+            <Dialog open={openMicDialog} TransitionComponent={Transition} keepMounted onClose={handleMicDialogClose} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" className={HeaderStyles.dialogWrapper}>
+                <div className={HeaderStyles.modalinnerwrapper}>
+                    <div><h4 className={HeaderStyles.headerTextVoice}>Search Topics</h4></div>
+                    <IconButton aria-label="close" onClick={handleMicDialogClose} sx={{ position: 'absolute', right: 8, top: 8, color: "#666" }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-slide-description">
+                            <p>{listening ? <div className={HeaderStyles.speakNow}>{transcript?.length > 0 ? <><h6>Listening<span className={HeaderStyles.listeningLoading}>...</span></h6><div><h6 style={{ textAlign: 'center' }}>Please speak closer to microphone for better results</h6></div></> : <h6>Speak Now</h6>}</div> : <div className={HeaderStyles.speakNowErr}>{ transcript?.length > 0 ? <><span>It's not what you spoke? </span><span onClick={handleMicToggle}>Try speaking again </span><span>close to microphone</span></> : <><span>Didn't get that. </span><span onClick={handleMicToggle}>Try speaking again</span></>}</div>}</p>
+                            <div className={listening ? HeaderStyles.center : HeaderStyles.centerMicOff} onClick={handleMicToggle}>
+                                <div className={listening ? HeaderStyles.microphoneActive : HeaderStyles.microphoneInActive}>
+                                <MicIcon className={listening ? HeaderStyles.micIconActive : HeaderStyles.micIconInactive} />
+                                </div>
+                            </div>
+                        </DialogContentText>
+                        <div className={HeaderStyles.transcript}>{transcript}</div>
+                    </DialogContent>
+                    {transcript?.length > 0 &&
+                        <div className={HeaderStyles.modalabuttons}>
+                            <div className={HeaderStyles.modalactionsection}>
+                                <button onClick={handleReset} className={HeaderStyles.okButton}>
+                                    Reset
+                                </button>
+                            </div>
+                            <div className={HeaderStyles.modalactionsection}>
+                                <button onClick={handleOk} className={HeaderStyles.okButton}>
+                                    Ok
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </Dialog>
+            <Snackbar open={openMicSnackbar} autoHideDuration={4000} onClose={() => setOpenMicSnackbar(false)} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+                <Alert
+                    onClose={() => setOpenMicSnackbar(false)}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                    severity="error"
+                    sx={{ width: '100%' }}
+                >
+                    {micPermissionError}
+                </Alert>
+            </Snackbar>
         </>
     )
 }

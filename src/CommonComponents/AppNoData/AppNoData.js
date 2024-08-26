@@ -1,6 +1,6 @@
 import React from 'react';
 import NoDataStyle from './Styles/AppNoData.module.css';
-import NoResultsImg from '../../Images/noDataFound.jpg';
+import NoResultsImg from '../../Images/trace.svg';
 
 const AppNoData = (props) => {
 
