@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import InterviewQAStyles from './InterviewQAStyles.module.css'
 import CommonButton from '../CommonButton'
 import PropTypes from 'prop-types';
@@ -7,11 +7,11 @@ import AddQA from '../AddQA/AddQA';
 import { AntTab, AntTabs } from './TabsStyles';
 import { useFetchAPI } from '../../Hooks/useAPI';
 import EditIcon from '@mui/icons-material/Edit';
-import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
-import ClearIcon from '@mui/icons-material/Clear';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, Fade, InputAdornment, Pagination, Paper, Skeleton, Slide, Table, TableBody, TableHead, TableRow, TextField, Typography } from '@mui/material';
@@ -28,10 +28,13 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 import { ref as storageRef, deleteObject } from "firebase/storage";
 import { storage } from '../../firebaseConfig';
 import BookmarkedTab from './BookmarkedTab';
+import SearchQA from './SearchQA';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
+
+
 
 const InterviewQA = (props) => {
 
@@ -59,7 +62,7 @@ const InterviewQA = (props) => {
     const [bookmarkQuestionPayload, setBookmarkQuestionPayload] = useState({});
     const [callBookmarkApi, setCallBookmarkApi] = useState(false);
     const [bookmarkApiInfo, setBookmarkApiInfo] = useState({ open: false, successMsg: '', errorMsg: '' });
-    const searchInput = useRef('');
+    const [searchInput, setSearchInput] = useState('')
 
     const TabPanel = (props) => {
         const { children, value, index, ...other } = props;
@@ -214,23 +217,22 @@ const InterviewQA = (props) => {
     }
 
     const handleInputChange = (e) => {
-        // console.log(inputValue);
-        searchInput.current = e.target.value
-    }
+         setSearchInput(e.target.value)
+     }
+ 
+     const handleKeyDown = (e) => {
+         if (e.keyCode === 13 || e.key === "Enter") {
+             if(searchInput?.length > 0) {
+                 setGetInterviewQAPayload(prev => ({...prev, searchText: searchInput}))
+             }
+         }
+     }
+ 
+     const handleClear = (e) => {
+        setSearchInput('');
+        setGetInterviewQAPayload(prev => ({...prev, searchText: undefined}))
+     }
 
-    const handleKeyDown = (e) => {
-        if (e.keyCode === 13 || e.key === "Enter") {
-            console.log(searchInput.current);
-        }
-      
-    }
-
-    const handleClear = () => {
-
-    }
-
-    console.log(searchInput.current);
-    
 
     const getQA = useFetchAPI("getQA", `/categories/getInterviewQA`, "POST", getInterviewQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onGetQASuccess));
     const deleteQA = useFetchAPI("deleteQA", `/categories/deleteInterviewQuestion`, "POST", deletePayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteSuccess, "", callDeleteApi));
@@ -247,32 +249,32 @@ const InterviewQA = (props) => {
                     <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Question</CommonButton>
                 </div>
                 <div className={InterviewQAStyles.tabs}>
+                    <div className={InterviewQAStyles.searchBar}>
+                        <TextField
+                            name='search'
+                            value={searchInput}
+                            onChange={(e) => handleInputChange(e)}
+                            onKeyDown={(e) => handleKeyDown(e)}
+                            InputProps={{
+                                type: 'text',
+                                startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? InterviewQAStyles.searchIcon : InterviewQAStyles.searchIconDisabled} /></InputAdornment>,
+                                endAdornment: (
+                                    <>
+                                        <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={InterviewQAStyles.clearIcon} onClick={() => handleClear()} />}</InputAdornment>
+                                    </>
+                                )
+                            }}
+                            sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
+                            className={InterviewQAStyles.textField}
+                            placeholder={'Search Question'} size="large"
+                        />
+                    </div>
                     <AntTabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         <AntTab label="All Interview Question and Answers" {...a11yProps(0)} />
                         <AntTab label="Bookmarked Interview Question and Answers" {...a11yProps(1)} />
                         {showHiddenTab && <AntTab label="Hidden Interview Question and Answers" {...a11yProps(2)} />}
                     </AntTabs>
                     <TabPanel value={value} index={0}>
-                        <div className={InterviewQAStyles.searchBar}>
-                            <TextField
-                                name='search'
-                                ref={searchInput}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyDown}
-                                InputProps={{
-                                    type: 'text',
-                                    startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? InterviewQAStyles.searchIcon : InterviewQAStyles.searchIconDisabled} /></InputAdornment>,
-                                    endAdornment: (
-                                        <>
-                                            <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={InterviewQAStyles.clearIcon} onClick={handleClear} />}</InputAdornment>
-                                        </>
-                                    )
-                                }}
-                                sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
-                                className={InterviewQAStyles.textField}
-                                placeholder={'Search Question'} size="large"
-                            />
-                        </div>
                         {fetching ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
                             (allInterviewQAData && allInterviewQAData?.length > 0) ? allInterviewQAData?.map((el, i) => {
                                 if (el?.enabled) return (
