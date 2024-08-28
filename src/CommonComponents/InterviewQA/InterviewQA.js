@@ -77,6 +77,12 @@ const InterviewQA = (props) => {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        setSearchInput('');
+        setGetInterviewQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        if (newValue === 1) {
+            setGetBookmarkedQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }));
+            setcallBookmarkedQAApi(true);
+        }
     }
 
     const toggleDrawer = () => {
@@ -217,21 +223,31 @@ const InterviewQA = (props) => {
     }
 
     const handleInputChange = (e) => {
-         setSearchInput(e.target.value)
-     }
- 
-     const handleKeyDown = (e) => {
-         if (e.keyCode === 13 || e.key === "Enter") {
-             if(searchInput?.length > 0) {
-                 setGetInterviewQAPayload(prev => ({...prev, searchText: searchInput}))
-             }
-         }
-     }
- 
-     const handleClear = (e) => {
+        setSearchInput(e.target.value)
+    }
+
+    const handleKeyDown = (e) => {
+        console.log(value);
+
+        if (e.keyCode === 13 || e.key === "Enter") {
+            if (searchInput?.length > 0 && value === 0) {
+                setGetInterviewQAPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
+            } else if (searchInput?.length > 0 && value === 1) {
+                setGetBookmarkedQAPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
+                setcallBookmarkedQAApi(true);
+            }
+        }
+    }
+
+    const handleClear = (e) => {
         setSearchInput('');
-        setGetInterviewQAPayload(prev => ({...prev, searchText: undefined}))
-     }
+        if (value === 0) {
+            setGetInterviewQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        } else if (value === 1) {
+            setcallBookmarkedQAApi(true);
+            setGetBookmarkedQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        }
+    }
 
 
     const getQA = useFetchAPI("getQA", `/categories/getInterviewQA`, "POST", getInterviewQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onGetQASuccess));
@@ -399,25 +415,41 @@ const InterviewQA = (props) => {
                                             {el?.data?.map((ans, index) => (
                                                 <div key={ans.answer + index}>
                                                     <Typography>{ans.answer}</Typography>
-                                                    {ans?.snippets?.length > 0 && <div className={InterviewQAStyles.ansImageDiv}>
+                                                    {ans?.code && <div>
+                                                        <h3><u>Code</u></h3>
+                                                        <div className={InterviewQAStyles.codeBlock}>
+                                                            <pre>
+                                                                <code className={InterviewQAStyles.code}>{ans?.code}</code>
+                                                            </pre>
+                                                        </div>
+                                                    </div>}
+                                                    <div className={InterviewQAStyles.ansImageDiv}>
                                                         {ans.snippets.map(img => (
                                                             <Zoom>
                                                                 <img src={img.url} alt={img?.url} />
                                                             </Zoom>
                                                         ))}
-                                                    </div>}
+                                                    </div>
                                                     {ans?.hasPoints && ans?.pointsData?.map((ele, i) => (
                                                         <>
 
                                                             {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
                                                             <Typography>{ele.value}</Typography>
-                                                            {ele?.snippets?.length > 0 && <div className={InterviewQAStyles.ansImageDiv}>
+                                                            {ele?.code && <div>
+                                                                <h3><u>Code</u></h3>
+                                                                <div className={InterviewQAStyles.codeBlock}>
+                                                                    <pre>
+                                                                        <code className={InterviewQAStyles.code}>{ele?.code}</code>
+                                                                    </pre>
+                                                                </div>
+                                                            </div>}
+                                                            <div className={InterviewQAStyles.ansImageDiv}>
                                                                 {ele?.snippets?.map(imge => (
                                                                     <Zoom>
                                                                         <img src={imge?.url} alt={imge?.url} />
                                                                     </Zoom>
                                                                 ))}
-                                                            </div>}
+                                                            </div>
                                                         </>
                                                     ))}
                                                     {ans?.hasTable && (
@@ -443,7 +475,7 @@ const InterviewQA = (props) => {
                                                             </CustomizedTable>
                                                         </div>
                                                     )}
-                                                    {el?.note && <Typography>Note : {el?.note}</Typography>}
+                                                    {ans?.note && <Typography><b>Note:</b> {ans?.note}</Typography>}
                                                 </div>
                                             ))}
                                             <div className={InterviewQAStyles.iconsDiv}>

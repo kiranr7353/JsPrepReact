@@ -78,6 +78,14 @@ const BookmarkedTab = (props) => {
                                 {el?.data?.map((ans, index) => (
                                     <div key={ans.answer + index}>
                                         <Typography>{ans.answer}</Typography>
+                                        {ans?.code && <div>
+                                            <h3><u>Code</u></h3>
+                                            <div className={InterviewQAStyles.codeBlock}>
+                                                <pre>
+                                                    <code className={InterviewQAStyles.code}>{ans?.code}</code>
+                                                </pre>
+                                            </div>
+                                        </div>}
                                         <div className={InterviewQAStyles.ansImageDiv}>
                                             {ans.snippets.map(img => (
                                                 <Zoom>
@@ -90,6 +98,14 @@ const BookmarkedTab = (props) => {
 
                                                 {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
                                                 <Typography>{ele.value}</Typography>
+                                                {ele?.code && <div>
+                                                    <h3><u>Code</u></h3>
+                                                    <div className={InterviewQAStyles.codeBlock}>
+                                                        <pre>
+                                                            <code className={InterviewQAStyles.code}>{ele?.code}</code>
+                                                        </pre>
+                                                    </div>
+                                                </div>}
                                                 <div className={InterviewQAStyles.ansImageDiv}>
                                                     {ele?.snippets?.map(imge => (
                                                         <Zoom>
@@ -122,7 +138,7 @@ const BookmarkedTab = (props) => {
                                                 </CustomizedTable>
                                             </div>
                                         )}
-                                        {el?.note && <Typography>Note : {el?.note}</Typography>}
+                                        {ans?.note && <Typography><b>Note:</b> {ans?.note}</Typography>}
                                     </div>
                                 ))}
                                 <div className={InterviewQAStyles.iconsDiv}>
