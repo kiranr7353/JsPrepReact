@@ -107,7 +107,7 @@ const BookmarkedSnippet = (props) => {
             </Accordion>
           )
         }) : <AppNoData />}
-      {bookmarkedSnippetData?.totalCount > 10 && <div className={CodeSnippetsStyles.pagination}>
+      {bookmarkedSnippetData?.totalCount > 25 && <div className={CodeSnippetsStyles.pagination}>
         <Pagination count={bookmarkedSnippetData?.totalCount} page={bookmarkedPageState} onChange={handleBookmarkedPageChange} color="primary" />
       </div>}
       <ConfirmationDialog openDialog={removeBookmarkInfo?.open} errorMessage={removeBookmarkInfo?.errorMsg} successMessage={removeBookmarkInfo?.successMsg} handleCloseDialog={handleRemoveBookmarkClosePopup} />

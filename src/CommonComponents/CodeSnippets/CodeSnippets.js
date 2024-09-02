@@ -3,7 +3,7 @@ import CodeSnippetsStyles from './CodeSnippetsStyles.module.css';
 import CommonButton from '../CommonButton';
 import { AntTab, AntTabs } from '../InterviewQA/TabsStyles';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, Pagination, Skeleton, Slide, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, InputAdornment, Pagination, Skeleton, Slide, TextField, Typography } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Zoom from 'react-medium-image-zoom'
@@ -15,6 +15,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import { ref as storageRef, deleteObject } from "firebase/storage";
@@ -40,8 +42,8 @@ const CodeSnippets = (props) => {
     const [bookmarkedPageState, setBookmarkedPageState] = useState(1);
     const [totalDocs, setTotalDocs] = useState();
     const [callBookmarkedSnippetApi, setcallBookmarkedSnippetApi] = useState(false);
-    const [getSnippetPayload, setGetSnippetPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 10, pageNumber: pageState })
-    const [getBookmarkedSnippetPayload, setGetBookmarkedSnippetPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 10, pageNumber: bookmarkedPageState })
+    const [getSnippetPayload, setGetSnippetPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: pageState })
+    const [getBookmarkedSnippetPayload, setGetBookmarkedSnippetPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: bookmarkedPageState })
     const [allSnippetData, setAllInterviewSnippetData] = useState([]);
     const [bookmarkedSnippetData, setBookmarkedSnippetData] = useState([]);
     const [editItem, setEditItem] = useState({});
@@ -54,7 +56,7 @@ const CodeSnippets = (props) => {
     const [bookmarkSnippetPayload, setBookmarkSnippetPayload] = useState({});
     const [callBookmarkApi, setCallBookmarkApi] = useState(false);
     const [bookmarkApiInfo, setBookmarkApiInfo] = useState({ open: false, successMsg: '', errorMsg: '' })
-
+    const [searchInput, setSearchInput] = useState('');
 
 
     const TabPanel = (props) => {
@@ -69,6 +71,12 @@ const CodeSnippets = (props) => {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        setSearchInput('');
+        setGetSnippetPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        if (newValue === 1) {
+            setGetBookmarkedSnippetPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }));
+            setCallBookmarkApi(true);
+        }
     }
 
     const toggleDrawer = () => {
@@ -199,6 +207,31 @@ const CodeSnippets = (props) => {
         }
     }
 
+    const handleInputChange = (e) => {
+        setSearchInput(e.target.value)
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.keyCode === 13 || e.key === "Enter") {
+            if (searchInput?.length > 0 && value === 0) {
+                setGetSnippetPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
+            } else if (searchInput?.length > 0 && value === 1) {
+                setGetBookmarkedSnippetPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
+                setCallBookmarkApi(true);
+            }
+        }
+    }
+
+    const handleClear = (e) => {
+        setSearchInput('');
+        if (value === 0) {
+            setGetSnippetPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        } else if (value === 1) {
+            setCallBookmarkApi(true);
+            setGetBookmarkedSnippetPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        }
+    }
+
     const getSnippet = useFetchAPI("getSnippet", `/snippets/getSnippets`, "POST", getSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onGetSnippetSuccess));
     const deleteSnippet = useFetchAPI("deleteSnippet", `/snippets/deleteSnippet`, "POST", deletePayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteSuccess, "", callDeleteApi));
     const bookmarkSnippet = useFetchAPI("bookmarkSnippet", `/snippets/bookmarkSnippet`, "POST", bookmarkSnippetPayload, CommonHeaders(), fetchQueryParams("", "", "", onBookmarkSuccess, "", callBookmarkApi));
@@ -213,6 +246,26 @@ const CodeSnippets = (props) => {
                     <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Snippet</CommonButton>
                 </div>
                 <div className={CodeSnippetsStyles.tabs}>
+                <div className={CodeSnippetsStyles.searchBar}>
+                        <TextField
+                            name='search'
+                            value={searchInput}
+                            onChange={(e) => handleInputChange(e)}
+                            onKeyDown={(e) => handleKeyDown(e)}
+                            InputProps={{
+                                type: 'text',
+                                startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? CodeSnippetsStyles.searchIcon : CodeSnippetsStyles.searchIconDisabled} /></InputAdornment>,
+                                endAdornment: (
+                                    <>
+                                        <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={CodeSnippetsStyles.clearIcon} onClick={() => handleClear()} />}</InputAdornment>
+                                    </>
+                                )
+                            }}
+                            sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
+                            className={CodeSnippetsStyles.textField}
+                            placeholder={'Search Snippet'} size="large"
+                        />
+                    </div>
                     <AntTabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         <AntTab label="All Snippets" {...a11yProps(0)} />
                         <AntTab label="Bookmarked Snippets" {...a11yProps(1)} />
@@ -271,7 +324,7 @@ const CodeSnippets = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        {totalDocs > 10 && <div className={CodeSnippetsStyles.pagination}>
+                        {totalDocs > 25 && <div className={CodeSnippetsStyles.pagination}>
                             <Pagination count={totalDocs} page={pageState} onChange={handlePageChange} color="primary" />
                         </div>}
                     </TabPanel>
@@ -330,7 +383,7 @@ const CodeSnippets = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        {totalDocs > 10 && <div className={CodeSnippetsStyles.pagination}>
+                        {totalDocs > 25 && <div className={CodeSnippetsStyles.pagination}>
                             <Pagination count={totalDocs} page={hiddenPageState} onChange={handleHiddenPageChange} color="primary" />
                         </div>}
                     </TabPanel>}

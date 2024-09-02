@@ -47,8 +47,8 @@ const InterviewQA = (props) => {
     const [bookmarkedPageState, setBookmarkedPageState] = useState(1);
     const [totalDocs, setTotalDocs] = useState();
     const [callBookmarkedQAApi, setcallBookmarkedQAApi] = useState(false);
-    const [getInterviewQAPayload, setGetInterviewQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 10, pageNumber: pageState })
-    const [getBookmarkedQAPayload, setGetBookmarkedQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 10, pageNumber: bookmarkedPageState })
+    const [getInterviewQAPayload, setGetInterviewQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: pageState })
+    const [getBookmarkedQAPayload, setGetBookmarkedQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: bookmarkedPageState })
     const [allInterviewQAData, setAllInterviewQAData] = useState([]);
     const [bookmarkedInterviewQAData, setBookmarkedInterviewQAData] = useState([]);
     const [editClicked, setEditClicked] = useState(false);
@@ -227,8 +227,6 @@ const InterviewQA = (props) => {
     }
 
     const handleKeyDown = (e) => {
-        console.log(value);
-
         if (e.keyCode === 13 || e.key === "Enter") {
             if (searchInput?.length > 0 && value === 0) {
                 setGetInterviewQAPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
@@ -311,7 +309,7 @@ const InterviewQA = (props) => {
                                         </AccordionSummary>
                                         <AccordionDetails sx={{ background: '#fcfcfc', boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px', padding: '8px 16px 30px' }}>
                                             {el?.data?.map((ans, index) => (
-                                                <div key={ans.answer + index}>
+                                                <div key={ans.answer + index} className={InterviewQAStyles.ansBlock}>
                                                     <Typography>{ans.answer}</Typography>
                                                     {ans?.code && <div>
                                                         <h3><u>Code</u></h3>
@@ -332,7 +330,7 @@ const InterviewQA = (props) => {
                                                         <>
 
                                                             {ans?.showPointsStyles ? <ul style={{ listStyle: ans?.pointsStyles }}><li>{ele.pointHeader}</li></ul> : <h4>{ele.pointHeader}</h4>}
-                                                            <Typography>{ele.value}</Typography>
+                                                            <li>{ele.value}</li>
                                                             {ele?.code && <div>
                                                                 <h3><u>Code</u></h3>
                                                                 <div className={InterviewQAStyles.codeBlock}>
@@ -385,7 +383,7 @@ const InterviewQA = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        {totalDocs > 10 && <div className={InterviewQAStyles.pagination}>
+                        {totalDocs > 25 && <div className={InterviewQAStyles.pagination}>
                             <Pagination count={totalDocs} page={pageState} onChange={handlePageChange} color="primary" />
                         </div>}
                     </TabPanel>
@@ -413,7 +411,7 @@ const InterviewQA = (props) => {
                                         </AccordionSummary>
                                         <AccordionDetails sx={{ background: '#fcfcfc' }}>
                                             {el?.data?.map((ans, index) => (
-                                                <div key={ans.answer + index}>
+                                                <div key={ans.answer + index} className={InterviewQAStyles.ansBlock}>
                                                     <Typography>{ans.answer}</Typography>
                                                     {ans?.code && <div>
                                                         <h3><u>Code</u></h3>
@@ -475,7 +473,7 @@ const InterviewQA = (props) => {
                                                             </CustomizedTable>
                                                         </div>
                                                     )}
-                                                    {ans?.note && <Typography><b>Note:</b> {ans?.note}</Typography>}
+                                                    {ans?.note && <Typography className={InterviewQAStyles.noteDiv}><b>Note:</b> {ans?.note}</Typography>}
                                                 </div>
                                             ))}
                                             <div className={InterviewQAStyles.iconsDiv}>
@@ -486,7 +484,7 @@ const InterviewQA = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        {totalDocs > 10 && <div className={InterviewQAStyles.pagination}>
+                        {totalDocs > 25 && <div className={InterviewQAStyles.pagination}>
                             <Pagination count={totalDocs} page={hiddenPageState} onChange={handleHiddenPageChange} color="primary" />
                         </div>}
                     </TabPanel>}

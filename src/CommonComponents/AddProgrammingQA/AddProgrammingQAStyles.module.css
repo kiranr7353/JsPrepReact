@@ -1,6 +1,28 @@
 .addQAContainer {
     width: 700px;
     padding: 20px;
+    background: #f1f1f1
+}
+.title {
+    border-bottom: 5px solid #7ff17f;
+}
+.tableColHeaders {
+    border-bottom: 5px solid #7ff17f;
+    width: 18%;
+}
+.tableDataHeaders {
+    border-bottom: 5px solid #7ff17f;
+    width: 13%;
+}
+.noteText {
+    border-bottom: 5px solid #7ff17f;
+    width: 6%;
+}
+.cancelIcon {
+    transform: scale(1.1);
+    color: red;
+    border: 2px solid black;
+    border-radius: 50%;
 }
 .addQATitle {
     display: flex;
@@ -26,6 +48,7 @@
 .headerInput {
     margin-bottom: 15px !important;
     width: 100%;
+    border: 2px solid black;
 }
 .uploadInput {
     width: 100%;
@@ -82,6 +105,7 @@
 
 .pointsInput {
     width: 100%;
+    border: 2px solid;
 }
 
 .points {
@@ -158,4 +182,8 @@
 }
 .codeDiv {
     padding: 30px 20px 30px 20px;
+}
+.pointTitle {
+    border-bottom: 4px solid #7ff17f;
+    width: 9%;
 }

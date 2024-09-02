@@ -283,10 +283,10 @@ const AddProgrammingQA = (props) => {
                 <div className={AddProgrammingQAStyles.addQAContainer}>
                     <div className={AddProgrammingQAStyles.addQATitle}>
                         <div>
-                            <h2>{editClicked ? 'Edit Snippet' : 'Add Snippet'}</h2>
+                            <h2 className={AddProgrammingQAStyles.title}>{editClicked ? 'Edit Snippet' : 'Add Snippet'}</h2>
                         </div>
                         <div>
-                            <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+                            <CancelIcon className={AddProgrammingQAStyles.cancelIcon} sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div className={AddProgrammingQAStyles.addQAForm}>
@@ -296,7 +296,7 @@ const AddProgrammingQA = (props) => {
                                 <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
                             </Typography>}
                             <FormControl sx={{ width: '100%' }}>
-                                <label>Question/Title ID <span className={AddProgrammingQAStyles.required}>*</span></label>
+                                <label>Question/Title ID</label>
                                 <TextField
                                     name='titleId'
                                     value={titleId}
@@ -311,6 +311,7 @@ const AddProgrammingQA = (props) => {
                                 <TextField
                                     name='title'
                                     value={title}
+                                    className={AddProgrammingQAStyles.headerInput}
                                     onChange={(e) => setTitle(e.target.value)}
                                     InputProps={{
                                         type: 'text',

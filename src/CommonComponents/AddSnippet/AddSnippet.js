@@ -264,10 +264,10 @@ const AddSnippet = (props) => {
                 <div className={AddSnippetStyles.addQAContainer}>
                     <div className={AddSnippetStyles.addQATitle}>
                         <div>
-                            <h2>{editClicked ? 'Edit Snippet' : 'Add Snippet'}</h2>
+                            <h2 className={AddSnippetStyles.title}>{editClicked ? 'Edit Snippet' : 'Add Snippet'}</h2>
                         </div>
                         <div>
-                            <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+                            <CancelIcon className={AddSnippetStyles.cancelIcon} sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div className={AddSnippetStyles.addQAForm}>
@@ -277,7 +277,7 @@ const AddSnippet = (props) => {
                                 <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
                             </Typography>}
                             <FormControl sx={{ width: '100%' }}>
-                                <label>Question/Title ID <span className={AddSnippetStyles.required}>*</span></label>
+                                <label>Question/Title ID</label>
                                 <TextField
                                     name='titleId'
                                     value={titleId}
@@ -292,6 +292,7 @@ const AddSnippet = (props) => {
                                 <TextField
                                     name='title'
                                     value={title}
+                                    className={AddSnippetStyles.headerInput}
                                     onChange={(e) => setTitle(e.target.value)}
                                     InputProps={{
                                         type: 'text',

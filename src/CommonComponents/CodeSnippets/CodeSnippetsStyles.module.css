@@ -87,3 +87,33 @@
     font-size: 20px;
     font-weight: bold;
 }
+.textField div fieldset {
+    border: 1px solid;
+    background-color: #f7f9fa;
+    border-radius: 26px;
+    z-index: -100;
+}
+
+.textField div input {
+    width: 400px;
+    height: 15px;
+}
+.searchIcon {
+    z-index: 100;
+    cursor: pointer;
+}
+
+.clearIcon {
+    z-index: 100;
+    cursor: pointer;
+}
+
+.searchIconDisabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.searchBar {
+    display: flex;
+    justify-content: end;
+    padding-bottom: 20px;
+}

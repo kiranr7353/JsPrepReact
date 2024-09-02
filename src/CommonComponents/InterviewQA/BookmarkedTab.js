@@ -150,7 +150,7 @@ const BookmarkedTab = (props) => {
                         </Accordion>
                     )
                 }) : <AppNoData />}
-            {bookmarkedInterviewQAData?.totalCount > 10 && <div className={InterviewQAStyles.pagination}>
+            {bookmarkedInterviewQAData?.totalCount > 25 && <div className={InterviewQAStyles.pagination}>
                 <Pagination count={bookmarkedInterviewQAData?.totalCount} page={bookmarkedPageState} onChange={handleBookmarkedPageChange} color="primary" />
             </div>}
             <ConfirmationDialog openDialog={removeBookmarkInfo?.open} errorMessage={removeBookmarkInfo?.errorMsg} successMessage={removeBookmarkInfo?.successMsg} handleCloseDialog={handleRemoveBookmarkClosePopup} />

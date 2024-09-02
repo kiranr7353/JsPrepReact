@@ -4,7 +4,7 @@ import CommonButton from '../CommonButton'
 import AddProgrammingQA from '../AddProgrammingQA/AddProgrammingQA';
 import { AntTab, AntTabs } from '../InterviewQA/TabsStyles';
 import PropTypes from 'prop-types';
-import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, Pagination, Skeleton, Slide, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Dialog, DialogContent, InputAdornment, Pagination, Skeleton, Slide, TextField, Typography } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Zoom from 'react-medium-image-zoom'
@@ -14,6 +14,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import { ref as storageRef, deleteObject } from "firebase/storage";
@@ -41,8 +43,8 @@ const ProgrammingQA = (props) => {
     const [bookmarkedPageState, setBookmarkedPageState] = useState(1);
     const [totalDocs, setTotalDocs] = useState();
     const [callBookmarkedPQAApi, setcallBookmarkedPQAApi] = useState(false);
-    const [getPQAPayload, setGetPQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 10, pageNumber: pageState })
-    const [getBookmarkedPQAPayload, setGetBookmarkedPQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 10, pageNumber: bookmarkedPageState })
+    const [getPQAPayload, setGetPQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: pageState })
+    const [getBookmarkedPQAPayload, setGetBookmarkedPQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: bookmarkedPageState })
     const [allPQAData, setAllInterviewPQAData] = useState([]);
     const [bookmarkedPQAData, setBookmarkedPQAData] = useState([]);
     const [deletePayload, setDeletePayload] = useState({});
@@ -54,6 +56,7 @@ const ProgrammingQA = (props) => {
     const [bookmarkPQAPayload, setBookmarkPQAPayload] = useState({});
     const [callBookmarkApi, setCallBookmarkApi] = useState(false);
     const [bookmarkApiInfo, setBookmarkApiInfo] = useState({ open: false, successMsg: '', errorMsg: '' })
+    const [searchInput, setSearchInput] = useState('');
 
     const toggleDrawer = () => {
         setAddPQAClicked(true);
@@ -71,6 +74,12 @@ const ProgrammingQA = (props) => {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        setSearchInput('');
+        setGetPQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        if (newValue === 1) {
+            setGetBookmarkedPQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }));
+            setCallBookmarkApi(true);
+        }
     }
 
     const onGetPQASuccess = res => {
@@ -201,6 +210,31 @@ const ProgrammingQA = (props) => {
         }
     }
 
+    const handleInputChange = (e) => {
+        setSearchInput(e.target.value)
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.keyCode === 13 || e.key === "Enter") {
+            if (searchInput?.length > 0 && value === 0) {
+                setGetPQAPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
+            } else if (searchInput?.length > 0 && value === 1) {
+                setGetBookmarkedPQAPayload(prev => ({ ...prev, searchText: searchInput, pageNumber: 1 }))
+                setCallBookmarkApi(true);
+            }
+        }
+    }
+
+    const handleClear = (e) => {
+        setSearchInput('');
+        if (value === 0) {
+            setGetPQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        } else if (value === 1) {
+            setCallBookmarkApi(true);
+            setGetBookmarkedPQAPayload(prev => ({ ...prev, searchText: undefined, pageNumber: 1 }))
+        }
+    }
+
 
     const getPQA = useFetchAPI("getPQA", `/programmingQA/getProgrammingQA`, "POST", getPQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onGetPQASuccess));
     const deletePQA = useFetchAPI("deletePQA", `/programmingQA/deleteProgrammingQA`, "POST", deletePayload, CommonHeaders(), fetchQueryParams("", "", "", onDeleteSuccess, "", callDeleteApi));
@@ -216,6 +250,26 @@ const ProgrammingQA = (props) => {
                     <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add ProgrammingQA</CommonButton>
                 </div>
                 <div className={ProgrammingStyles.tabs}>
+                <div className={ProgrammingStyles.searchBar}>
+                        <TextField
+                            name='search'
+                            value={searchInput}
+                            onChange={(e) => handleInputChange(e)}
+                            onKeyDown={(e) => handleKeyDown(e)}
+                            InputProps={{
+                                type: 'text',
+                                startAdornment: <InputAdornment position="start"><SearchIcon className={searchInput?.length > 0 ? ProgrammingStyles.searchIcon : ProgrammingStyles.searchIconDisabled} /></InputAdornment>,
+                                endAdornment: (
+                                    <>
+                                        <InputAdornment position="end">{searchInput?.length > 0 && <ClearIcon className={ProgrammingStyles.clearIcon} onClick={() => handleClear()} />}</InputAdornment>
+                                    </>
+                                )
+                            }}
+                            sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
+                            className={ProgrammingStyles.textField}
+                            placeholder={'Search Question'} size="large"
+                        />
+                    </div>
                     <AntTabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         <AntTab label="All Programming Question & Answers" {...a11yProps(0)} />
                         <AntTab label="Bookmarked Programming Question & Answers" {...a11yProps(1)} />
@@ -279,7 +333,7 @@ const ProgrammingQA = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        {totalDocs > 10 && <div className={ProgrammingStyles.pagination}>
+                        {totalDocs > 25 && <div className={ProgrammingStyles.pagination}>
                             <Pagination count={totalDocs} page={pageState} onChange={handlePageChange} color="primary" />
                         </div>}
                     </TabPanel>
@@ -343,7 +397,7 @@ const ProgrammingQA = (props) => {
                                     </Accordion>
                                 )
                             }) : <AppNoData />}
-                        {totalDocs > 10 && <div className={ProgrammingStyles.pagination}>
+                        {totalDocs > 25 && <div className={ProgrammingStyles.pagination}>
                             <Pagination count={totalDocs} page={hiddenPageState} onChange={handleHiddenPageChange} color="primary" />
                         </div>}
                     </TabPanel>}

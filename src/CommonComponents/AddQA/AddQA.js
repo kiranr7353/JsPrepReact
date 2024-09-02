@@ -376,10 +376,10 @@ const AddQA = (props) => {
                 <div className={AddQAStyles.addQAContainer}>
                     <div className={AddQAStyles.addQATitle}>
                         <div>
-                            <h2>{editClicked ? 'Edit Question and Answer' : 'Add Question and Answer'}</h2>
+                            <h2 className={AddQAStyles.title}>{editClicked ? 'Edit Question and Answer' : 'Add Question and Answer'}</h2>
                         </div>
                         <div>
-                            <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+                            <CancelIcon className={AddQAStyles.cancelIcon} sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div className={AddQAStyles.addQAForm}>
@@ -389,7 +389,7 @@ const AddQA = (props) => {
                                 <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
                             </Typography>}
                             <FormControl sx={{ width: '100%' }}>
-                                <label>Question ID <span className={AddQAStyles.required}>*</span></label>
+                                <label>Question ID</label>
                                 <TextField
                                     name='questionId'
                                     value={questionId}
@@ -405,6 +405,7 @@ const AddQA = (props) => {
                                 <TextField
                                     name='question'
                                     value={question}
+                                    className={AddQAStyles.headerInput}
                                     onChange={(e) => setQuestion(e.target.value)}
                                     InputProps={{
                                         type: 'text',
@@ -505,7 +506,7 @@ const AddQA = (props) => {
                                                                 <>
                                                                     <div className={AddQAStyles.pointsDiv}>
                                                                         {idx ? <HighlightOffIcon titleAccess='Remove' className={AddQAStyles.removeIconPoint} onClick={() => removePoint(idx, i, point)} /> : null}
-                                                                        <h4>Point {idx + 1}</h4>
+                                                                        <h4 className={AddQAStyles.pointTitle}>Point {idx + 1}</h4>
                                                                         <label>Enter Point</label>
                                                                         <TextField
                                                                             className={AddQAStyles.pointsInput}
@@ -595,7 +596,7 @@ const AddQA = (props) => {
                                                     {QA[i].hasTable ?
                                                         <>
                                                             <div>
-                                                                <h4>Table Columns</h4>
+                                                                <h4 className={AddQAStyles.tableColHeaders}>Table Columns</h4>
                                                                 {QA[i]?.tableColumns?.map((el, index) =>
                                                                     <TextField
                                                                         className={AddQAStyles.columnInput}
@@ -611,7 +612,7 @@ const AddQA = (props) => {
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <h4>Table Data</h4>
+                                                                <h4 className={AddQAStyles.tableDataHeaders}>Table Data</h4>
                                                                 {QA[i]?.tableData?.map((el, index) =>
                                                                     <>
                                                                         <div className={AddQAStyles.tableDataFlex}>
@@ -663,7 +664,7 @@ const AddQA = (props) => {
                                                     {QA[i].hasNote ?
                                                         <>
                                                             <div>
-                                                                <h4>Note</h4>
+                                                                <h4 className={AddQAStyles.noteText}>Note</h4>
                                                                 <TextField
                                                                     className={AddQAStyles.headerInput}
                                                                     name='note'
