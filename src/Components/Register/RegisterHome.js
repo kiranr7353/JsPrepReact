@@ -13,15 +13,17 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import { TextField, FormControl, InputAdornment, Dialog, DialogContent, DialogContentText, Slide, Snackbar, Alert, Select, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import CommonButton from '../../CommonComponents/CommonButton';
-import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail, GoogleAuthProvider, onAuthStateChanged, signInWithCredential } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import Loader from '../../CommonComponents/Loader/Loader';
 import { setUserInfo } from '../../Redux/Actions/ReduxOperations';
 import { UserContext } from '../../CommonComponents/UserContextProvider';
 import { useDispatch } from 'react-redux';
-import { SetCookie } from '../../Utils/util-functions';
+import { GetCookie, SetCookie } from '../../Utils/util-functions';
 import { useFetchAPI } from '../../Hooks/useAPI';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
+import { useGoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -46,6 +48,12 @@ const RegisterHome = () => {
     const [registerPayload, setRegisterPayload] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
     const [openRegisterErrorDialog, setOpenRegisterErrorDialog] = useState(false);
+    const [googleLoginPayload, setGoogleLoginPayload] = useState({});
+    const [googleUser, setGoogleUser] = useState({});
+    const [uuid, setUuid] = useState("");
+    const [callGoogleLoginApi, setCallGoogleLoginApi] = useState(false);
+    const [googleRegisterPayload, setGoogleRegisterPayload] = useState({});
+    const [callGoogleRegsiterApi, setCallGoogleRegsiterApi] = useState(false)
 
     const codes = ['+91', '+92'];
 
@@ -53,6 +61,12 @@ const RegisterHome = () => {
         "content-type": "application/json",
         "accept": "application/json"
     }
+
+    useEffect(() => {
+        if (GetCookie('userTokenInfo') || GetCookie('userInfo')) {
+            navigate('/home');
+        }
+    }, [])
 
     const handleLoginText = () => {
         navigate('/login');
@@ -111,7 +125,6 @@ const RegisterHome = () => {
         setIsFetching(true);
         createUserWithEmailAndPassword(auth, registerFormValues?.email, registerFormValues?.password).then((user) => {
             setIsFetching(false);
-            console.log(user);
             setObject({ userInfo: user?.user?.stsTokenManager?.accessToken }, 'add');
             SetCookie('userTokenInfo', user?.user?.stsTokenManager?.accessToken, { path: '/' });
             SetCookie('userInfo', user?.user?.reloadUserInfo, { path: '/' });
@@ -139,8 +152,8 @@ const RegisterHome = () => {
     }
 
     const onRegisterSuccess = res => {
+        setErrorMessage('')
         setCallRegisterApi(false);
-        console.log(res);
         if ((res?.status === 200 || res?.status === 201)) {
             navigate('/home');
         } else {
@@ -149,8 +162,86 @@ const RegisterHome = () => {
         }
     }
 
+    const handleGoogle = (tokenResponse) => {
+        setGoogleLoginPayload({ code: tokenResponse?.code });
+        setCallGoogleLoginApi(true)
+    }
+
+    const handleGoogleRegister = useGoogleLogin({
+        onSuccess: tokenResponse => handleGoogle(tokenResponse),
+        flow: 'auth-code'
+    });
+
+    const googleAuth = (tokens) => {
+        setErrorMessage('')
+        const credential = GoogleAuthProvider.credential(tokens?.id_token);
+        const decoded = jwtDecode(credential?.idToken);
+        setIsFetching(true);
+        fetchSignInMethodsForEmail(auth, decoded?.email).then(res => {
+            if (res?.length > 0) {
+                setIsFetching(false);
+                setErrorMessage("Email already exists. Please login or use different email!!");
+                setOpenRegisterErrorDialog(true);
+            } else {
+                signInWithCredential(auth, credential).then((user) => {
+                    setIsFetching(false);
+                    setGoogleUser(user)
+                    setUuid(user?.user?.uid);
+                    let payload = {};
+                    let firstName = user?.user?.displayName?.split(" ")[0]
+                    let lastName = user?.user?.displayName?.split(" ")[1] ? user?.user?.displayName?.split(" ")[1] : "";
+                    payload.email = user?.user?.email;
+                    payload.idToken = user?.user?.stsTokenManager?.accessToken;
+                    payload.refreshToken = user?.user?.stsTokenManager?.refreshToken;
+                    payload.firstName = firstName;
+                    payload.lastName = lastName;
+                    setGoogleRegisterPayload(payload);
+                    setCallGoogleRegsiterApi(true);
+                }).catch((error) => {
+                    setIsFetching(false);
+                    const errString = JSON.stringify(error);
+                    const errorJson = JSON.parse(errString);
+                    handleRegisterErrors(errorJson)
+                })
+            }
+        }).catch(err => {
+            setIsFetching(false);
+            setErrorMessage('Something went wrong. Please try again later.');
+            setOpenRegisterErrorDialog(true);
+        })
+    }
+
+    const onGoogleLoginSuccess = res => {
+        setErrorMessage('');
+        setCallGoogleLoginApi(false);
+        if ((res?.status === 200 || res?.status === 201)) {
+            googleAuth(res?.data)
+        } else {
+            setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
+            setOpenRegisterErrorDialog(true);
+        }
+    }
+
+    const onGoogleRegisterSuccess = res => {
+        setCallGoogleRegsiterApi(false);
+        if ((res?.status === 200 || res?.status === 201)) {
+            setObject({ userInfo: googleUser?.user?.stsTokenManager?.accessToken }, 'add');
+            SetCookie('userTokenInfo', googleUser?.user?.stsTokenManager?.accessToken, { path: '/' });
+            SetCookie('userInfo', googleUser?.user?.reloadUserInfo, { path: '/' });
+            dispatch(setUserInfo(googleUser?.user?.reloadUserInfo));
+            navigate('/home');
+        } else {
+            setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
+            setOpenRegisterErrorDialog(true);
+        }
+    }
+
+
     let registerApi = useFetchAPI("RegisterApi", `/user/register`, "POST", registerPayload, Common_headers, fetchQueryParams("", "", "", onRegisterSuccess, "", callRegisterApi));
-    const fetching = registerApi?.Loading || registerApi?.Fetching;
+    let googleLogin = useFetchAPI("googleLogin", `/user/login/googleLoginIn`, "POST", googleLoginPayload, Common_headers, fetchQueryParams("", "", "", onGoogleLoginSuccess, "", callGoogleLoginApi));
+    let googleRegister = useFetchAPI("googleRegister", `/user/google/register`, "POST", googleRegisterPayload, Common_headers, fetchQueryParams("", "", "", onGoogleRegisterSuccess, "", callGoogleRegsiterApi));
+
+    const fetching = registerApi?.Loading || registerApi?.Fetching || googleLogin?.Loading || googleLogin?.Fetching || googleRegister?.Loading || googleRegister?.Fetching;
 
     return (
         <>
@@ -306,7 +397,7 @@ const RegisterHome = () => {
                                 <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} disabled={!registerFormValues?.email || !registerFormValues?.password || !registerFormValues?.confirmPassword || !registerFormValues?.firstName || !registerFormValues?.lastName || !registerFormValues?.phoneNumber || !registerFormValues?.dob || !passwordMatch} onClick={handleRegister}>Sign Up</CommonButton>
                             </div>
                             <div className={RegisterStyles.googleBtn}>
-                                <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'}>
+                                <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleGoogleRegister}>
                                     <img className={RegisterStyles.googleImage} src={GoogleImg} alt="Google Logo" /> Sign up with Google
                                 </CommonButton>
                             </div>

@@ -12,12 +12,14 @@ import { useNavigate } from 'react-router-dom';
 import CommonButton from '../../CommonComponents/CommonButton';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import { useFetchAPI } from '../../Hooks/useAPI';
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider, fetchSignInMethodsForEmail } from 'firebase/auth'
 import { auth } from '../../firebaseConfig';
 import { UserContext } from '../../CommonComponents/UserContextProvider';
 import { GetCookie, SetCookie } from '../../Utils/util-functions';
 import { useDispatch } from 'react-redux';
 import { setUserInfo } from '../../Redux/Actions/ReduxOperations';
+import { useGoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 import Loader from '../../CommonComponents/Loader/Loader';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -40,6 +42,12 @@ const LoginHome = () => {
   const [formValues, setFormValues] = useState({ email: '', password: '', rememberMe: false });
   const [loginPayload, setLoginPayload] = useState({});
   const [callLoginApi, setCallLoginApi] = useState(false);
+  const [callGoogleLoginApi, setCallGoogleLoginApi] = useState(false);
+  const [googleLoginPayload, setGoogleLoginPayload] = useState({});
+  const [googleTokens, setGoogleTokens] = useState({});
+  const [googleUser, setGoogleUser] = useState({});
+  const [uuid, setUuid] = useState("");
+  const [callDetailApi, setCallDetailApi] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snakbarMsg, setSnakbarMsg] = useState('');
   const [isFetching, setIsFetching] = useState(false);
@@ -49,11 +57,11 @@ const LoginHome = () => {
   const value = JSON.parse(localStorage.getItem('rememberMe'));
 
   useEffect(() => {
-    if(GetCookie('userTokenInfo') || GetCookie('userInfo')) {
+    if (GetCookie('userTokenInfo') || GetCookie('userInfo')) {
       navigate('/home');
     }
   }, [])
-  
+
   useEffect(() => {
     if (localStorage.getItem('rememberMe') !== null) {
       setFormValues(prev => ({ ...prev, email: value?.email, rememberMe: value?.rememberMe }));
@@ -102,7 +110,7 @@ const LoginHome = () => {
 
   const handleKeyDown = (e) => {
     if (e.keyCode === 13 || e.key === "Enter") {
-      if(!formValues?.email || !formValues?.password) {
+      if (!formValues?.email || !formValues?.password) {
         return;
       } else {
         handleLogin();
@@ -136,6 +144,7 @@ const LoginHome = () => {
   }
 
   const onLoginSuccess = res => {
+    setErrorMessage('');
     setCallLoginApi(false);
     if ((res?.status === 200 || res?.status === 201)) {
       navigate('/home');
@@ -145,12 +154,84 @@ const LoginHome = () => {
     }
   }
 
+  const handleGoogle = (tokenResponse) => {
+    setGoogleLoginPayload({ code: tokenResponse?.code });
+    setCallGoogleLoginApi(true)
+  }
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: tokenResponse => handleGoogle(tokenResponse),
+    flow: 'auth-code'
+  });
+
+
+  const googleAuth = (tokens) => {
+    const credential = GoogleAuthProvider.credential(tokens?.id_token);
+    const decoded = jwtDecode(credential?.idToken);
+    fetchSignInMethodsForEmail(auth, decoded.email).then(res => {
+      if (res?.length > 0) {
+        setIsFetching(true);
+        signInWithCredential(auth, credential).then((user) => {
+          setIsFetching(false);
+          setGoogleUser(user)
+          setUuid(user?.user?.uid);
+          setCallDetailApi(true);
+        }).catch((error) => {
+          setIsFetching(false);
+          const errString = JSON.stringify(error);
+          const errorJson = JSON.parse(errString);
+          handleLoginErrors(errorJson)
+        })
+      } else {
+        setErrorMessage("Seems you don't have an account. Please register!!");
+        setOpenLoginErrorDialog(true);
+      }
+    })
+  }
+
+  const onGoogleLoginSuccess = res => {
+    setErrorMessage('');
+    setCallGoogleLoginApi(false);
+    if ((res?.status === 200 || res?.status === 201)) {
+      setGoogleTokens(res?.data)
+      googleAuth(res?.data)
+    } else {
+      setErrorMessage(res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later.');
+      setOpenLoginErrorDialog(true);
+    }
+  }
+
+  const onDetailSuccess = res => {
+    setErrorMessage('');
+    setCallDetailApi(false)
+    if ((res?.status === 200 || res?.status === 201)) {
+      setLoginPayload({
+        idToken: googleUser?.user?.stsTokenManager?.accessToken,
+        refreshToken: googleUser?.user?.stsTokenManager?.refreshToken
+      });
+      setObject({ userInfo: googleUser?.user?.stsTokenManager?.accessToken }, 'add');
+      SetCookie('userTokenInfo', googleUser?.user?.stsTokenManager?.accessToken, { path: '/' });
+      SetCookie('userInfo', googleUser?.user?.reloadUserInfo, { path: '/' });
+      SetCookie('tokenTimeStamp', new Date().toISOString(), { path: '/' });
+      SetCookie('idleTime', googleUser?.user?.stsTokenManager?.expirationTime, { path: '/' });
+      SetCookie('refreshToken', googleUser?.user?.stsTokenManager?.refreshToken, { path: '/' });
+      dispatch(setUserInfo(googleUser?.user?.reloadUserInfo));
+      setCallLoginApi(true);
+    } else {
+      setErrorMessage("Seems you don't have an account. Please register!!");
+      setOpenLoginErrorDialog(true);
+    }
+  }
+
   let loginApi = useFetchAPI("LoginApi", `/user/login`, "POST", loginPayload, Common_headers, fetchQueryParams("", "", "", onLoginSuccess, "", callLoginApi));
-  const fetching = loginApi?.Loading || loginApi?.Fetching;
+  let googleLogin = useFetchAPI("googleLogin", `/user/login/googleLoginIn`, "POST", googleLoginPayload, Common_headers, fetchQueryParams("", "", "", onGoogleLoginSuccess, "", callGoogleLoginApi));
+  let checkuserApi = useFetchAPI("checkuserApi", `/user/checkuser/${uuid}`, "GET", '', Common_headers, fetchQueryParams("", "", "", onDetailSuccess, "", callDetailApi));
+
+  const fetching = loginApi?.Loading || loginApi?.Fetching || googleLogin?.Loading || googleLogin?.Fetching || checkuserApi?.Loading || checkuserApi?.Fetching;
 
   return (
     <>
-      {(isFetching || fetching) && <Loader showLoader={isFetching} />}
+      {(isFetching || fetching) && <Loader showLoader={isFetching || fetching} />}
       <div className={LoginStyles.loginCcontainer}>
         <div className={LoginStyles.loginBox}>
           <div className={LoginStyles.loginLeft}>
@@ -197,8 +278,8 @@ const LoginHome = () => {
               </div>
               <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} disabled={!formValues?.email || !formValues?.password} onClick={handleLogin}>Log In</CommonButton>
             </div>
-            <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'}>
-              <img className={LoginStyles.googleImage} src={GoogleImg} alt="Google Logo" /> Sign up with Google
+            <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'} onClick={() => handleGoogleLogin()}>
+              <img className={LoginStyles.googleImage} src={GoogleImg} alt="Google Logo" /> Sign In with Google
             </CommonButton>
             <p className={LoginStyles.loginRegister}>
               Don't have an account? <span className={LoginStyles.registerHere} onClick={handleRegisterText}>Register here</span>
