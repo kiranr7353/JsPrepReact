@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import LoginStyles from './Login.module.css';
 import GoogleImg from '../../Images/google.png';
+import LoginImg from '../../Images/login.jpg';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -274,7 +275,7 @@ const LoginHome = () => {
                 <label>
                   <input type="checkbox" value={formValues?.rememberMe} checked={formValues?.rememberMe} onChange={handleRemeberMe} /> <span className={LoginStyles.remember}>Remember me</span>
                 </label>
-                <a href="/forgot-password" className={LoginStyles.forgotPassword}>Forgot your password?</a>
+                <p onClick={() => navigate('/forgot-password')} className={LoginStyles.forgotPasswordText}>Forgot your password?</p>
               </div>
               <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} disabled={!formValues?.email || !formValues?.password} onClick={handleLogin}>Log In</CommonButton>
             </div>
@@ -286,7 +287,7 @@ const LoginHome = () => {
             </p>
           </div>
           <div className={LoginStyles.loginRight}>
-            <img src={'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/LoginPageImages%2Flogin.jpg?alt=media&token=5612d53b-c76b-48ca-a4c5-c9ae0e5c9a48'} loading='lazy' alt="Background Design" className={LoginStyles.backgroundImage} />
+            <img src={LoginImg} loading='lazy' alt="Background Design" className={LoginStyles.backgroundImage} />
           </div>
         </div>
       </div>

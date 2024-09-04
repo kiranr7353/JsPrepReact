@@ -216,7 +216,7 @@ const Header = () => {
     return (
         <>
             {(isFetching || fetching) && <Loader showLoader={fetching} />}
-            <div>
+            <div style={{ background: '#f7f9fa' }}>
                 <div className={HeaderStyles.container}>
                     <div className={HeaderStyles.topBar}>
                         <div className={HeaderStyles.topBarContainer}>

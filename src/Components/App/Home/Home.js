@@ -5,9 +5,9 @@ import { useSelector } from 'react-redux';
 import { useFetchAPI } from '../../../Hooks/useAPI';
 import { fetchQueryParams } from '../../../Hooks/fetchQueryParams';
 import { CommonHeaders } from '../../../CommonComponents/CommonHeaders';
-import { Alert, Dialog, DialogContent, Drawer, FormControl, Skeleton, Slide, Snackbar, Stack, TextField, Typography } from '@mui/material';
+import { Alert, CircularProgress, Dialog, DialogContent, Drawer, FormControl, Skeleton, Slide, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import Switch from '@mui/joy/Switch';
-import Image from '../../../Images/learning.png';
+import Image from '../../../Images/banner3.jpg';
 import Loader from '../../../CommonComponents/Loader/Loader';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
@@ -629,6 +629,10 @@ const Home = () => {
             <div className={HomeStyles.body}>
                 <div className={HomeStyles.imageSection}>
                     <img src={Image} alt='Image' />
+                    <div>
+                    <h2>INTERVIEW PREPARATION MADE EASY</h2>
+                    <p>Prepare for your interviews much quicker with your favorite topics</p>
+                    </div>
                 </div>
                 { favoriteTopics && favoriteTopics?.length > 0 &&  <div className={HomeStyles.topics}>
                     {favoriteTopics && favoriteTopics?.length > 0 && <h4 className={HomeStyles.categoriesText}>Favorite Topics</h4>}
@@ -914,7 +918,7 @@ const Home = () => {
                         </div>
                     </DialogContent>
                     <div className={HomeStyles.modalactionsection}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleEditCategoryConfirm} disabled={!editCategoryInfo?.categoryName || !editCategoryInfo?.description || !editCategoryInfo?.image[0]?.imageUploaded}>Edit</CommonButton>
+                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleEditCategoryConfirm} disabled={!editCategoryInfo?.categoryName || !editCategoryInfo?.description || !editCategoryInfo?.image[0]?.imageUploaded}>{ isLoading ? <CircularProgress /> : 'Edit' }</CommonButton>
                         <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleEditCategoryCloseDialog}>Cancel</CommonButton>
                     </div>
                 </div>

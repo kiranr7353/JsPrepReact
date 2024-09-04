@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import RegisterStyles from './Register.module.css';
 import GoogleImg from '../../Images/google.png';
+import RegisterImg from '../../Images/Register.jpg'
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -385,12 +386,6 @@ const RegisterHome = () => {
                                 </div>
                                 {!passwordMatch && <span className={RegisterStyles.passwordMismatch}>*{passwordMatchedError.current}</span>}
                             </FormControl>
-                            {/* <div className={RegisterStyles.loginOptions}>
-                            <label>
-                                <input type="checkbox" /> <span className={RegisterStyles.remember}>Remember me</span>
-                            </label>
-                        </div> */}
-
                         </div>
                         <div className={RegisterStyles.buttonsDiv}>
                             <div className={RegisterStyles.signUpBtn}>
@@ -407,7 +402,7 @@ const RegisterHome = () => {
                         </p>
                     </div>
                     <div className={RegisterStyles.loginRight}>
-                        <img src={'https://firebasestorage.googleapis.com/v0/b/jsprep-ed0c8.appspot.com/o/RegisterPageImages%2FRegister.jpg?alt=media&token=1031547f-bc39-43c0-b580-83e24e473726'} alt="Background Design" className={RegisterStyles.backgroundImage} />
+                        <img src={RegisterImg} alt="Background Design" className={RegisterStyles.backgroundImage} />
                     </div>
                 </div>
             </div>

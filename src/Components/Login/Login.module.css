@@ -181,3 +181,11 @@
     color: #514e4e;
     font-size: 19px;
   }
+  .forgotPasswordText {
+    margin: 0;
+    padding-top: 13px;
+    color: blue;
+    font-weight: 650;
+    font-size: 13px;
+    cursor: pointer;
+  }

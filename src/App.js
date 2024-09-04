@@ -18,6 +18,7 @@ import appStore from './Redux/Reducers/AppReducer';
 import PrivateRoutes from './Components/PrivateRoutes';
 import Header from './Components/Header/Header';
 import SearchResults from './Components/Header/SearchResults';
+import ForgotPasswordHome from './Components/ForgotPassword/ForgotPasswordHome';
 
 const LoginHome = lazy(() => import('./Components/Login/LoginHome'));
 const LogoutHome = lazy(() => import('./Components/Logout/LogoutHome'));
@@ -96,6 +97,7 @@ function App() {
                         <Route path="/login" element={<LoginHome />} />
                         <Route path="/register" element={<RegisterHome />} />
                         <Route path="/logout" element={<LogoutHome />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordHome />} />
                         <Route path='/home' element={<Header />} >
                           <Route index element={<Home />} />
                           <Route path='search' element={<SearchResults />} />
