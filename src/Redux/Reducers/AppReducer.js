@@ -4,6 +4,7 @@ import {configureStore} from "@reduxjs/toolkit";
 import storage from "redux-persist/lib/storage";
 import {persistReducer} from "redux-persist";
 import UserInfoReducer from "./UserInfoReducer";
+import RoleReducer from "./RoleReducer";
 
 
 const config = {
@@ -14,6 +15,7 @@ const config = {
 
 export const allReducers = combineReducers({
     userInfo: UserInfoReducer,
+    role: RoleReducer
 });
 
 export const persistedReducer = persistReducer(config, allReducers);

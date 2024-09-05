@@ -6,16 +6,18 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
 import MicIcon from '@mui/icons-material/Mic';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import HeaderStyles from './HeaderStyles.module.css';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useFetchAPI } from '../../Hooks/useAPI';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CommonHeaders } from '../../CommonComponents/CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import Loader from '../../CommonComponents/Loader/Loader';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { setRole } from '../../Redux/Actions/ReduxOperations';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -25,6 +27,7 @@ const Header = () => {
 
     const appState = useSelector(state => state);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [searchInput, setSearchInput] = useState('');
     const [detailsResponse, setDetailsResponse] = useState({});
@@ -48,6 +51,7 @@ const Header = () => {
     const onDetailSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
             setDetailsResponse(res?.data?.userInfo);
+            dispatch(setRole(res?.data?.userInfo?.role));
         } else {
             if (res?.status === 401) {
                 setDetailErrorMessage("Session Expired. Please login again!!");
@@ -165,7 +169,7 @@ const Header = () => {
 
     const handleMicToggle = () => {
         resetTranscript();
-        if(!listening) {
+        if (!listening) {
             SpeechRecognition.startListening({ continuous: true });
             setTimeout(() => {
                 if (transcript?.length === 0) {
@@ -182,8 +186,8 @@ const Header = () => {
         setCallSearchApi(true);
         handleMicDialogClose();
         setTimeout(() => {
-           SpeechRecognition.stopListening();
-           SpeechRecognition.abortListening();
+            SpeechRecognition.stopListening();
+            SpeechRecognition.abortListening();
         }, 100);
     }
 
@@ -191,19 +195,19 @@ const Header = () => {
         resetTranscript();
     }
 
-    const randomPlaceholder = (arr,min, max) => { 
-        return arr[Math.floor(Math.random()  
-                * (max - min + 1)) + min]; 
-    }; 
+    const randomPlaceholder = (arr, min, max) => {
+        return arr[Math.floor(Math.random()
+            * (max - min + 1)) + min];
+    };
 
     const onPlaceholderSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
-              let data = res?.data?.placeholders?.length > 0 ? res?.data?.placeholders : ['Topics'];
-              setInterval(() => {
+            let data = res?.data?.placeholders?.length > 0 ? res?.data?.placeholders : ['Topics'];
+            setInterval(() => {
                 setPlaceholder(randomPlaceholder(data, 0, data.length - 1))
-              }, 2000);
+            }, 2000);
         } else {
-              setPlaceholder('Topics');
+            setPlaceholder('Topics');
         }
     }
 
@@ -239,16 +243,13 @@ const Header = () => {
                                             </>
                                         )
                                     }}
-                                    sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } } }}
+                                    sx={{ input: { "&::placeholder": { opacity: 0.7, zIndex: 10000 } }, height: '50px' }}
                                     className={HeaderStyles.textField}
                                     placeholder={'Search ' + placeholder} size="large"
                                 />
                             </div>
                             <div className={HeaderStyles.requestSection}>
                                 <div className={HeaderStyles.requestSectionContainer}>
-                                    {/* <div>
-                                        <h5 className={HeaderStyles.requestText}>Request a Category</h5>
-                                    </div> */}
                                     <div>
                                         <h5 className={HeaderStyles.requestText}>Request a Topic</h5>
                                     </div>
@@ -256,9 +257,12 @@ const Header = () => {
                             </div>
                             <div className={HeaderStyles.profileSection}>
                                 <div className={HeaderStyles.profileSectionContainer}>
-                                    <div className={HeaderStyles.avatar}>
+                                    { appState?.role === 'superAdmin' && <div className={HeaderStyles.notifyDiv}>
+                                        <NotificationsNoneIcon className={HeaderStyles.notifyIcon} />
+                                    </div>}
+                                    {detailsResponse?.firstName && <div className={HeaderStyles.avatar}>
                                         <h5>{detailsResponse?.firstName?.charAt(0) + detailsResponse?.lastName?.charAt(0)}</h5>
-                                    </div>
+                                    </div>}
                                     <div>
                                         <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'37px'} onClick={handleLogout}>Log Out</CommonButton>
                                     </div>
@@ -306,10 +310,10 @@ const Header = () => {
                     </IconButton>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-slide-description">
-                            <p>{listening ? <div className={HeaderStyles.speakNow}>{transcript?.length > 0 ? <><h6>Listening<span className={HeaderStyles.listeningLoading}>...</span></h6><div><h6 style={{ textAlign: 'center' }}>Please speak closer to microphone for better results</h6></div></> : <h6>Speak Now</h6>}</div> : <div className={HeaderStyles.speakNowErr}>{ transcript?.length > 0 ? <><span>It's not what you spoke? </span><span onClick={handleMicToggle}>Try speaking again </span><span>close to microphone</span></> : <><span>Didn't get that. </span><span onClick={handleMicToggle}>Try speaking again</span></>}</div>}</p>
+                            <p>{listening ? <div className={HeaderStyles.speakNow}>{transcript?.length > 0 ? <><h6>Listening<span className={HeaderStyles.listeningLoading}>...</span></h6><div><h6 style={{ textAlign: 'center' }}>Please speak closer to microphone for better results</h6></div></> : <h6>Speak Now</h6>}</div> : <div className={HeaderStyles.speakNowErr}>{transcript?.length > 0 ? <><span>It's not what you spoke? </span><span onClick={handleMicToggle}>Try speaking again </span><span>close to microphone</span></> : <><span>Didn't get that. </span><span onClick={handleMicToggle}>Try speaking again</span></>}</div>}</p>
                             <div className={listening ? HeaderStyles.center : HeaderStyles.centerMicOff} onClick={handleMicToggle}>
                                 <div className={listening ? HeaderStyles.microphoneActive : HeaderStyles.microphoneInActive}>
-                                <MicIcon className={listening ? HeaderStyles.micIconActive : HeaderStyles.micIconInactive} />
+                                    <MicIcon className={listening ? HeaderStyles.micIconActive : HeaderStyles.micIconInactive} />
                                 </div>
                             </div>
                         </DialogContentText>

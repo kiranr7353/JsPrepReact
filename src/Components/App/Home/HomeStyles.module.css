@@ -7,23 +7,39 @@
 .imageSection {
   position: relative;
 }
-.imageSection h2 {
+.imageSectionDiv {
   position: absolute;
   top: 78px;
   left: 84px;
-  color: white;
+  background: white;
+  width: 33%;
+  padding: 11px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .08);
+}
+.imageSectionDivThree {
+  position: absolute;
+  top: 78px;
+  left: 84px;
+  background: white;
+  width: 33%;
+  padding: 11px;
+}
+.imageSection h2 {
+  color: black;
   font-weight: bold;
+  font-size: 26px;
+  font-family: SuisseWorks, Georgia, Times, "Times New Roman", serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 .imageSection p {
-  position: absolute;
-  top: 150px;
-  left: 84px;
-  color: white;
-  font-weight: bold;
+  color: black;
+  font-family: SuisseWorks, Georgia, Times, "Times New Roman", serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 .imageSection img {
   width: 100%;
   height: 400px;
+}
+.bannerThreeText {
+
 }
 .categories {
   margin-top: 20px;
@@ -35,6 +51,31 @@
   letter-spacing: -.016rem;
   max-width: 36em;
   margin-bottom: 20px;
+  font-family: sans-serif;
+}
+.favTopicsText {
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  letter-spacing: -.016rem;
+  max-width: 36em;
+  margin-bottom: 20px;
+  font-family: sans-serif;
+}
+.borderBottom {
+  border: 3px solid #0072ef;
+  width: 14%;
+  margin-top: 6px;
+}
+.borderBottomCat {
+  border: 3px solid #0072ef;
+  width: 9%;
+  margin-top: 6px;
+}
+.borderBottomTopics {
+  border: 3px solid #0072ef;
+  width: 5%;
+  margin-top: 6px;
 }
 .tabImage {
   width: 50px;

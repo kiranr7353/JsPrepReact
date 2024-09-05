@@ -8,9 +8,13 @@ import { CommonHeaders } from '../../../CommonComponents/CommonHeaders';
 import { Alert, CircularProgress, Dialog, DialogContent, Drawer, FormControl, Skeleton, Slide, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import Switch from '@mui/joy/Switch';
 import Image from '../../../Images/banner3.jpg';
+import ImageTwo from '../../../Images/banner4.jpg';
+import ImageThree from '../../../Images/banner6.jpg';
 import Loader from '../../../CommonComponents/Loader/Loader';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Mousewheel, Keyboard } from 'swiper/modules';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { Carousel } from 'react-responsive-carousel';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
@@ -121,7 +125,7 @@ const Home = () => {
         if ((res?.status === 200 || res?.status === 201)) {
             setCategoryInfo({ data: res?.data?.categories, error: '' });
             let filterHidden = res?.data?.categories?.filter(el => !el?.enabled);
-            if(filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0) {
                 setShowCategoryHiddenBtn(true);
             } else {
                 setShowCategoryHiddenBtn(false);
@@ -150,15 +154,15 @@ const Home = () => {
             })
             const results = res?.data?.topics?.filter(({ topicId: id1 }) => favoriteTopics?.some(({ topicId: id2 }) => id2 === id1));
             let setFavTopic = [];
-            if(results?.length > 0) {
+            if (results?.length > 0) {
                 const modified = results?.map(el => ({ ...el, favorite: true }));
-                if(modified && modified?.length > 0) {
+                if (modified && modified?.length > 0) {
                     setFavTopic = res?.data?.topics?.map(el => {
                         let item = modified?.find(id => id.topicId === el.topicId)
-                        if(item) {
+                        if (item) {
                             return item;
                         }
-                        return el; 
+                        return el;
                     })
                     setTopicInfo({ data: setFavTopic, error: '' });
                 }
@@ -166,7 +170,7 @@ const Home = () => {
                 setTopicInfo({ data: res?.data?.topics, error: '' });
             }
             let filterHidden = res?.data?.topics?.filter(el => !el?.enabled);
-            if(filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0) {
                 setShowTopicHiddenBtn(true);
             } else {
                 setShowTopicHiddenBtn(false);
@@ -175,7 +179,7 @@ const Home = () => {
             setTopicInfo({ data: [], error: res?.data?.detail ? res?.data?.detail : 'Something went wrong. Please try again later' });
         }
     }
-    
+
     const handleFavoriteEdit = el => {
         setFavoriteTopicObj({ topicDetails: el })
         setCallFavTopicsApi(true);
@@ -627,15 +631,31 @@ const Home = () => {
         <>
             {(isFetching || fetching) && <Loader showLoader={fetching || isLoading} />}
             <div className={HomeStyles.body}>
-                <div className={HomeStyles.imageSection}>
-                    <img src={Image} alt='Image' />
-                    <div>
-                    <h2>INTERVIEW PREPARATION MADE EASY</h2>
-                    <p>Prepare for your interviews much quicker with your favorite topics</p>
+                <Carousel showArrows={true} showThumbs={false} showStatus={false} autoPlay={true} infiniteLoop={true} >
+                    <div className={HomeStyles.imageSection}>
+                        <img src={Image} alt='Image' />
+                        <div className={HomeStyles.imageSectionDiv}>
+                            <h2>Interview Preparation Made Easy</h2>
+                            <p>Prepare for your interviews much quicker with your favorite topics</p>
+                        </div>
                     </div>
-                </div>
-                { favoriteTopics && favoriteTopics?.length > 0 &&  <div className={HomeStyles.topics}>
-                    {favoriteTopics && favoriteTopics?.length > 0 && <h4 className={HomeStyles.categoriesText}>Favorite Topics</h4>}
+                    <div className={HomeStyles.imageSection}>
+                        <img src={ImageTwo} alt='Image' />
+                        <div className={HomeStyles.imageSectionDiv}>
+                            <h2>Keep Yourself Updated Always</h2>
+                            <p>Stay ahead with the latest content of each topics updated every week</p>
+                        </div>
+                    </div>
+                    <div className={HomeStyles.imageSection}>
+                        <img src={ImageThree} alt='Image' />
+                        <div className={HomeStyles.imageSectionDiv}>
+                            <h2>Learn Anytime, Anywhere</h2>
+                            <p>Learn at your own convenience anywhere and at any time</p>
+                        </div>
+                    </div>
+                </Carousel>
+                {favoriteTopics && favoriteTopics?.length > 0 && <div className={HomeStyles.topics}>
+                    {favoriteTopics && favoriteTopics?.length > 0 && <h4 className={HomeStyles.favTopicsText}>Favorite Topics<div className={HomeStyles.borderBottom}></div></h4>}
                     <Swiper
                         slidesPerView={4}
                         spaceBetween={0}
@@ -672,12 +692,12 @@ const Home = () => {
                                 }) : <></>}
                         </div>
                     </Swiper>
-                </div> }
+                </div>}
                 <div className={HomeStyles.categoryList}>
-                    <h4 className={HomeStyles.categoriesText}>Categories</h4>
+                    <h4 className={HomeStyles.categoriesText}>Categories<div className={HomeStyles.borderBottomCat}></div></h4>
                     <div className={HomeStyles.addCategoryBtn}>
                         <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Category</CommonButton>
-                        { showCategoryHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('categories')}>View Hidden Categories</CommonButton> }
+                        {showCategoryHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('categories')}>View Hidden Categories</CommonButton>}
                     </div>
                     {categoriesListData?.length > 0 ? (
                         <>
@@ -729,10 +749,10 @@ const Home = () => {
                     </Swiper>
                 </div>
                 <div className={HomeStyles.topics}>
-                    {getTopics?.data && <h4 className={HomeStyles.categoriesText}>Topics</h4>}
+                    {getTopics?.data && <h4 className={HomeStyles.categoriesText}>Topics<div className={HomeStyles.borderBottomTopics}></div></h4>}
                     {getTopics?.data && <div className={HomeStyles.addTopicBtn}>
                         <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Topic</CommonButton>
-                        { showTopicHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('topics')}>View Hidden Topics</CommonButton> }
+                        {showTopicHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('topics')}>View Hidden Topics</CommonButton>}
                     </div>}
                     <Swiper
                         slidesPerView={4}
@@ -760,7 +780,7 @@ const Home = () => {
                                                     </div>
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
-                                                    { el?.favorite ? <FavoriteIcon sx={{ color: 'blue' }} onClick={() => handleRemoveFavorite(el)} /> : <FavoriteBorderIcon titleAccess='Set Favorite' onClick={() => handleFavoriteEdit(el)} /> }
+                                                    {el?.favorite ? <FavoriteIcon sx={{ color: 'blue' }} onClick={() => handleRemoveFavorite(el)} /> : <FavoriteBorderIcon titleAccess='Set Favorite' onClick={() => handleFavoriteEdit(el)} />}
                                                     <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
                                                     <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
                                                 </div>
@@ -897,10 +917,10 @@ const Home = () => {
                                             {image?.url && <><img src={image?.url} className={HomeStyles.descriptionImage} alt="upload" />
                                                 <div className={HomeStyles.uploadBtnContainer}>
                                                     <div className={HomeStyles.imageUploadBtn}>
-                                                        <button className={HomeStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadEditCategoryImages(image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : 'Upload'}</button>
+                                                        <button className={HomeStyles.uploadBtn} disabled={image?.imageUploaded} onClick={() => uploadEditCategoryImages(image?.url, index)}>{image?.imageUploaded ? 'Uploaded Successfully' : isLoading ? <CircularProgress sx={{ transform: 'scale(0.8)', color: 'black' }} /> : 'Upload'}</button>
                                                     </div>
                                                     <div>
-                                                        {!image?.imageUploaded ? <button className={HomeStyles.imageDelete} onClick={() => deleteEditCategoryImage(image)}>
+                                                        {(!image?.imageUploaded) ? <button className={HomeStyles.imageDelete} onClick={() => deleteEditCategoryImage(image)}>
                                                             Remove
                                                         </button> : <button className={HomeStyles.imageDelete} onClick={() => removeUploadedEditCategoryImage(image?.url, index)}>
                                                             Cancel Upload
@@ -918,7 +938,7 @@ const Home = () => {
                         </div>
                     </DialogContent>
                     <div className={HomeStyles.modalactionsection}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleEditCategoryConfirm} disabled={!editCategoryInfo?.categoryName || !editCategoryInfo?.description || !editCategoryInfo?.image[0]?.imageUploaded}>{ isLoading ? <CircularProgress /> : 'Edit' }</CommonButton>
+                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleEditCategoryConfirm} disabled={!editCategoryInfo?.categoryName || !editCategoryInfo?.description || !editCategoryInfo?.image[0]?.imageUploaded}>Edit</CommonButton>
                         <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #ddd'} onClick={handleEditCategoryCloseDialog}>Cancel</CommonButton>
                     </div>
                 </div>
@@ -1049,16 +1069,16 @@ const Home = () => {
                                         </div>
                                     )
                                 }
-                            }) : <AppNoData/>}
+                            }) : <AppNoData />}
                         </div>
                     </div>
                 </div>
             </Drawer>
             <Snackbar autoHideDuration={3000} open={snackSetFavBarOpen} onClose={handleSetFavSnackBarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }} >
-                <Alert severity={ favTopicInfo?.errorMsg > 0 ? "error" : "success"} onClose={handleSetFavSnackBarClose} sx={{ width: '100%' }}>{ favTopicInfo?.errorMsg > 0 ? favTopicInfo?.errorMsg : favTopicInfo?.successMsg }</Alert>
+                <Alert severity={favTopicInfo?.errorMsg > 0 ? "error" : "success"} onClose={handleSetFavSnackBarClose} sx={{ width: '100%' }}>{favTopicInfo?.errorMsg > 0 ? favTopicInfo?.errorMsg : favTopicInfo?.successMsg}</Alert>
             </Snackbar>
             <Snackbar autoHideDuration={3000} open={snackRemoveFavBarOpen} onClose={handleRemoveFavSnackBarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }} >
-                <Alert severity={ removeFavTopicInfo?.length > 0 ? "error" : "success"} onClose={handleRemoveFavSnackBarClose} sx={{ width: '100%' }}>{ removeFavTopicInfo?.errorMsg > 0 ? removeFavTopicInfo?.errorMsg : removeFavTopicInfo?.successMsg }</Alert>
+                <Alert severity={removeFavTopicInfo?.length > 0 ? "error" : "success"} onClose={handleRemoveFavSnackBarClose} sx={{ width: '100%' }}>{removeFavTopicInfo?.errorMsg > 0 ? removeFavTopicInfo?.errorMsg : removeFavTopicInfo?.successMsg}</Alert>
             </Snackbar>
         </>
     )

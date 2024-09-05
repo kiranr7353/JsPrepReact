@@ -16,11 +16,12 @@ import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 
 const AddQA = (props) => {
 
-    const { setAddQAClicked, setEditClicked, editClicked, editItem, params, locationDetails, getQA } = props;
+    const { role, setAddQAClicked, setEditClicked, editClicked, editItem, params, locationDetails, getQA } = props;
 
     const [openDrawer, setOpenDrawer] = useState(false);
     const [question, setQuestion] = useState('');
     const [questionId, setQuestionId] = useState('');
+    const [requestId, setRequestId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [callCreateQAApi, setCallCreateQAApi] = useState(false);
     const [callEditQAApi, setCallEditQAApi] = useState(false);
@@ -39,6 +40,8 @@ const AddQA = (props) => {
     useEffect(() => {
         setOpenDrawer(true);
         const uuid = uuidv4();
+        const requestuuid = uuidv4();
+        setRequestId(`${params?.categoryId}-${params?.topicId}-${requestuuid}`)
         editClicked ? setQuestionId(editItem?.questionId) : setQuestionId(`${params?.categoryId}-${params?.topicId}-${uuid}`);
         if (editClicked) {
             setQuestion(editItem?.question);
@@ -335,7 +338,9 @@ const AddQA = (props) => {
         questionId,
         question,
         data: QA,
-        enabled: editClicked ? enabled : undefined
+        enabled: editClicked ? enabled : undefined,
+        requestId: role === 'admin' ? requestId : undefined,
+        type: role === 'admin' ? 'request' : 'add',
     };
 
     const handleAddQuestion = () => {
@@ -389,6 +394,18 @@ const AddQA = (props) => {
                                 <Switch id='enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
                             </Typography>}
                             <FormControl sx={{ width: '100%' }}>
+                              { role === 'admin' && <><label>Request ID</label>
+                                <TextField
+                                    name='requestId'
+                                    value={requestId}
+                                    onChange={(e) => setRequestId(e.target.value)}
+                                    InputProps={{
+                                        type: 'text',
+                                    }}
+                                    sx={{ input: { "&::placeholder": { opacity: 0.9 } } }}
+                                    placeholder={"Enter Question"} size="large"
+                                    disabled
+                                /></> }
                                 <label>Question ID</label>
                                 <TextField
                                     name='questionId'
@@ -699,7 +716,7 @@ const AddQA = (props) => {
                         </div>
                         <div className={AddQAStyles.editBtnContainer}>
                             <div>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddQuestion()} disabled={!question}>Save</CommonButton>
+                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddQuestion()} disabled={!question}>{role === 'superAdmin' ? 'Save' : 'Request'}</CommonButton>
                             </div>
                             <div>
                                 <CommonButton variant="contained" bgColor={'#f8f8f8'} color={'black'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} border={'1px solid #ddd'} onClick={handleCloseDrawer}>Cancel</CommonButton>

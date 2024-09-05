@@ -1,6 +1,5 @@
 .topBar {
   background: #fff;
-  height: 5rem;
   padding: 0 2.4rem;
   position: relative;
   z-index: 1010;
@@ -12,6 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 4rem;
 }
 
 .requestSectionContainer {
@@ -30,6 +30,10 @@
 
 .requestText:hover {
   color: blue;
+}
+
+.textField > div {
+  height: 48px;
 }
 
 .textField div fieldset {
@@ -59,13 +63,12 @@
 }
 
 .avatar {
-  margin-left: -26px;
   margin-right: 20px;
   border: 1px solid gray;
-  padding: 10px;
+  padding: 6px 15px 15px 10px;
   border-radius: 50%;
-  width: 34px;
-  height: 34px;
+  width: 20px;
+  height: 20px;
   text-align: center;
   font-size: 20px;
   background-color: #f7f9fa;
@@ -74,7 +77,7 @@
 
 .avatar>h5 {
   margin: 0px;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
 }
 
@@ -325,6 +328,15 @@
   font-family: monospace;
   clip-path: inset(0 3ch 0 0);
   animation: l 1s steps(4) infinite;
+}
+
+.notifyDiv {
+  padding-right: 20px;
+}
+
+.notifyIcon {
+  transform: scale(1.3);
+  cursor: pointer;
 }
 
 @media screen and (max-width: 1440px) {

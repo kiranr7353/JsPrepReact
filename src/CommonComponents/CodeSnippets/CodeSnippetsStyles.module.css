@@ -82,6 +82,8 @@
      padding: 20px;
      width: fit-content;
      height: fit-content;
+     background: black;
+     color: white;
 }
 .code {
     font-size: 20px;

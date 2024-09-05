@@ -29,6 +29,7 @@ import { ref as storageRef, deleteObject } from "firebase/storage";
 import { storage } from '../../firebaseConfig';
 import BookmarkedTab from './BookmarkedTab';
 import SearchQA from './SearchQA';
+import { useSelector } from 'react-redux';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -39,6 +40,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const InterviewQA = (props) => {
 
     const { params, locationDetails } = props;
+    const appState = useSelector(state => state);
+
+    console.log(appState);
+    
 
     const [addQAClicked, setAddQAClicked] = useState(false);
     const [value, setValue] = useState(0);
@@ -260,7 +265,7 @@ const InterviewQA = (props) => {
             {(fetching) && <Loader showLoader={fetching} />}
             <div className={InterviewQAStyles.mainContentContainer}>
                 <div className={InterviewQAStyles.addQuestionBtn}>
-                    <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Question</CommonButton>
+                    <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>{ appState?.role === 'superAdmin' ? 'Add Question' : 'Request Question'}</CommonButton>
                 </div>
                 <div className={InterviewQAStyles.tabs}>
                     <div className={InterviewQAStyles.searchBar}>
@@ -489,7 +494,7 @@ const InterviewQA = (props) => {
                         </div>}
                     </TabPanel>}
                 </div>
-                {(addQAClicked || editClicked) && <AddQA setAddQAClicked={setAddQAClicked} setEditClicked={setEditClicked} editClicked={editClicked} params={params} locationDetails={locationDetails} getQA={getQA} editItem={editItem} />}
+                {(addQAClicked || editClicked) && <AddQA role={appState?.role} setAddQAClicked={setAddQAClicked} setEditClicked={setEditClicked} editClicked={editClicked} params={params} locationDetails={locationDetails} getQA={getQA} editItem={editItem} />}
             </div>
             <Dialog open={openDeleteModal} TransitionComponent={Transition} keepMounted onClose={handleQACloseDialog} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" >
                 <div className={InterviewQAStyles.modalinnerwrapper}>

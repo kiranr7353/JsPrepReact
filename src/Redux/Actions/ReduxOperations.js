@@ -4,3 +4,9 @@ export const setUserInfo = (item) => {
         item : item
     }
 }
+export const setRole = (item) => {
+    return{
+        type : 'ROLE',
+        item : item
+    }
+}
