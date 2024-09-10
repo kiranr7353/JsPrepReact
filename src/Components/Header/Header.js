@@ -15,6 +15,7 @@ import { useFetchAPI } from '../../Hooks/useAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { CommonHeaders } from '../../CommonComponents/CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
+import ChatBot from '../ChatBot/ChatBot';
 import Loader from '../../CommonComponents/Loader/Loader';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { setRole } from '../../Redux/Actions/ReduxOperations';
@@ -248,18 +249,18 @@ const Header = () => {
                                     placeholder={'Search ' + placeholder} size="large"
                                 />
                             </div>
-                            <div className={HeaderStyles.requestSection}>
+                            {/* <div className={HeaderStyles.requestSection}>
                                 <div className={HeaderStyles.requestSectionContainer}>
                                     <div>
                                         <h5 className={HeaderStyles.requestText}>Request a Topic</h5>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className={HeaderStyles.profileSection}>
                                 <div className={HeaderStyles.profileSectionContainer}>
-                                    { appState?.role === 'superAdmin' && <div className={HeaderStyles.notifyDiv}>
+                                    {/* { appState?.role === 'superAdmin' && <div className={HeaderStyles.notifyDiv}>
                                         <NotificationsNoneIcon className={HeaderStyles.notifyIcon} />
-                                    </div>}
+                                    </div>} */}
                                     {detailsResponse?.firstName && <div className={HeaderStyles.avatar}>
                                         <h5>{detailsResponse?.firstName?.charAt(0) + detailsResponse?.lastName?.charAt(0)}</h5>
                                     </div>}
@@ -270,8 +271,11 @@ const Header = () => {
                             </div>
                         </div>
                     </div>
+                    <div>
+                        
+                    </div>
                     <div className={HeaderStyles.footer}>
-
+                       <ChatBot firstName={detailsResponse?.firstName} lastName={detailsResponse?.lastName} />
                     </div>
                 </div>
                 <Dialog open={openDetailErrorDialog} TransitionComponent={Transition} keepMounted onClose={handleDetailErrorModalClose} aria-describedby="alert-dialog-slide-description" fullWidth={false} maxWidth="sm" className={HeaderStyles.dialogWrapper}>

@@ -1,0 +1,383 @@
+.floatingBtn {
+  display: block;
+  background: #1976d2;
+  border: none;
+  border-radius: 50%;
+  bottom: 23px;
+  box-shadow: 0 5px 40px rgba(0, 0, 0, .16);
+  color: #fff;
+  cursor: pointer;
+  height: 60px;
+  opacity: 1;
+  outline: none;
+  position: fixed !important;
+  right: 40px;
+  width: 60px;
+  z-index: 1;
+}
+
+.chatBox {
+  display: block;
+  position: fixed;
+  bottom: 55px;
+  right: 103px;
+  background: white;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 12px 28px 0px, rgba(0, 0, 0, 0.1) 0px 2px 4px 0px, rgba(255, 255, 255, 0.05) 0px 0px 0px 1px inset;
+  padding: 10px;
+  width: 20%;
+  height: 530px;
+  z-index: 100;
+  border-radius: 15px;
+}
+
+.chatHeader {
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 18px 50px -10px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1565c0;
+  height: 40px;
+}
+
+.footer {
+  padding-top: 30px;
+}
+
+.chatHeaderText {
+  font-weight: 650;
+  color: white;
+  font-size: 27px;
+}
+
+.clearChatIcon,
+.refreshIcon {
+  transform: scale(1.2);
+  color: white;
+  cursor: pointer;
+}
+
+.refreshIcon {
+  margin-right: 20px;
+}
+
+.inputtextfield {
+  width: 100% !important
+}
+
+.inputtextfield div fieldset {
+  border: none;
+}
+
+.inputtextfield div input {
+  width: 90% !important;
+}
+
+.inputDiv {
+  border-radius: 25px;
+  background-color: #e6e6e6;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.chatContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatArea {
+  margin-top: 15px;
+  height: 350px;
+  overflow: auto;
+}
+
+.modalinnerwrapper {
+  padding: 20px;
+  min-width: 300px;
+}
+
+.headerText {
+  font-weight: bold;
+  font-size: 30px;
+  opacity: 0.7;
+}
+
+.modalactionsection {
+  text-align: center;
+}
+
+.modalactionsection button {
+  margin: 10px 10px;
+}
+
+.okButton {
+  text-transform: initial;
+  background-color: rgb(40, 108, 226);
+  border-radius: 8px;
+  padding: 0.5rem 1.5rem;
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  pointer-events: auto;
+  border: none;
+}
+
+.headerTextVoice {
+  font-size: 20px !important;
+  font-weight: bold;
+  margin-top: -3px;
+  margin-right: 10px;
+}
+
+.speakNow>h6 {
+  text-align: center;
+  font-weight: bold;
+}
+
+.speakNowErr>span:nth-child(1) {
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.speakNowErr>span:nth-child(2) {
+  text-align: center;
+  font-size: 14px;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0 40px 0;
+  cursor: pointer;
+}
+
+.centerMicOff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 60px 0 60px 0;
+  cursor: pointer;
+}
+
+.microphoneActive {
+  height: 100px;
+  width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #689efb;
+  position: relative;
+  box-shadow: -18px 18px 24px -5px rgba(246, 241, 241, 0.78);
+  -webkit-box-shadow: -18px 18px 24px -5px rgba(0, 0, 0, 0.78);
+  -moz-box-shadow: -18px 18px 24px -5px rgba(0, 0, 0, 0.78);
+}
+
+.microphoneActive::before {
+  content: "";
+  position: absolute;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  border: 1px solid #77f373;
+  border-radius: 50%;
+  animation: animate 1.5s linear infinite;
+
+}
+
+.microphoneActive::after {
+  content: "";
+  position: absolute;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  border: 1px solid #77f373;
+  border-radius: 50%;
+  animation: animate 1.5s linear infinite;
+  animation-delay: 0.4s;
+}
+
+.microphoneInActive::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid red;
+  border-radius: 50%;
+  margin-left: -61px;
+  margin-top: -36px;
+}
+
+.floatingBtnAnimate::before {
+  content: "";
+  position: absolute;
+  width: calc(90% + 20px);
+  height: calc(90% + 20px);
+  border: 2px solid #1565c0;
+  border-radius: 50%;
+  animation: animate 1.5s linear infinite;
+}
+
+.floatingBtnAnimate::after {
+  content: "";
+  position: absolute;
+  width: calc(90% + 20px);
+  height: calc(90% + 20px);
+  border: 2px solid #1565c0;
+  border-radius: 50%;
+  animation: animate 1.5s linear infinite;
+  animation-delay: 0.4s;
+}
+
+.clearIcon {
+  transform: scale(1.2);
+}
+
+@keyframes animate {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.micIconActive {
+  transform: scale(2);
+  color: white;
+}
+
+.micIconInactive {
+  transform: scale(2);
+  color: black;
+}
+
+.feedBack {
+  display: flex;
+  gap: 5px;
+  justify-content: end;
+}
+
+.thumbsUpIcon {
+  cursor: pointer;
+  transform: scale(0.8);
+}
+
+.thumbsDownIcon {
+  cursor: pointer;
+  transform: scale(0.8);
+}
+
+.thumbsUpIcon:hover {
+  color: #296CE2;
+}
+
+.thumbsDownIcon:hover {
+  color: #296CE2;
+}
+
+.thumbsUpIconFilled {
+  cursor: pointer;
+  color: #296CE2;
+  transform: scale(0.7);
+}
+
+.thumbsDownIconFilled {
+  cursor: pointer;
+  color: #296CE2;
+  transform: scale(0.7);
+}
+
+.transcript {
+  padding-top: 22px;
+  font-weight: bold;
+  color: #514e4e;
+  font-size: 19px;
+}
+
+.modalabuttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  font-weight: bold;
+  display: inline-block;
+  font-family: monospace;
+  font-size: 30px;
+  clip-path: inset(0 3ch 0 0);
+  animation: l 1s steps(4) infinite;
+}
+
+.listeningLoading {
+  font-weight: bold;
+  display: inline-block;
+  font-family: monospace;
+  clip-path: inset(0 3ch 0 0);
+  animation: l 1s steps(4) infinite;
+}
+
+
+@keyframes l {
+  to {
+    clip-path: inset(0 -1ch 0 0)
+  }
+}
+
+.chatContainer ::-webkit-scrollbar {
+  width: 5px;
+}
+
+.chatContainer ::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.chatContainer ::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+.aiChatImage {
+  height: 59px;
+  width: 59px;
+  border-radius: 50%;
+}
+
+.headerFlex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aiHeadingChatImage {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}
+
+.tooltipContainer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.tooltipClose {
+  color: red;
+  padding-left: 5px;
+  cursor: pointer;
+}
