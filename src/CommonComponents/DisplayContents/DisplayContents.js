@@ -27,6 +27,7 @@ import AddSection from '../AddSection/AddSection';
 import AddDescription from '../AddDescription/AddDescription';
 import EditDescription from '../EditDescription/EditDescription';
 import Loader from '../Loader/Loader';
+import { useSelector } from 'react-redux';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -35,6 +36,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const DisplayContents = (props) => {
 
   const { contentData, locationDetails, categoryId, getConcepts, setSelectedIndex, setContentData, params } = props;
+
+  const appState = useSelector(state => state);
 
   const [editClicked, setEditClicked] = useState(false);
   const [addClicked, setAddClicked] = useState(false);
@@ -169,15 +172,15 @@ const DisplayContents = (props) => {
           <div><h2 className={DisplayContentsStyles.contentTitle}>{contentData?.title}</h2></div>
         </div>
         <div>
-          <AddIcon titleAccess='Add Section' className={DisplayContentsStyles.addSectionIcon} onClick={() => handleAddSection()} />
+        { appState?.role !== 'user' &&  <AddIcon titleAccess='Add Section' className={DisplayContentsStyles.addSectionIcon} onClick={() => handleAddSection()} /> }
         </div>
       </div>
       <div className={DisplayContentsStyles.contentData}>
         {contentData?.data ? contentData?.data?.length > 0 && contentData?.data?.map((el, i) => (
           <div className={DisplayContentsStyles.section} key={el?.sectionId + i}>
             <div className={DisplayContentsStyles.addDescBtn}>
-              <PostAddIcon titleAccess='Add Description' onClick={() => handleAddDescription(el, el?.sectionId)} className={DisplayContentsStyles.addDescIcon} />
-              <DeleteIcon titleAccess='Delete Section' onClick={() => handleDeleteSection(el, el?.sectionId)} className={DisplayContentsStyles.deleteSectionIcon} />
+            { appState?.role !== 'user' && <PostAddIcon titleAccess='Add Description' onClick={() => handleAddDescription(el, el?.sectionId)} className={DisplayContentsStyles.addDescIcon} /> }
+            { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete Section' onClick={() => handleDeleteSection(el, el?.sectionId)} className={DisplayContentsStyles.deleteSectionIcon} /> }
             </div>
             {el?.description && el?.description?.length > 0 && el?.description?.map((desc, idx) => (
               <div className={DisplayContentsStyles.description} key={desc?.id + idx}>
@@ -264,8 +267,8 @@ const DisplayContents = (props) => {
                   </div>
                 )}
                 <div className={DisplayContentsStyles.addDescBtn}>
-                  <EditIcon className={DisplayContentsStyles.editDescIcon} titleAccess='Edit Description' onClick={() => handleEditDescription(desc, el?.sectionId)} />
-                  <DeleteIcon className={DisplayContentsStyles.deleteDescIcon} titleAccess='Delete Description' onClick={() => handleDeleteDescription(desc, el?.sectionId)} />
+                { appState?.role !== 'user' && <EditIcon className={DisplayContentsStyles.editDescIcon} titleAccess='Edit Description' onClick={() => handleEditDescription(desc, el?.sectionId)} /> }
+                { appState?.role !== 'user' && <DeleteIcon className={DisplayContentsStyles.deleteDescIcon} titleAccess='Delete Description' onClick={() => handleDeleteDescription(desc, el?.sectionId)} /> }
                 </div>
               </div>
             ))}

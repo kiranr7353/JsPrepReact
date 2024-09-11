@@ -25,6 +25,7 @@ import { useFetchAPI } from '../../Hooks/useAPI';
 import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
+import { useSelector } from 'react-redux';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -33,6 +34,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const CodeSnippets = (props) => {
 
     const { params, locationDetails } = props;
+
+    const appState = useSelector(state => state); 
 
     const [value, setValue] = useState(0);
     const [addSnippetClicked, setAddSnippetClicked] = useState(false);
@@ -89,7 +92,7 @@ const CodeSnippets = (props) => {
             setAllInterviewSnippetData(res?.data?.data);
             setTotalDocs(res?.data?.totalCount);
             let filterHidden = res?.data?.data?.filter(el => !el?.enabled);
-            if (filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0 && appState?.role !== 'user') {
                 setShowHiddenTab(true);
             } else {
                 setShowHiddenTab(false);
@@ -316,9 +319,9 @@ const CodeSnippets = (props) => {
                                                 </div>
                                             ))}
                                             <div className={CodeSnippetsStyles.iconsDiv}>
-                                                <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => handleSnippetEdit(el)} />
+                                            { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => handleSnippetEdit(el)} /> }
                                                 {el?.bookmarked ? <BookmarkAddedIcon titleAccess='Bookmarked' className={CodeSnippetsStyles.bookmarkedIcon} /> : <BookmarkBorderIcon titleAccess='Bookmark' className={CodeSnippetsStyles.bookmarkQAIcon} onClick={() => handleBookmark(el)} />}
-                                                <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => handleSnippetDelete(el)} />
+                                            { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => handleSnippetDelete(el)} /> }
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>

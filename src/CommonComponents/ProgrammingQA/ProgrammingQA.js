@@ -25,6 +25,7 @@ import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 import BookmarkedProgrammingQA from './BookmarkedProgrammingQA';
+import { useSelector } from 'react-redux';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -33,6 +34,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const ProgrammingQA = (props) => {
 
     const { params, locationDetails } = props;
+
+    const appState = useSelector(state => state); 
 
     const [addPQAClicked, setAddPQAClicked] = useState(false);
     const [editClicked, setEditClicked] = useState(false);
@@ -88,7 +91,7 @@ const ProgrammingQA = (props) => {
             setAllInterviewPQAData(res?.data?.data);
             setTotalDocs(res?.data?.totalCount);
             let filterHidden = res?.data?.data?.filter(el => !el?.enabled);
-            if (filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0 && appState?.role !== 'user') {
                 setShowHiddenTab(true);
             } else {
                 setShowHiddenTab(false);
@@ -325,9 +328,9 @@ const ProgrammingQA = (props) => {
                                                 </div>
                                             ))}
                                             <div className={ProgrammingStyles.iconsDiv}>
-                                                <EditIcon titleAccess='Edit' className={ProgrammingStyles.editQAIcon} onClick={() => handlePQAEdit(el)} />
+                                            { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={ProgrammingStyles.editQAIcon} onClick={() => handlePQAEdit(el)} /> }
                                                 {el?.bookmarked ? <BookmarkAddedIcon titleAccess='Bookmarked' className={ProgrammingStyles.bookmarkedIcon} /> : <BookmarkBorderIcon titleAccess='Bookmark' className={ProgrammingStyles.bookmarkQAIcon} onClick={() => handleBookmark(el)} />}
-                                                <DeleteIcon titleAccess='Delete' className={ProgrammingStyles.deleteQAIcon} onClick={() => handlePQADelete(el)} />
+                                            { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={ProgrammingStyles.deleteQAIcon} onClick={() => handlePQADelete(el)} /> }
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>

@@ -40,11 +40,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const InterviewQA = (props) => {
 
     const { params, locationDetails } = props;
-    const appState = useSelector(state => state);
-
-    console.log(appState);
+    const appState = useSelector(state => state); 
     
-
     const [addQAClicked, setAddQAClicked] = useState(false);
     const [value, setValue] = useState(0);
     const [pageState, setPageState] = useState(1);
@@ -100,7 +97,7 @@ const InterviewQA = (props) => {
             setAllInterviewQAData(res?.data?.data);
             setTotalDocs(res?.data?.totalCount);
             let filterHidden = res?.data?.data?.filter(el => !el?.enabled);
-            if (filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0 && appState?.role !== 'user') {
                 setShowHiddenTab(true);
             } else {
                 setShowHiddenTab(false);
@@ -265,7 +262,7 @@ const InterviewQA = (props) => {
             {(fetching) && <Loader showLoader={fetching} />}
             <div className={InterviewQAStyles.mainContentContainer}>
                 <div className={InterviewQAStyles.addQuestionBtn}>
-                    <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>{ appState?.role === 'superAdmin' ? 'Add Question' : 'Request Question'}</CommonButton>
+                    { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>{ appState?.role === 'superAdmin' ? 'Add Question' : 'Request Question'}</CommonButton> }
                 </div>
                 <div className={InterviewQAStyles.tabs}>
                     <div className={InterviewQAStyles.searchBar}>
@@ -380,9 +377,9 @@ const InterviewQA = (props) => {
                                                 </div>
                                             ))}
                                             <div className={InterviewQAStyles.iconsDiv}>
-                                                <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => handleQAEdit(el)} />
+                                                { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => handleQAEdit(el)} /> }
                                                 {el?.bookmarked ? <BookmarkAddedIcon titleAccess='Bookmarked' className={InterviewQAStyles.bookmarkedIcon} /> : <BookmarkBorderIcon titleAccess='Bookmark' className={InterviewQAStyles.bookmarkQAIcon} onClick={() => handleBookmark(el)} />}
-                                                <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => handleQADelete(el)} />
+                                                { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => handleQADelete(el)} /> }
                                             </div>
                                         </AccordionDetails>
                                     </Accordion>
@@ -395,7 +392,7 @@ const InterviewQA = (props) => {
                     <TabPanel value={value} index={1}>
                         <BookmarkedTab getBookmarkQA={getBookmarkQA} setGetBookmarkedQAPayload={setGetBookmarkedQAPayload} setBookmarkedPageState={setBookmarkedPageState} bookmarkedInterviewQAData={bookmarkedInterviewQAData} bookmarkedPageState={bookmarkedPageState} handleQAEdit={handleQAEdit} handleQADelete={handleQADelete} setcallBookmarkedQAApi={setcallBookmarkedQAApi} getQA={getQA} setValue={setValue} />
                     </TabPanel>
-                    {showHiddenTab && <TabPanel value={value} index={2}>
+                    {(showHiddenTab) && <TabPanel value={value} index={2}>
                         {fetching ? <Skeleton variant="rectangular" width={'100%'} height={120} sx={{ marginBottom: 10 }} /> :
                             (allInterviewQAData && allInterviewQAData?.length > 0) ? allInterviewQAData?.map((el, i) => {
                                 if (!el?.enabled) return (

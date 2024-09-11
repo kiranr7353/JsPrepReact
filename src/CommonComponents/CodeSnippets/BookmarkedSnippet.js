@@ -14,10 +14,13 @@ import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 import Loader from '../Loader/Loader';
+import { useSelector } from 'react-redux';
 
 const BookmarkedSnippet = (props) => {
 
   const { getBookmarkSnippet, setGetBookmarkedSnippetPayload, setBookmarkedPageState, bookmarkedSnippetData, bookmarkedPageState, setcallBookmarkedSnippetApi, getSnippet, setValue } = props;
+
+  const appState = useSelector(state => state); 
 
   const [removeBookmarkPayload, setRemoveBookmarkPayload] = useState({});
   const [callRemoveBookmarkApi, setCallRemoveBookmarkApi] = useState(false);
@@ -99,9 +102,9 @@ const BookmarkedSnippet = (props) => {
                   </div>
                 ))}
                 <div className={CodeSnippetsStyles.iconsDiv}>
-                  <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => props.handleSnippetEdit(el)} />
+                { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={CodeSnippetsStyles.editQAIcon} onClick={() => props.handleSnippetEdit(el)} /> }
                   <BookmarkRemoveIcon titleAccess='Remove Bookmark' className={CodeSnippetsStyles.removeBookmarkIcon} onClick={() => handleRemoveBookmark(el)} />
-                  <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => props.handleSnippetDelete(el)} />
+                { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={CodeSnippetsStyles.deleteQAIcon} onClick={() => props.handleSnippetDelete(el)} /> }
                 </div>
               </AccordionDetails>
             </Accordion>

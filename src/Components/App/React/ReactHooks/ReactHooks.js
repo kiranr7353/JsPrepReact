@@ -26,6 +26,7 @@ import 'swiper/css/pagination';
 import './ReactHooksSwiperStyles.css';
 import DisplayContent from './DisplayContent';
 import ConfirmationDialog from '../../../../CommonComponents/ConfirmationDialog/ConfirmationDialog';
+import { useSelector } from 'react-redux';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -35,6 +36,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const ReactHooks = (props) => {
 
     const { params, locationDetails } = props;
+
+    const appState = useSelector(state => state);
 
     const [hooksConceptsInfo, setHooksConceptsInfo] = useState({ data: [], error: '' });
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -488,7 +491,7 @@ const ReactHooks = (props) => {
                         </div>
                     </div>
                     <div className={ReactStyles.addConceptsBtn}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Concept</CommonButton>
+                      { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Concept</CommonButton> }
                     </div>
                     <div className={ReactStyles.concepts}>
                         <Swiper
@@ -512,8 +515,8 @@ const ReactHooks = (props) => {
                                                     </div>
                                                 </div>
                                                 <div className={ReactStyles.icons}>
-                                                    <EditIcon titleAccess='Edit' className={ReactStyles.editIcon} onClick={() => handleEditConcept(el)} />
-                                                    <DeleteIcon titleAccess='Delete' className={ReactStyles.deleteIcon} onClick={() => handleDeleteConcept(el?.title, el)} />
+                                                  { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={ReactStyles.editIcon} onClick={() => handleEditConcept(el)} /> }
+                                                  { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={ReactStyles.deleteIcon} onClick={() => handleDeleteConcept(el?.title, el)} /> }
                                                 </div>
                                             </div>
                                         </SwiperSlide>

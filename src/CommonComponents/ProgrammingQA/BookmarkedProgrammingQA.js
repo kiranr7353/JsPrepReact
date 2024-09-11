@@ -14,8 +14,11 @@ import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 import Loader from '../Loader/Loader';
+import { useSelector } from 'react-redux';
 
 const BookmarkedProgrammingQA = (props) => {
+
+    const appState = useSelector(state => state); 
 
     const { getBookmarkPQA, setGetBookmarkedPQAPayload, setBookmarkedPageState, bookmarkedPQAData, bookmarkedPageState, setcallBookmarkedPQAApi, getPQA, setValue } = props;
 
@@ -104,9 +107,9 @@ const BookmarkedProgrammingQA = (props) => {
                                     </div>
                                 ))}
                                 <div className={ProgrammingStyles.iconsDiv}>
-                                    <EditIcon titleAccess='Edit' className={ProgrammingStyles.editQAIcon} onClick={() => props.handlePQAEdit(el)} />
+                                { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={ProgrammingStyles.editQAIcon} onClick={() => props.handlePQAEdit(el)} /> }
                                     <BookmarkRemoveIcon titleAccess='Remove Bookmark' className={ProgrammingStyles.removeBookmarkIcon} onClick={() => handleRemoveBookmark(el)} />
-                                    <DeleteIcon titleAccess='Delete' className={ProgrammingStyles.deleteQAIcon} onClick={() => props.handlePQADelete(el)} />
+                                { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={ProgrammingStyles.deleteQAIcon} onClick={() => props.handlePQADelete(el)} /> }
                                 </div>
                             </AccordionDetails>
                         </Accordion>

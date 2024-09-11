@@ -25,6 +25,7 @@ import AddSection from './AddSection';
 import AppNoData from '../../../../CommonComponents/AppNoData/AppNoData';
 import { storage } from '../../../../firebaseConfig';
 import { ref as storageRef, deleteObject } from "firebase/storage";
+import { useSelector } from 'react-redux';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -33,6 +34,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const DisplayContent = (props) => {
 
     const { contentData, locationDetails, categoryId, GetHooks, setSelectedIndex, setContentData } = props;
+
+    const appState = useSelector(state => state);
 
     const [editClicked, setEditClicked] = useState(false);
     const [addClicked, setAddClicked] = useState(false);
@@ -168,15 +171,15 @@ const DisplayContent = (props) => {
                         <div><h2 className={ReactStyles.contentTitle}>{contentData?.title}</h2></div>
                     </div>
                     <div>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddSection()}>Add Section</CommonButton>
+                    { appState?.role !== 'user' &&  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddSection()}>Add Section</CommonButton> }
                     </div>
                 </div>
                 <div className={ReactStyles.contentData}>
                     {contentData?.data ? contentData?.data?.length > 0 && contentData?.data?.map((el, i) => (
                         <div className={ReactStyles.section} key={el?.sectionId + i}>
                             <div className={ReactStyles.addDescBtn}>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddDescription(el, el?.sectionId)}>Add Description</CommonButton>
-                                <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteSection(el, el?.sectionId)}>Delete Section</CommonButton>
+                            { appState?.role !== 'user' &&  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleAddDescription(el, el?.sectionId)}>Add Description</CommonButton> }
+                            { appState?.role !== 'user' &&  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteSection(el, el?.sectionId)}>Delete Section</CommonButton> }
                             </div>
                             {el?.description && el?.description?.length > 0 && el?.description?.map((desc, idx) => (
                                 <div className={ReactStyles.description} key={desc?.id + idx}>
@@ -263,8 +266,8 @@ const DisplayContent = (props) => {
                                         </div>
                                     )}
                                     <div className={ReactStyles.addDescBtn}>
-                                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleEditDescription(desc, el?.sectionId)}>Edit Description</CommonButton>
-                                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'28%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteDescription(desc, el?.sectionId)}>Delete Description</CommonButton>
+                                    { appState?.role !== 'user' &&  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'25%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleEditDescription(desc, el?.sectionId)}>Edit Description</CommonButton> }
+                                    { appState?.role !== 'user' &&  <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'10px'} borderRadius={'5px'} fontWeight={'bold'} width={'28%'} height={'45px'} margin={'20px 0 0 0'} onClick={() => handleDeleteDescription(desc, el?.sectionId)}>Delete Description</CommonButton> }
                                     </div>
                                 </div>
                             ))}

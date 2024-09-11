@@ -15,8 +15,11 @@ import { CommonHeaders } from '../CommonHeaders';
 import { fetchQueryParams } from '../../Hooks/fetchQueryParams';
 import ConfirmationDialog from '../ConfirmationDialog/ConfirmationDialog';
 import Loader from '../Loader/Loader';
+import { useSelector } from 'react-redux';
 
 const BookmarkedTab = (props) => {
+
+    const appState = useSelector(state => state);
 
     const { getBookmarkQA, setGetBookmarkedQAPayload, setBookmarkedPageState, bookmarkedInterviewQAData, bookmarkedPageState, setcallBookmarkedQAApi, getQA, setValue } = props;
 
@@ -142,9 +145,9 @@ const BookmarkedTab = (props) => {
                                     </div>
                                 ))}
                                 <div className={InterviewQAStyles.iconsDiv}>
-                                    <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => props.handleQAEdit(el)} />
+                                    { appState?.role !== 'user' && <EditIcon titleAccess='Edit' className={InterviewQAStyles.editQAIcon} onClick={() => props.handleQAEdit(el)} /> }
                                     <BookmarkRemoveIcon titleAccess='Remove Bookmark' className={InterviewQAStyles.removeBookmarkIcon} onClick={() => handleRemoveBookmark(el)} />
-                                    <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => props.handleQADelete(el)} />
+                                    { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete' className={InterviewQAStyles.deleteQAIcon} onClick={() => props.handleQADelete(el)} /> }
                                 </div>
                             </AccordionDetails>
                         </Accordion>

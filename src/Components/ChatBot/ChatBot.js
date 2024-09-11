@@ -317,7 +317,7 @@ const ChatBot = ({ firstName, lastName }) => {
                         </div>
                         <div className={ChatBotStylesStyles.footer}>
                             <div className={ChatBotStylesStyles.inputDiv}>
-                                <TextField autoComplete='off' placeholder={placeholder} value={lockForInput ? '' : userInput} onChange={(e) => { setUserInput(e.target.value) }} onKeyDown={aiSmartSearchkeyDownInput} disabled={!(!lockForInput)} className={ChatBotStylesStyles.inputtextfield} sx={{ input: { "&::placeholder": { color: 'black', opacity: '0.8' } } }} />
+                                <TextField autoComplete='off' placeholder={placeholder} value={userInput} onChange={(e) => { setUserInput(e.target.value) }} onKeyDown={aiSmartSearchkeyDownInput} className={ChatBotStylesStyles.inputtextfield} sx={{ input: { "&::placeholder": { color: 'black', opacity: '0.8' } } }} />
                                 <MicIcon titleAccess='Ask by voice' onClick={handleMicIconClick} sx={{ cursor: 'pointer', color: '#296CE2', marginRight: '10px' }} />
                                 <SendIcon sx={{ pointerEvents: (userInput?.length > 0) ? '' : 'none', opacity: (userInput?.length > 0) ? '1' : '0.4', cursor: 'pointer', color: '#296CE2' }} disabled={userInput?.length <= 0} onClick={handleSendIcon} />
                             </div>

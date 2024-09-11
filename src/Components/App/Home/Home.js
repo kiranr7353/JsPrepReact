@@ -96,6 +96,9 @@ const Home = () => {
     const [snackSetFavBarOpen, setSnackSetFavBarOpen] = useState(false);
     const [snackRemoveFavBarOpen, setSnackRemoveFavBarOpen] = useState(false);
 
+    console.log(appState, 'appState');
+    
+
     const onCategoriesListSuccess = res => {
         if ((res?.status === 200 || res?.status === 201)) {
             setCategoryListData(res?.data?.categoriesList);
@@ -683,8 +686,8 @@ const Home = () => {
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
                                                     <CancelIcon titleAccess='Remove Favorite' onClick={() => handleRemoveFavorite(el)} />
-                                                    <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
-                                                    <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
+                                                    { appState?.role !== 'user' && <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} /> }
+                                                    { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} /> }
                                                 </div>
                                             </div>
                                         </SwiperSlide>
@@ -696,8 +699,8 @@ const Home = () => {
                 <div className={HomeStyles.categoryList}>
                     <h4 className={HomeStyles.categoriesText}>Categories<div className={HomeStyles.borderBottomCat}></div></h4>
                     <div className={HomeStyles.addCategoryBtn}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Category</CommonButton>
-                        {showCategoryHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('categories')}>View Hidden Categories</CommonButton>}
+                        { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Category</CommonButton> }
+                        {(showCategoryHiddenBtn || appState?.role !== 'user') && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('categories')}>View Hidden Categories</CommonButton>}
                     </div>
                     {categoriesListData?.length > 0 ? (
                         <>
@@ -739,7 +742,7 @@ const Home = () => {
                                                     </div>
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
-                                                    <EditIcon titleAccess='Edit Category' className={HomeStyles.topicEditIcon} onClick={() => handleCategoryEdit(el)} />
+                                                    { appState?.role !== 'user' && <EditIcon titleAccess='Edit Category' className={HomeStyles.topicEditIcon} onClick={() => handleCategoryEdit(el)} />}
                                                 </div>
                                             </div>
                                         </SwiperSlide>
@@ -751,8 +754,8 @@ const Home = () => {
                 <div className={HomeStyles.topics}>
                     {getTopics?.data && <h4 className={HomeStyles.categoriesText}>Topics<div className={HomeStyles.borderBottomTopics}></div></h4>}
                     {getTopics?.data && <div className={HomeStyles.addTopicBtn}>
-                        <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Topic</CommonButton>
-                        {showTopicHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('topics')}>View Hidden Topics</CommonButton>}
+                        { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Topic</CommonButton> }
+                        { (showTopicHiddenBtn || appState?.role !== 'user') && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('topics')}>View Hidden Topics</CommonButton>}
                     </div>}
                     <Swiper
                         slidesPerView={4}
@@ -781,8 +784,8 @@ const Home = () => {
                                                 </div>
                                                 <div className={HomeStyles.cardIcons}>
                                                     {el?.favorite ? <FavoriteIcon sx={{ color: 'blue' }} onClick={() => handleRemoveFavorite(el)} /> : <FavoriteBorderIcon titleAccess='Set Favorite' onClick={() => handleFavoriteEdit(el)} />}
-                                                    <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} />
-                                                    <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} />
+                                                    { appState?.role !== 'user' && <EditIcon titleAccess='Edit Topic' className={HomeStyles.topicEditIcon} onClick={() => handleTopicEdit(el)} /> }
+                                                    { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete Topic' onClick={() => handleTopicDelete(el)} /> }
                                                 </div>
                                             </div>
                                         </SwiperSlide>
