@@ -48,6 +48,7 @@ const InterviewQA = (props) => {
     const [hiddenPageState, setHiddenPageState] = useState(1);
     const [bookmarkedPageState, setBookmarkedPageState] = useState(1);
     const [totalDocs, setTotalDocs] = useState();
+    const [pages, setPages] = useState();
     const [callBookmarkedQAApi, setcallBookmarkedQAApi] = useState(false);
     const [getInterviewQAPayload, setGetInterviewQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: pageState })
     const [getBookmarkedQAPayload, setGetBookmarkedQAPayload] = useState({ topicId: params?.topicId, categoryId: params?.categoryId, pageSize: 25, pageNumber: bookmarkedPageState })
@@ -96,6 +97,7 @@ const InterviewQA = (props) => {
             setcallBookmarkedQAApi(true);
             setAllInterviewQAData(res?.data?.data);
             setTotalDocs(res?.data?.totalCount);
+            setPages(res?.data?.pages);
             let filterHidden = res?.data?.data?.filter(el => !el?.enabled);
             if (filterHidden && filterHidden?.length > 0 && appState?.role !== 'user') {
                 setShowHiddenTab(true);
@@ -104,7 +106,9 @@ const InterviewQA = (props) => {
                 setValue(value === 1 ? value : 0);
             }
         } else {
-            setAllInterviewQAData([])
+            setAllInterviewQAData([]);
+            setTotalDocs();
+            setPages()
         }
     }
 
@@ -386,7 +390,7 @@ const InterviewQA = (props) => {
                                 )
                             }) : <AppNoData />}
                         {totalDocs > 25 && <div className={InterviewQAStyles.pagination}>
-                            <Pagination count={totalDocs} page={pageState} onChange={handlePageChange} color="primary" />
+                            <Pagination count={pages} page={pageState} onChange={handlePageChange} color="primary" />
                         </div>}
                     </TabPanel>
                     <TabPanel value={value} index={1}>
@@ -487,7 +491,7 @@ const InterviewQA = (props) => {
                                 )
                             }) : <AppNoData />}
                         {totalDocs > 25 && <div className={InterviewQAStyles.pagination}>
-                            <Pagination count={totalDocs} page={hiddenPageState} onChange={handleHiddenPageChange} color="primary" />
+                            <Pagination count={pages} page={hiddenPageState} onChange={handleHiddenPageChange} color="primary" />
                         </div>}
                     </TabPanel>}
                 </div>

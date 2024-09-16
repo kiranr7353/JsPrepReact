@@ -53,6 +53,13 @@ const MainContent = (props) => {
     const onGetConceptsSuccess = res => {
         setConceptsInfo({ data: [], error: '' });
         if ((res?.status === 200 || res?.status === 201)) {
+            const sortedData = res?.data?.concepts?.sort((a, b) => {
+                let keyA = a?.id,
+                    keyB = b?.id;
+                if (keyA < keyB) return -1;
+                if (keyA > keyB) return 1;
+                return 0;
+            })
             setConceptsInfo({ data: res?.data?.concepts, error: '' });
             setContentData(res?.data?.concepts[0]);
             setSelectedIndex(0);

@@ -328,10 +328,10 @@ const AddConcept = (props) => {
                 <div className={AddConceptStyles.addConceptContainer}>
                     <div className={AddConceptStyles.addConceptTitle}>
                         <div>
-                            <h2>Add Concept</h2>
+                            <h2 className={AddConceptStyles.title}>Add Concept</h2>
                         </div>
                         <div>
-                            <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+                            <CancelIcon sx={{ cursor: 'pointer' }} className={AddConceptStyles.cancelIcon} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div className={AddConceptStyles.addConceptForm}>
@@ -341,6 +341,7 @@ const AddConcept = (props) => {
                                 <TextField
                                     name='title'
                                     value={addConceptTitle}
+                                    className={AddConceptStyles.headerInput}
                                     onChange={(e) => setAddConceptTitle(e.target.value)}
                                     InputProps={{
                                         type: 'text',
@@ -430,7 +431,7 @@ const AddConcept = (props) => {
                                                                 <>
                                                                     <div className={AddConceptStyles.pointsDiv}>
                                                                         {idx ? <HighlightOffIcon titleAccess='Remove' className={AddConceptStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
-                                                                        <h4>Point {idx + 1}</h4>
+                                                                        <h4 className={AddConceptStyles.pointTitle}>Point {idx + 1}</h4>
                                                                         <label>Enter Point</label>
                                                                         <TextField
                                                                             className={AddConceptStyles.pointsInput}
@@ -499,7 +500,7 @@ const AddConcept = (props) => {
                                                     {description[i].hasTable ?
                                                         <>
                                                             <div>
-                                                                <h4>Table Columns</h4>
+                                                                <h4 className={AddConceptStyles.tableColHeaders}>Table Columns</h4>
                                                                 {description[i]?.tableColumns?.map((el, index) =>
                                                                     <TextField
                                                                         className={AddConceptStyles.columnInput}
@@ -515,7 +516,7 @@ const AddConcept = (props) => {
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <h4>Table Data</h4>
+                                                                <h4 className={AddConceptStyles.tableDataHeaders}>Table Data</h4>
                                                                 {description[i]?.tableData?.map((el, index) =>
                                                                     <>
                                                                         <div className={AddConceptStyles.tableDataFlex}>

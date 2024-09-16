@@ -169,7 +169,7 @@ const DisplayContents = (props) => {
       {(editDescription?.Loading || editDescription?.Fetching) && <Loader showLoader={editDescription?.Loading || editDescription?.Fetching} />}
       <div className={DisplayContentsStyles.headerFlex}>
         <div>
-          <div><h2 className={DisplayContentsStyles.contentTitle}>{contentData?.title}</h2></div>
+          <div><h2 className={DisplayContentsStyles.contentTitle}>{contentData?.title}</h2><div className={DisplayContentsStyles.borderBottom}></div></div>
         </div>
         <div>
         { appState?.role !== 'user' &&  <AddIcon titleAccess='Add Section' className={DisplayContentsStyles.addSectionIcon} onClick={() => handleAddSection()} /> }
@@ -184,9 +184,9 @@ const DisplayContents = (props) => {
             </div>
             {el?.description && el?.description?.length > 0 && el?.description?.map((desc, idx) => (
               <div className={DisplayContentsStyles.description} key={desc?.id + idx}>
-                <h5 className={DisplayContentsStyles.descHeader}>{desc?.header && desc?.header}</h5>
+                <h5 className={DisplayContentsStyles.descHeader}><u>{desc?.header && desc?.header}</u></h5>
                 <h6 className={DisplayContentsStyles.descData}>{desc?.data && desc?.data}</h6>
-                {desc?.snippet && desc?.snippet?.length > 0 && <h6 className={DisplayContentsStyles.descCodeSnippet}><u>Code Snippets</u></h6>}
+                {desc?.snippet && desc?.snippet?.length > 0 && <h5 className={DisplayContentsStyles.descCodeSnippet}><u>Code Snippets</u></h5>}
                 <Swiper
                   slidesPerView={4}
                   spaceBetween={0}

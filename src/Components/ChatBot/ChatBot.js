@@ -277,7 +277,7 @@ const ChatBot = ({ firstName, lastName }) => {
                                             return (
                                                 <Box sx={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
                                                     <Box sx={{ width: '50px', marginRight: '10px' }}>
-                                                        <Typography sx={{ height: '25px', width: '25px', backgroundColor: '#1565c0;', borderRadius: '50%', padding: '10px', fontWeight: '600', color: 'white' }}>{firstName ? `${ firstName.split('')[0]}${lastName.split('')[0]}` : `UR`}</Typography>
+                                                        <Typography sx={{ height: '25px', width: '25px', backgroundColor: '#1565c0;', borderRadius: '50%', padding: '10px', fontWeight: '600', color: 'white' }}>{firstName ? `${firstName.split('')[0]}${lastName.split('')[0]}` : `UR`}</Typography>
                                                     </Box>
                                                     <Box>
                                                         <Typography sx={{ backgroundColor: 'rgba(13,169,230,0.24)', padding: '4px 8px', borderRadius: '10px', fontSize: '0.8rem !important' }} >{msg}</Typography>
@@ -286,7 +286,7 @@ const ChatBot = ({ firstName, lastName }) => {
                                             )
                                         }
                                         else {
-                                            return (
+                                            if(msg?.msg?.length > 0) {return (
                                                 <Box sx={{ display: 'flex', marginBottom: '10px' }}>
                                                     <Box sx={{ width: '50px', marginRight: '10px' }}>
                                                         <img src={AIChat} alt="image" height={50} width={50} style={{ borderRadius: '50%' }} />
@@ -296,12 +296,14 @@ const ChatBot = ({ firstName, lastName }) => {
                                                         </Typography>
                                                     </Box>
                                                 </Box>
-                                            )
+                                             )} else {
+                                                return (<></>)
+                                             }
                                         }
                                     })
                                 }
                                 {
-                                    completeConversation?.length < newFormedQuestion?.length * 2 ?
+                                    (AIAPI?.Loading || AIAPI?.Fetching) ?
                                         <Box sx={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
                                             <Box sx={{ width: '50px', marginRight: '10px' }}>
                                                 <img src={AIChat} alt="image" height={50} width={50} style={{ borderRadius: '50%' }} />
@@ -326,11 +328,11 @@ const ChatBot = ({ firstName, lastName }) => {
                 </div>
             </div>
             <HtmlTooltip
-                 open={openTooltip} onClose={handleTooltipClose} onOpen={handleTooltipOpen} arrow
+                open={openTooltip} onClose={handleTooltipClose} onOpen={handleTooltipOpen} arrow
                 title={
                     <div className={ChatBotStylesStyles.tooltipContainer}>
                         <Typography color="inherit">Hi {firstName ? firstName : ''}. How can I help you today?</Typography>
-                        <ClearIcon titleAccess='Close' className={ChatBotStylesStyles.tooltipClose} onClick={handleTooltipIcon}  />
+                        <ClearIcon titleAccess='Close' className={ChatBotStylesStyles.tooltipClose} onClick={handleTooltipIcon} />
                     </div>
                 }
             >

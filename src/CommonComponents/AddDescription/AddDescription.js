@@ -322,10 +322,10 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                 <div className={AddDescriptionStyles.addConceptContainer}>
                     <div className={AddDescriptionStyles.addConceptTitle}>
                         <div>
-                            <h2>Add Description</h2>
+                            <h2 className={AddDescriptionStyles.title}>Add Description</h2>
                         </div>
                         <div>
-                            <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+                            <CancelIcon sx={{ cursor: 'pointer' }} className={AddDescriptionStyles.cancelIcon} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div>
@@ -404,7 +404,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                                                             <>
                                                                 <div className={AddDescriptionStyles.pointsDiv}>
                                                                     {idx ? <HighlightOffIcon titleAccess='Remove' className={AddDescriptionStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
-                                                                    <h4>Point {idx + 1}</h4>
+                                                                    <h4 className={AddDescriptionStyles.pointTitle}>Point {idx + 1}</h4>
                                                                     <label>Enter Point</label>
                                                                     <TextField
                                                                         className={AddDescriptionStyles.pointsInput}
@@ -471,7 +471,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                                                 {description[i].hasTable ?
                                                     <>
                                                         <div>
-                                                            <h4>Table Columns</h4>
+                                                            <h4 className={AddDescriptionStyles.tableColHeaders}>Table Columns</h4>
                                                             {description[i]?.tableColumns?.map((el, index) =>
                                                                 <TextField
                                                                     className={AddDescriptionStyles.columnInput}
@@ -487,7 +487,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <h4>Table Data</h4>
+                                                            <h4 className={AddDescriptionStyles.tableDataHeaders}>Table Data</h4>
                                                             {description[i]?.tableData?.map((el, index) =>
                                                                 <>
                                                                     <div className={AddDescriptionStyles.tableDataFlex}>

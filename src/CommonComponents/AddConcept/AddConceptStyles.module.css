@@ -1,12 +1,39 @@
 .addConceptContainer {
     width: 700px;
     padding: 20px;
+    background: #f1f1f1;
 }
 
 .addConceptTitle {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.title {
+    border-bottom: 5px solid #7ff17f;
+}
+.tableColHeaders {
+    border-bottom: 5px solid #7ff17f;
+    width: 18%;
+}
+.tableDataHeaders {
+    border-bottom: 5px solid #7ff17f;
+    width: 13%;
+}
+.pointTitle {
+    border-bottom: 4px solid #7ff17f;
+    width: 9%;
+}
+.noteText {
+    border-bottom: 5px solid #7ff17f;
+    width: 6%;
+}
+.cancelIcon {
+    transform: scale(1.1);
+    color: red;
+    border: 2px solid black;
+    border-radius: 50%;
 }
 
 .addConceptForm label {

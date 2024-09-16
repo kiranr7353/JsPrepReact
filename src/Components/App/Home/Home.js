@@ -128,7 +128,7 @@ const Home = () => {
         if ((res?.status === 200 || res?.status === 201)) {
             setCategoryInfo({ data: res?.data?.categories, error: '' });
             let filterHidden = res?.data?.categories?.filter(el => !el?.enabled);
-            if (filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0  && appState?.role !== 'user') {
                 setShowCategoryHiddenBtn(true);
             } else {
                 setShowCategoryHiddenBtn(false);
@@ -173,7 +173,7 @@ const Home = () => {
                 setTopicInfo({ data: res?.data?.topics, error: '' });
             }
             let filterHidden = res?.data?.topics?.filter(el => !el?.enabled);
-            if (filterHidden && filterHidden?.length > 0) {
+            if (filterHidden && filterHidden?.length > 0 && appState?.role !== 'user') {
                 setShowTopicHiddenBtn(true);
             } else {
                 setShowTopicHiddenBtn(false);
@@ -700,7 +700,7 @@ const Home = () => {
                     <h4 className={HomeStyles.categoriesText}>Categories<div className={HomeStyles.borderBottomCat}></div></h4>
                     <div className={HomeStyles.addCategoryBtn}>
                         { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Category</CommonButton> }
-                        {(showCategoryHiddenBtn || appState?.role !== 'user') && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('categories')}>View Hidden Categories</CommonButton>}
+                        {showCategoryHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('categories')}>View Hidden Categories</CommonButton>}
                     </div>
                     {categoriesListData?.length > 0 ? (
                         <>
@@ -755,7 +755,7 @@ const Home = () => {
                     {getTopics?.data && <h4 className={HomeStyles.categoriesText}>Topics<div className={HomeStyles.borderBottomTopics}></div></h4>}
                     {getTopics?.data && <div className={HomeStyles.addTopicBtn}>
                         { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} onClick={handleAddTopic}>Add Topic</CommonButton> }
-                        { (showTopicHiddenBtn || appState?.role !== 'user') && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('topics')}>View Hidden Topics</CommonButton>}
+                        { showTopicHiddenBtn && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'0.2rem 2.6rem'} borderRadius={'8px'} fontWeight={'bold'} border={'1px solid #286ce2'} margin={'0px 12px'} onClick={() => handleHiddenData('topics')}>View Hidden Topics</CommonButton>}
                     </div>}
                     <Swiper
                         slidesPerView={4}
