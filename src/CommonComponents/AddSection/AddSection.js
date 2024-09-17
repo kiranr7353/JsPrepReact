@@ -336,10 +336,10 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
                 <div className={AddSectionStyles.addConceptContainer}>
                     <div className={AddSectionStyles.addConceptTitle}>
                         <div>
-                            <h2>Add Section</h2>
+                            <h2 className={AddSectionStyles.title}>Add Section</h2>
                         </div>
                         <div>
-                            <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+                            <CancelIcon sx={{ cursor: 'pointer' }} className={AddSectionStyles.cancelIcon} onClick={handleCloseDrawer} />
                         </div>
                     </div>
                     <div className={AddSectionStyles.addConceptForm}>
@@ -422,7 +422,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
                                                                 <>
                                                                     <div className={AddSectionStyles.pointsDiv}>
                                                                         {idx ? <HighlightOffIcon titleAccess='Remove' className={AddSectionStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
-                                                                        <h4>Point {idx + 1}</h4>
+                                                                        <h4 className={AddSectionStyles.pointTitle}>Point {idx + 1}</h4>
                                                                         <label>Enter Point</label>
                                                                         <TextField
                                                                             className={AddSectionStyles.pointsInput}
@@ -491,7 +491,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
                                                     {description[i].hasTable ?
                                                         <>
                                                             <div>
-                                                                <h4>Table Columns</h4>
+                                                                <h4 className={AddSectionStyles.tableColHeaders}>Table Columns</h4>
                                                                 {description[i]?.tableColumns?.map((el, index) =>
                                                                     <TextField
                                                                         className={AddSectionStyles.columnInput}
@@ -507,7 +507,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <h4>Table Data</h4>
+                                                                <h4 className={AddSectionStyles.tableDataHeaders}>Table Data</h4>
                                                                 {description[i]?.tableData?.map((el, index) =>
                                                                     <>
                                                                         <div className={AddSectionStyles.tableDataFlex}>

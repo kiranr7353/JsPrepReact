@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import LoginStyles from './Login.module.css';
 import GoogleImg from '../../Images/google.png';
 import LoginImg from '../../Images/login.jpg';
+import Logo from '../../Images/jsPrepLogo.png';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -237,7 +238,7 @@ const LoginHome = () => {
         <div className={LoginStyles.loginBox}>
           <div className={LoginStyles.loginLeft}>
             <div className={LoginStyles.loginLogo}>
-              <img src={'gs://jsprep-ed0c8.appspot.com/LoginPageImages/login.jpg'} alt="Logo" />
+              {/* <img src={Logo} alt="Logo" /> */}
             </div>
             <h1 className={LoginStyles.loginTitle}>Welcome back!</h1>
             <div className={LoginStyles.loginForm}>

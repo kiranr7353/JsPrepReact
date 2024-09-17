@@ -22,6 +22,7 @@
   .contentDescription {
     color: white;
     font-size: 16px;
+    padding-right: 30px;
   }
   .topicImage {
     width: 91%;

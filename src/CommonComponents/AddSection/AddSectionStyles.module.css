@@ -1,6 +1,33 @@
 .addConceptContainer {
     width: 700px;
     padding: 20px;
+    background: #f1f1f1;
+}
+
+.title {
+    border-bottom: 5px solid #7ff17f;
+}
+.tableColHeaders {
+    border-bottom: 5px solid #7ff17f;
+    width: 18%;
+}
+.tableDataHeaders {
+    border-bottom: 5px solid #7ff17f;
+    width: 13%;
+}
+.pointTitle {
+    border-bottom: 4px solid #7ff17f;
+    width: 9%;
+}
+.pointLabel {
+    font-weight: bold;
+    padding-bottom: 5px;
+}
+.cancelIcon {
+    transform: scale(1.1);
+    color: red;
+    border: 2px solid black;
+    border-radius: 50%;
 }
 
 .addConceptTitle {
@@ -43,6 +70,7 @@
 .headerInput {
     margin-bottom: 15px !important;
     width: 100%;
+    border: 2px solid black !important;
 }
 
 .uploadInput {
@@ -108,6 +136,8 @@
 
 .pointsInput {
     width: 100%;
+    border: 2px solid black !important;
+    margin-bottom: 13px !important;
 }
 
 .points {
