@@ -57,6 +57,7 @@
 
     .descData {
         font-size: 19px;
+        font-weight: 400;
     }
 
     .descCodeSnippet {
@@ -68,16 +69,10 @@
     }
 
     .grid {
-        display: grid;
-        width: 114rem;
-        grid-gap: 3rem;
-        grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
-    }
-
-    @media (max-width: 60em) {
-        .grid {
-            grid-gap: 3rem;
-        }
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 20px;
     }
 
     .pointsDiv {

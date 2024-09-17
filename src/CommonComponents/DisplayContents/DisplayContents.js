@@ -172,42 +172,29 @@ const DisplayContents = (props) => {
           <div><h2 className={DisplayContentsStyles.contentTitle}>{contentData?.title}</h2><div className={DisplayContentsStyles.borderBottom}></div></div>
         </div>
         <div>
-        { appState?.role !== 'user' &&  <AddIcon titleAccess='Add Section' className={DisplayContentsStyles.addSectionIcon} onClick={() => handleAddSection()} /> }
+          {appState?.role !== 'user' && <AddIcon titleAccess='Add Section' className={DisplayContentsStyles.addSectionIcon} onClick={() => handleAddSection()} />}
         </div>
       </div>
       <div className={DisplayContentsStyles.contentData}>
         {contentData?.data ? contentData?.data?.length > 0 && contentData?.data?.map((el, i) => (
           <div className={DisplayContentsStyles.section} key={el?.sectionId + i}>
             <div className={DisplayContentsStyles.addDescBtn}>
-            { appState?.role !== 'user' && <PostAddIcon titleAccess='Add Description' onClick={() => handleAddDescription(el, el?.sectionId)} className={DisplayContentsStyles.addDescIcon} /> }
-            { appState?.role !== 'user' && <DeleteIcon titleAccess='Delete Section' onClick={() => handleDeleteSection(el, el?.sectionId)} className={DisplayContentsStyles.deleteSectionIcon} /> }
+              {appState?.role !== 'user' && <PostAddIcon titleAccess='Add Description' onClick={() => handleAddDescription(el, el?.sectionId)} className={DisplayContentsStyles.addDescIcon} />}
+              {appState?.role !== 'user' && <DeleteIcon titleAccess='Delete Section' onClick={() => handleDeleteSection(el, el?.sectionId)} className={DisplayContentsStyles.deleteSectionIcon} />}
             </div>
             {el?.description && el?.description?.length > 0 && el?.description?.map((desc, idx) => (
               <div className={DisplayContentsStyles.description} key={desc?.id + idx}>
                 <h5 className={DisplayContentsStyles.descHeader}><u>{desc?.header && desc?.header}</u></h5>
                 <h6 className={DisplayContentsStyles.descData}>{desc?.data && desc?.data}</h6>
                 {desc?.snippet && desc?.snippet?.length > 0 && <h5 className={DisplayContentsStyles.descCodeSnippet}><u>Code Snippets</u></h5>}
-                <Swiper
-                  slidesPerView={4}
-                  spaceBetween={0}
-                  cssMode={true}
-                  navigation={true}
-                  mousewheel={true}
-                  keyboard={true}
-                  modules={[Navigation, Mousewheel, Keyboard]}
-                  className="mySwiper"
-                >
-                  <div className={DisplayContentsStyles.grid}>
-                    {
-                      desc?.snippet && desc?.snippet?.length > 0 && desc?.snippet?.map((img, index) => (
-                        <SwiperSlide key={img?.url + index}>
-                          <Zoom>
-                            <img src={img?.url} alt={img?.url} width="500" />
-                          </Zoom>
-                        </SwiperSlide>
-                      ))}
-                  </div>
-                </Swiper>
+                <div className={DisplayContentsStyles.grid}>
+                  {
+                    desc?.snippet && desc?.snippet?.length > 0 && desc?.snippet?.map((img, index) => (
+                      <Zoom>
+                        <img src={img?.url} alt={img?.url} width="500" />
+                      </Zoom>
+                    ))}
+                </div>
                 {desc?.hasPoints && (
                   <div className={DisplayContentsStyles.pointsDiv}>
                     {desc?.pointsData && desc?.pointsData?.length > 0 && (
@@ -267,8 +254,8 @@ const DisplayContents = (props) => {
                   </div>
                 )}
                 <div className={DisplayContentsStyles.addDescBtn}>
-                { appState?.role !== 'user' && <EditIcon className={DisplayContentsStyles.editDescIcon} titleAccess='Edit Description' onClick={() => handleEditDescription(desc, el?.sectionId)} /> }
-                { appState?.role !== 'user' && <DeleteIcon className={DisplayContentsStyles.deleteDescIcon} titleAccess='Delete Description' onClick={() => handleDeleteDescription(desc, el?.sectionId)} /> }
+                  {appState?.role !== 'user' && <EditIcon className={DisplayContentsStyles.editDescIcon} titleAccess='Edit Description' onClick={() => handleEditDescription(desc, el?.sectionId)} />}
+                  {appState?.role !== 'user' && <DeleteIcon className={DisplayContentsStyles.deleteDescIcon} titleAccess='Delete Description' onClick={() => handleDeleteDescription(desc, el?.sectionId)} />}
                 </div>
               </div>
             ))}

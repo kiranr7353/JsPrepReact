@@ -2,6 +2,7 @@
     width: 700px;
     padding: 20px;
     background: #f1f1f1;
+    height: 'initial';
 }
 
 .title {
@@ -9,15 +10,19 @@
 }
 .tableColHeaders {
     border-bottom: 5px solid #7ff17f;
-    width: 18%;
+    width: 17%;
 }
 .tableDataHeaders {
     border-bottom: 5px solid #7ff17f;
-    width: 13%;
+    width: 12%;
 }
 .pointTitle {
     border-bottom: 4px solid #7ff17f;
     width: 9%;
+}
+.pointLabel {
+    font-weight: bold;
+    padding-bottom: 5px;
 }
 
 .cancelIcon {
@@ -67,6 +72,7 @@
 .headerInput {
     margin-bottom: 15px !important;
     width: 100%;
+    border: 2px solid black !important;
 }
 
 .uploadInput {
@@ -132,6 +138,8 @@
 
 .pointsInput {
     width: 100%;
+    border: 2px solid black !important;
+    margin-bottom: 13px !important;
 }
 
 .points {
@@ -200,4 +208,12 @@
     margin-left: 0 !important;
     margin-bottom: 20px !important;
     gap: 10px !important;
+}
+
+.switch span {
+    font-weight: bold !important;
+}
+
+.DocUpload {
+    font-weight: bold;
 }

@@ -190,20 +190,10 @@ const MainContent = (props) => {
                     { appState?.role !== 'user' && <CommonButton variant="contained" bgColor={'#5b67f1'} color={'white'} padding={'15px'} borderRadius={'5px'} fontWeight={'bold'} width={'100%'} height={'45px'} margin={'20px 0 0 0'} onClick={toggleDrawer}>Add Concept</CommonButton> }
                 </div>
                 <div className={MainContentStyles.concepts}>
-                    <Swiper
-                        slidesPerView={6}
-                        spaceBetween={10}
-                        cssMode={true}
-                        navigation={true}
-                        mousewheel={true}
-                        keyboard={true}
-                        modules={[Navigation, Mousewheel, Keyboard]}
-                        className="mySwiper"
-                    >
                         <div className={MainContentStyles.grid}>
                             {
                                 conceptsInfo?.data?.length > 0 ? conceptsInfo?.data?.map((el, index) => (
-                                    <SwiperSlide key={el?.title}>
+                                    <div className={MainContentStyles.conceptFlex} key={el?.title}>
                                         <div className={selectedIndex === index ? MainContentStyles.topicCardActive : MainContentStyles.topicCard} onClick={() => handleContentClick(el, index)}>
                                             <div className={MainContentStyles.topicCardFlex}>
                                                 <div className={MainContentStyles.card__contentHooks}>
@@ -215,10 +205,9 @@ const MainContent = (props) => {
                                             { appState?.role !== 'user' &&  <DeleteIcon titleAccess='Delete' className={MainContentStyles.deleteIcon} onClick={() => handleDeleteConcept(el?.title, el)} /> }
                                             </div>
                                         </div>
-                                    </SwiperSlide>
+                                    </div>
                                 )) : <><h4 className={MainContentStyles.topicsError}>{conceptsInfo?.error}</h4></>}
                         </div>
-                    </Swiper>
                     {contentData?.title && <div className={MainContentStyles.conceptContent}>
                         <DisplayContents contentData={contentData} params={params} locationDetails={locationDetails} categoryId={params?.categoryId} getConcepts={getConcepts} setSelectedIndex={setSelectedIndex} setContentData={setSelectedIndex} />
                     </div>}

@@ -336,16 +336,16 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
         <div className={EditDescriptionStyles.addConceptContainer}>
           <div className={EditDescriptionStyles.addConceptTitle}>
             <div>
-              <h2>Edit Description</h2>
+              <h2 className={EditDescriptionStyles.title}>Edit Description</h2>
             </div>
             <div>
-              <CancelIcon sx={{ cursor: 'pointer' }} onClick={handleCloseDrawer} />
+              <CancelIcon sx={{ cursor: 'pointer' }} className={EditDescriptionStyles.cancelIcon} onClick={handleCloseDrawer} />
             </div>
           </div>
           <div>
             <div className={EditDescriptionStyles.conceptDescription}>
               <FormControl sx={{ width: '100%' }}>
-                <label>Description <span className={EditDescriptionStyles.required}>*</span></label>
+                <label className={EditDescriptionStyles.descLabel}>Description</label>
                 {description?.map((el, i) => (
                   <div>
                     <div className={EditDescriptionStyles.descriptionDiv}>
@@ -420,8 +420,8 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                               <>
                                 <div className={EditDescriptionStyles.pointsDiv}>
                                   {idx ? <HighlightOffIcon titleAccess='Remove' className={EditDescriptionStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
-                                  <h4>Point {idx + 1}</h4>
-                                  <label>Enter Point</label>
+                                  <h4 className={EditDescriptionStyles.pointTitle}>Point {idx + 1}</h4>
+                                  <label className={EditDescriptionStyles.pointLabel}>Enter Point</label>
                                   <TextField
                                     className={EditDescriptionStyles.pointsInput}
                                     name='value'
@@ -487,7 +487,7 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                         {description[i].hasTable ?
                           <>
                             <div>
-                              <h4>Table Columns</h4>
+                              <h4 className={EditDescriptionStyles.tableColHeaders}>Table Columns</h4>
                               {description[i]?.tableColumns?.map((el, index) =>
                                 <TextField
                                   className={EditDescriptionStyles.columnInput}
@@ -503,7 +503,7 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                               )}
                             </div>
                             <div>
-                              <h4>Table Data</h4>
+                              <h4 className={EditDescriptionStyles.tableDataHeaders}>Table Data</h4>
                               {description[i]?.tableData?.map((el, index) =>
                                 <>
                                   <div className={EditDescriptionStyles.tableDataFlex}>

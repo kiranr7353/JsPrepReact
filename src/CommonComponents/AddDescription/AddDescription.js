@@ -405,7 +405,7 @@ const AddDescription = ({ addItem, setAddClicked, sectionId, locationDetails, ca
                                                                 <div className={AddDescriptionStyles.pointsDiv}>
                                                                     {idx ? <HighlightOffIcon titleAccess='Remove' className={AddDescriptionStyles.removeIconPoint} onClick={() => removePoint(idx, i)} /> : null}
                                                                     <h4 className={AddDescriptionStyles.pointTitle}>Point {idx + 1}</h4>
-                                                                    <label>Enter Point</label>
+                                                                    <label className={AddDescriptionStyles.pointLabel}>Enter Point</label>
                                                                     <TextField
                                                                         className={AddDescriptionStyles.pointsInput}
                                                                         name='value'
