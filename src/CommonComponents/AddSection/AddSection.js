@@ -48,7 +48,8 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
         let newValues = [...description];
         if (e.target.name === 'snippet') {
             const selectedFiles = e.target.files;
-            const selectedFilesArray = Array.from(selectedFiles);
+            let selectedFilesArray = Array.from(selectedFiles);
+            selectedFilesArray = selectedFilesArray.sort((a,b) => a.lastModified - b.lastModified);
             const imagesArray = selectedFilesArray.map((file) => {
                 return { url: URL.createObjectURL(file), imageUploaded: false };
             });
@@ -86,7 +87,8 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
         let pointsValues = [...description[i].pointsData];
         if (e.target.name === 'snippet') {
             const selectedFiles = e.target.files;
-            const selectedFilesArray = Array.from(selectedFiles);
+            let selectedFilesArray = Array.from(selectedFiles);
+            selectedFilesArray = selectedFilesArray.sort((a,b) => a.lastModified - b.lastModified);
             const imagesArray = selectedFilesArray.map((file) => {
                 return { url: URL.createObjectURL(file), imageUploaded: false };
             });
@@ -294,7 +296,7 @@ const AddSection = ({ contentData, locationDetails, categoryId, getConcepts, set
         payload.categoryId = categoryId;
         payload.title = contentData?.title;
         payload.topicId = locationDetails?.state?.topicDetails?.topicId;
-        let itemsToAdd = [{ description, sectionId: payload.sectionId }];
+        let itemsToAdd = { description, sectionId: payload.sectionId };
         if (contentData?.data?.length > 0) {
             contentData.data.push(itemsToAdd)
         } else {

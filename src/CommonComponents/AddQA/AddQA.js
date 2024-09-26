@@ -352,7 +352,6 @@ const AddQA = (props) => {
         setErrorMessage('');
         setSuccessMessage('')
         if ((res?.status === 200 || res?.status === 201)) {
-            setOpenDrawer(false);
             setAddQAClicked(false);
             setOpenModal(true);
             getQA.refetch();
@@ -367,6 +366,7 @@ const AddQA = (props) => {
     const handleClosePopup = () => {
         setOpenModal(false);
         setEditClicked(false);
+        setOpenDrawer(false);
     }
 
     const createQA = useFetchAPI("createQA", `/categories/createInterviewQuestions`, "POST", addQAPayload, CommonHeaders(), fetchQueryParams("", "", "", onAddQASuccess, "", callCreateQAApi));

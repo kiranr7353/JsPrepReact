@@ -191,7 +191,7 @@ const DisplayContents = (props) => {
                   {
                     desc?.snippet && desc?.snippet?.length > 0 && desc?.snippet?.map((img, index) => (
                       <Zoom>
-                        <img src={img?.url} alt={img?.url} width="500" />
+                        { img?.url && <img src={img?.url} alt={img?.url} width="500" loading='lazy' /> }
                       </Zoom>
                     ))}
                 </div>
@@ -203,27 +203,14 @@ const DisplayContents = (props) => {
                           <div className={DisplayContentsStyles.points}>
                             <li className={DisplayContentsStyles.descPoint} key={point + pointIndex}>{point?.value}</li>
                             {point?.snippet && point?.snippet?.length > 0 && <h6 className={DisplayContentsStyles.descCodeSnippet}><u>Code Snippets</u></h6>}
-                            <Swiper
-                              slidesPerView={4}
-                              spaceBetween={0}
-                              cssMode={true}
-                              navigation={true}
-                              mousewheel={true}
-                              keyboard={true}
-                              modules={[Navigation, Mousewheel, Keyboard]}
-                              className="mySwiper"
-                            >
                               <div className={DisplayContentsStyles.grid}>
                                 {
                                   point?.snippet && point?.snippet?.length > 0 && point?.snippet?.map((img, index) => (
-                                    <SwiperSlide key={img?.url + index}>
                                       <Zoom>
-                                        <img src={img?.url} alt={img?.url} width="500" />
+                                        <img src={img?.url} alt={img?.url} width="500" loading='lazy' />
                                       </Zoom>
-                                    </SwiperSlide>
                                   ))}
                               </div>
-                            </Swiper>
                           </div>
                         ))}
                       </ul>
