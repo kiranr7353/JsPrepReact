@@ -47,7 +47,8 @@ const AddConcept = (props) => {
         let newValues = [...description];
         if (e.target.name === 'snippet') {
             const selectedFiles = e.target.files;
-            const selectedFilesArray = Array.from(selectedFiles);
+            let selectedFilesArray = Array.from(selectedFiles);
+            selectedFilesArray = selectedFilesArray.sort((a,b) => a.lastModified - b.lastModified);
             const imagesArray = selectedFilesArray.map((file) => {
                 return { url: URL.createObjectURL(file), imageUploaded: false };
             });
@@ -85,7 +86,8 @@ const AddConcept = (props) => {
         let pointsValues = [...description[i].pointsData];
         if (e.target.name === 'snippet') {
             const selectedFiles = e.target.files;
-            const selectedFilesArray = Array.from(selectedFiles);
+            let selectedFilesArray = Array.from(selectedFiles);
+            selectedFilesArray = selectedFilesArray.sort((a,b) => a.lastModified - b.lastModified);
             const imagesArray = selectedFilesArray.map((file) => {
                 return { url: URL.createObjectURL(file), imageUploaded: false };
             });
