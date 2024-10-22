@@ -83,7 +83,7 @@ const MainContent = (props) => {
     }
 
     const handleDeleteConceptImages = (info) => {
-        info.data.forEach(el => {
+        info && info?.data && info?.data?.forEach(el => {
             el.description.forEach(desc => {
                 if (desc.snippet?.length > 0) {
                     desc.snippet?.forEach(img => {

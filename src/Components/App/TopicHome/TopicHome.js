@@ -4,6 +4,7 @@ import ReactHome from '../React/ReactHome';
 import JavascriptHome from '../Javascript/JavascriptHome';
 import HTMLHome from '../HTML/HTMLHome';
 import { CSSHome } from '../CSS/CSSHome';
+import AWSHome from '../AWS/AWSHome';
 
 const TopicHome = () => {
 
@@ -20,6 +21,8 @@ const TopicHome = () => {
         return <HTMLHome params={params} locationDetails={location} />
       case 'css3':
         return <CSSHome params={params} locationDetails={location} />
+      case 'aws':
+        return <AWSHome params={params} locationDetails={location} />
       default:
         return <JavascriptHome params={params} locationDetails={location} />
     }
