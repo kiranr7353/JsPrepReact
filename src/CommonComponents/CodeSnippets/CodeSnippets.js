@@ -41,6 +41,7 @@ const CodeSnippets = (props) => {
     const [addSnippetClicked, setAddSnippetClicked] = useState(false);
     const [editClicked, setEditClicked] = useState(false);
     const [pageState, setPageState] = useState(1);
+    const [pages, setPages] = useState();
     const [hiddenPageState, setHiddenPageState] = useState(1);
     const [bookmarkedPageState, setBookmarkedPageState] = useState(1);
     const [totalDocs, setTotalDocs] = useState();
@@ -91,6 +92,7 @@ const CodeSnippets = (props) => {
             setcallBookmarkedSnippetApi(true);
             setAllInterviewSnippetData(res?.data?.data);
             setTotalDocs(res?.data?.totalCount);
+            setPages(res?.data?.pages);
             let filterHidden = res?.data?.data?.filter(el => !el?.enabled);
             if (filterHidden && filterHidden?.length > 0 && appState?.role !== 'user') {
                 setShowHiddenTab(true);
@@ -100,6 +102,7 @@ const CodeSnippets = (props) => {
             }
         } else {
             setAllInterviewSnippetData([])
+            setPages();
         }
     }
 
@@ -301,14 +304,14 @@ const CodeSnippets = (props) => {
                                                             <code className={CodeSnippetsStyles.code}>{snippet?.code}</code>
                                                         </pre>
                                                     </div>
-                                                    <h3><u>Code Image</u></h3>
-                                                    <div className={CodeSnippetsStyles.ansImageDiv}>
+                                                    {/* <h3><u>Code Image</u></h3> */}
+                                                    {/* <div className={CodeSnippetsStyles.ansImageDiv}>
                                                         {snippet?.snippet?.map(img => (
                                                             <Zoom>
                                                                 <img src={img.url} alt={img?.url} />
                                                             </Zoom>
                                                         ))}
-                                                    </div>
+                                                    </div> */}
                                                     {snippet?.explanation?.map((explain, idx) => (
                                                         <div key={explain?.value + idx}>
                                                             <h3><u>Explanation {explain.id}</u></h3>
@@ -328,7 +331,7 @@ const CodeSnippets = (props) => {
                                 )
                             }) : <AppNoData />}
                         {totalDocs > 25 && <div className={CodeSnippetsStyles.pagination}>
-                            <Pagination count={totalDocs} page={pageState} onChange={handlePageChange} color="primary" />
+                            <Pagination count={pages} page={pageState} onChange={handlePageChange} color="primary" />
                         </div>}
                     </TabPanel>
                     <TabPanel value={value} index={1}>

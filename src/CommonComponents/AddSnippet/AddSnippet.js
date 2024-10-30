@@ -19,7 +19,7 @@ const AddSnippet = (props) => {
     const { setAddSnippetClicked, setEditClicked, editClicked, editItem, params, getSnippet } = props;
 
     const [openDrawer, setOpenDrawer] = useState(false);
-    const [title, setTitle] = useState('');
+    const [title, setTitle] = useState("What's the output?");
     const [titleId, setTitleId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [snippet, setSnippet] = useState([
@@ -221,7 +221,7 @@ const AddSnippet = (props) => {
         categoryId: params?.categoryId,
         topicId: params?.topicId,
         titleId,
-        title,
+        title : title ? title : "What's the output?",
         data: snippet,
         enabled: editClicked ? enabled : undefined
     };
