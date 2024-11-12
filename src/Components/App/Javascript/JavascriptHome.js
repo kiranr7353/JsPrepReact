@@ -5,6 +5,7 @@ import JavascriptInterviewQA from './JavascriptInterviewQA';
 import JavascriptCodeSnippets from './JavascriptCodeSnippets';
 import JavascriptTrickyConcepts from './JavascriptTrickyConcepts';
 import JavascriptProgrammingQA from './JavascriptProgrammingQA';
+import AsynchronousJavascript from './AsynchronousJavascript';
 
 const JavascriptHome = (props) => {
   const { params, locationDetails } = props;
@@ -15,6 +16,8 @@ const JavascriptHome = (props) => {
         return <JavascriptFundamentals params={params} locationDetails={locationDetails} />
       case 'advancedJavascript':
         return <AdvancedJavascript params={params} locationDetails={locationDetails} />
+      case 'asyncJs':
+        return <AsynchronousJavascript params={params} locationDetails={locationDetails} />
       case 'javascriptinterviewQuestions':
         return <JavascriptInterviewQA params={params} locationDetails={locationDetails} />
       case 'jsCodeSnippets':
