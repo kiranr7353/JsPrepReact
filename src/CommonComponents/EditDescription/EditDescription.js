@@ -374,7 +374,7 @@ const EditDescription = ({ desc, editClicked, setEditClicked, sectionId, locatio
                         placeholder={"Enter Description"} size="large"
                       />
                       <label className={`btn btn-primary ${EditDescriptionStyles.DocUpload}`}>Upload Code Snippet(s)</label>
-                      <input ref={el => descInputRef.current[i] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png' multiple className={EditDescriptionStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
+                      <input ref={el => descInputRef.current[i] = el} name='snippet' type='file' accept='.jpg,.jpeg,.png,.gif' multiple className={EditDescriptionStyles.uploadInput} onChange={(e) => handleDescriptionChange(i, e)} />
                       {description[i]?.snippet?.length > 0 &&
                         (description[i]?.snippet?.length > 10 ? (
                           <p className="error">
