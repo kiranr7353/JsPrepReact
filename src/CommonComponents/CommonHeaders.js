@@ -8,6 +8,7 @@ export const CommonHeaders = () => {
     const userInfo = useMemo(() => GetCookie('userInfo'), []);
     
     return {
+        "Access-Control-Allow-Origin": '*',
         "email": userInfo ? userInfo.email : '',
         "Login-Fullname": userInfo ? userInfo.email : '',
         "localId": userInfo ? userInfo.localId : '',
