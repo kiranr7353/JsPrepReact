@@ -7,6 +7,10 @@ import { CSSHome } from '../CSS/CSSHome';
 import AWSHome from '../AWS/AWSHome';
 import NextHome from '../Next/NextHome';
 import JenkinsHome from '../Jenkins/JenkinsHome';
+import TerraformHome from '../Terraform/TerraformHome';
+import DockerHome from '../Docker/DockerHome';
+import KubernetesHome from '../Kubernetes/KubernetesHome';
+import AnsibleHome from '../Ansible/AnsibleHome';
 
 const TopicHome = () => {
 
@@ -29,6 +33,14 @@ const TopicHome = () => {
         return <NextHome params={params} locationDetails={location} />
       case 'jenkins':
         return <JenkinsHome params={params} locationDetails={location} />
+      case 'terraform':
+        return <TerraformHome params={params} locationDetails={location} />
+      case 'docker':
+        return <DockerHome params={params} locationDetails={location} />
+      case 'kubernetes':
+        return <KubernetesHome params={params} locationDetails={location} />
+      case 'ansible':
+        return <AnsibleHome params={params} locationDetails={location} />
       default:
         return <JavascriptHome params={params} locationDetails={location} />
     }

@@ -2,7 +2,7 @@ import React from 'react'
 import TopHeader from '../../../CommonComponents/TopHeader/TopHeader';
 import InterviewQA from '../../../CommonComponents/InterviewQA/InterviewQA';
 
-const JenkinsInterviewQA = (props) => {
+const DockerInterviewQA = (props) => {
   
     const { params, locationDetails } = props;
 
@@ -14,4 +14,4 @@ const JenkinsInterviewQA = (props) => {
     )
 }
 
-export default JenkinsInterviewQA
+export default DockerInterviewQA
