@@ -5,6 +5,7 @@ import AWSEC2InterviewQA from './AWSEC2InterviewQA';
 import AWSS3InterviewQA from './AWSS3InterviewQA';
 import AWSIAMInterviewQA from './AWSIAMInterviewQA';
 import AWSScenarioQA from './AWSScenarioQA';
+import AWSVPCInterviewQA from './AWSVPCInterviewQA';
 
 const AWSHome = (props) => {
 
@@ -22,7 +23,11 @@ const AWSHome = (props) => {
         return <AWSS3InterviewQA params={params} locationDetails={locationDetails} />
       case 'awsIAMInterviewQA':
         return <AWSIAMInterviewQA params={params} locationDetails={locationDetails} />
-        case 'awsScenarioQA':
+      case 'awsVPCInterviewQA':
+        return <AWSVPCInterviewQA params={params} locationDetails={locationDetails} />
+      case 'awsRoute53InterviewQA':
+        return <AWSVPCInterviewQA params={params} locationDetails={locationDetails} />
+      case 'awsScenarioQA':
         return <AWSScenarioQA params={params} locationDetails={locationDetails} />
       default:
         return <IAM params={params} locationDetails={locationDetails} />
