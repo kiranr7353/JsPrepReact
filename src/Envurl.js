@@ -5,7 +5,7 @@ export const Envurl = () => {
         return {
             url: domainUrl,
             envName: 'jsprepreact',
-            apiURL: 'https://jsprepbackend-production.up.railway.app/api/v1/',
+            apiURL: 'https://jsprepbackend.onrender.com/api/v1',
             // oAuthRedirectURL: 'https://ehapp-uat.elevancehealth.com/app/appuidashboard/home',
             // contextPath: '/app/appuidashboard',
             siteUrl: 'https://jsprepreact.onrender.com',
