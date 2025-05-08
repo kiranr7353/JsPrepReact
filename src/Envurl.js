@@ -17,7 +17,7 @@ export const Envurl = () => {
         return {
             url: domainUrl,
             envName: 'local',
-            apiURL: 'https://jsprepbackend-production.up.railway.app/api/v1/',
+            apiURL: 'https://jsprepbackend.onrender.com/api/v1',
             // apiURL:'http://localhost:8082/api/v1/',
             // oAuthRedirectURL: 'http://localhost:3000/app/appuidashboard/home',
             contextPath: '/app/jsprep',
